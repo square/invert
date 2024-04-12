@@ -1,0 +1,25 @@
+/**
+ * Invert Gradle init-script which applies the plugin to an existing Gradle project.
+ *
+ * Run it with the following:
+ * ./gradlew --init-script invert.gradle :invert
+ */
+settingsEvaluated {
+    rootProject {
+        buildscript {
+            repositories {
+                mavenCentral()
+                gradlePluginPortal()
+                google()
+                mavenLocal()
+            }
+
+            dependencies {
+                classpath("com.squareup.invert:invert-plugin:0.0.1-SNAPSHOT")
+            }
+        }
+        afterEvaluate {
+            plugins.apply("com.squareup.invert")
+        }
+    }
+}

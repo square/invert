@@ -1,0 +1,16 @@
+build
+
+## IDE ###
+.idea
+
+/static
+
+### Mac OS ###
+.DS_Store
+/local.properties
+
+.gradle
+yarn.lock
+invert-report/src/jsMain/resources/js
+af-analysis-report/src/jsMain/resources/js
+invert-plugin/src/main/resources/META-INF
