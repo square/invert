@@ -2,7 +2,7 @@ plugins {
   kotlin("jvm")
   id("kotlinx-serialization")
   id("java-gradle-plugin")
-  id("com.vanniktech.maven.publish.base")
+  alias(libs.plugins.vanniktech.maven.publish)
 }
 
 gradlePlugin {
