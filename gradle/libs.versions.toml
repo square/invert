@@ -51,6 +51,7 @@ room = "2.5.0"
 secrets = "2.0.1"
 # @keep
 targetSdk = "33"
+vanniktech-maven-publish = "0.28.0"
 version-catalog-update = "0.8.0"
 
 [libraries]
@@ -144,3 +145,4 @@ kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref =
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secrets" }
 version-catalog-update = { id = "nl.littlerobots.version-catalog-update", version.ref = "version-catalog-update" }
+vanniktech-maven-publish = { id = "com.vanniktech.maven.publish.base", version.ref = "vanniktech-maven-publish" }
