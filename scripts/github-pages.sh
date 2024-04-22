@@ -4,7 +4,8 @@ REPOS=(
 "https://github.com/square/anvil"
 "https://github.com/chrisbanes/tivi"
 "https://github.com/android/nowinandroid"
-#"https://github.com/Jetbrains/kotlin"
+"https://github.com/gradle/gradle"
+"https://github.com/spring-projects/spring-boot"
 )
 
 ./scripts/publish.sh

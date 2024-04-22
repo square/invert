@@ -17,6 +17,7 @@ echo "pwd"
 pwd
 
 echo "./gradlew --init-script ../../../invert.gradle :invert"
-./gradlew --init-script ../../../invert.gradle :invert
+# -Dorg.gradle.ignoreBuildJavaVersionCheck=true is needed for https://github.com/gradle/gradle for the Java 11/Java 17 mix
+./gradlew --init-script ../../../invert.gradle :invert -Dorg.gradle.ignoreBuildJavaVersionCheck=true
 
 cd ../../..
