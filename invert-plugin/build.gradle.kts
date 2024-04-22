@@ -2,7 +2,7 @@ import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
     kotlin("jvm")
-    id("kotlinx-serialization")
+    kotlin("plugin.serialization")
     id("java-gradle-plugin")
     alias(libs.plugins.vanniktech.maven.publish)
 }
@@ -35,7 +35,18 @@ kotlin {
 }
 
 mavenPublishing {
-  pomFromGradleProperties()
-  signAllPublications()
-  publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
+    pomFromGradleProperties()
+    signAllPublications()
+    publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
 }
+
+// Allow overwriting of HTML & JS files in resources/META-INF during publishing
+tasks {
+    named<Copy>("processResources") {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+    named<Jar>("sourcesJar") {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+}
+
