@@ -15,13 +15,12 @@ rm -Rf $STATIC_SITE_FOLDER
 mkdir -p $STATIC_SITE_FOLDER
 HTML_FILE="$STATIC_SITE_FOLDER/index.html"
 
-mkdir -p "$STATIC_SITE_FOLDER/invert/invert"
-cp -p -r "build/reports/invert" "$STATIC_SITE_FOLDER/invert/invert"
-
+mkdir -p "$STATIC_SITE_FOLDER/invert"
+cp -p -r "build/reports/invert" "$STATIC_SITE_FOLDER/invert"
 
 echo "<html><head><link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css' crossorigin='anonymous'></head>" >> $HTML_FILE
 echo "<body><h1>Invert Reports</h1><br/><ul>" >> $HTML_FILE
-echo "<li><a href='invert/invert/index.html'>invert</a></li>" >> $HTML_FILE
+echo "<li><a href='invert/invert/index.html'>Invert</a></li>" >> $HTML_FILE
 
 for REPO_URL in ${REPOS[@]}; do
     echo "./scripts/invert-clone-and-run.sh $REPO_URL"
