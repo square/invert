@@ -37,23 +37,8 @@ jobs:
           distribution: 'zulu'
           java-version: 17
 
-      - name: Publish to Maven Local
-        run: ./scripts/publish.sh
-
-      - name: Run on https://github.com/spring-projects/spring-boot
-        run: ./scripts/invert-clone-and-run.sh https://github.com/spring-projects/spring-boot
-
-      - name: Create HTML
-        run: |
-          mkdir -p build/static && echo "
-          <html><head><link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css' crossorigin='anonymous'></head>
-          <body><h1>Invert Reports</h1><br/><ul>
-          <li><a href='invert/invert/index.html'>Invert</a></li>
-          <li><a href='anvil/invert/index.html'>anvil</a> (https://github.com/square/anvil)</li>
-          <li><a href='tivi/invert/index.html'>tivi</a> (https://github.com/chrisbanes/tivi)</li>
-          <li><a href='nowinandroid/invert/index.html'>nowinandroid</a> (https://github.com/android/nowinandroid)</li>
-          </ul></body></html>
-          " >> build/static/index.html
+      - name: Run Invert on Test Projects and Generate GitHub Pages
+        run: ./scripts/github-pages.main.kts
 
       - name: Setup Pages
         uses: actions/configure-pages@v3

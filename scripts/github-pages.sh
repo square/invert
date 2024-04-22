@@ -9,7 +9,7 @@ REPOS=(
 "https://github.com/spring-projects/spring-framework"
 )
 
-./scripts/publish.sh
+./scripts/publish-to-maven-local.sh
 ./gradlew --init-script invert.gradle :invert
 
 STATIC_SITE_FOLDER="build/static"
