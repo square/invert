@@ -8,6 +8,7 @@ on:
 
 jobs:
   publish-snapshot:
+    needs: [ check ]
     runs-on: ubuntu-latest
     if: github.repository == 'square/invert' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     timeout-minutes: 25
