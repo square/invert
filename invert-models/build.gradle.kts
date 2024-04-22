@@ -1,7 +1,9 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
   kotlin("multiplatform")
   id("kotlinx-serialization")
-  id("com.vanniktech.maven.publish.base")
+  alias(libs.plugins.vanniktech.maven.publish)
 }
 
 kotlin {
@@ -20,4 +22,10 @@ kotlin {
       }
     }
   }
+}
+
+mavenPublishing {
+  pomFromGradleProperties()
+  signAllPublications()
+  publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
 }

@@ -11,5 +11,5 @@ mkdir -p invert-plugin/src/main/resources/META-INF/
 cp invert-report/build/dist/js/invert_web/index.html invert-plugin/src/main/resources/META-INF/index.html
 cp invert-report/build/dist/js/invert_web/invert_web.js invert-plugin/src/main/resources/META-INF/invert_web.js
 
-echo "** Run Publish Tasks"
-./gradlew publishToMavenLocal
+echo "** Publishing to Maven Local"
+./gradlew publishToMavenLocal --no-configuration-cache
