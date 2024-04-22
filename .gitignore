@@ -3,7 +3,8 @@ build
 ## IDE ###
 .idea
 
-/static
+## Kotlin
+.kotlin
 
 ### Mac OS ###
 .DS_Store

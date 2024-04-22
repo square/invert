@@ -6,6 +6,7 @@ REPOS=(
 "https://github.com/android/nowinandroid"
 "https://github.com/gradle/gradle"
 "https://github.com/spring-projects/spring-boot"
+"https://github.com/spring-projects/spring-framework"
 )
 
 ./scripts/publish.sh
