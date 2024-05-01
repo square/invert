@@ -4,7 +4,12 @@ import com.squareup.invert.common.navigation.NavPage
 
 data class ArtifactsNavRoute(
   val query: String? = null,
-) : BaseNavRoute(Artifacts.pageId) {
+) : BaseNavRoute(NavPage(
+  pageId = "artifacts",
+  displayName = "Artifacts",
+  navIconSlug = "newspaper",
+  navRouteParser = { parser(it) }
+)) {
 
   override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
     .also { params ->
@@ -14,13 +19,6 @@ data class ArtifactsNavRoute(
     }
 
   companion object {
-
-    val Artifacts = NavPage(
-      pageId = "artifacts",
-      displayName = "Artifacts",
-      navIconSlug = "newspaper",
-      navRouteParser = { parser(it) }
-    )
 
     private const val QUERY_PARAM = "query"
 

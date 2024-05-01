@@ -8,7 +8,10 @@ import com.squareup.invert.models.GradlePath
 data class ModuleDetailNavRoute(
   val path: GradlePath,
   val configurationName: ConfigurationName? = null,
-) : BaseNavRoute(ModuleDetail.pageId) {
+) : BaseNavRoute(NavPage(
+  pageId = "module_detail",
+  navRouteParser = { parser(it) }
+)) {
   override fun toSearchParams() = toParamsWithOnlyPageId(this)
     .also { map ->
       map[PATH_PARAM] = path
@@ -18,10 +21,6 @@ data class ModuleDetailNavRoute(
     }
 
   companion object {
-    val ModuleDetail = NavPage(
-      pageId = "module_detail",
-      navRouteParser = { parser(it) }
-    )
 
     private const val PATH_PARAM = "path"
     private const val CONFIGURATION_PARAM = "configuration"

@@ -5,7 +5,12 @@ import com.squareup.invert.common.navigation.NavPage
 data class ModuleDependencyGraphNavRoute(
     val module: String? = null,
     val configuration: String? = null,
-) : BaseNavRoute(ModuleDependencyGraph.pageId) {
+) : BaseNavRoute(NavPage(
+            pageId = "module_dependency_graph",
+            displayName = "Module Dependency Graph",
+            navIconSlug = "diagram-3",
+            navRouteParser = { parser(it) }
+            )) {
 
     override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
         .also { params ->
@@ -18,13 +23,6 @@ data class ModuleDependencyGraphNavRoute(
         }
 
     companion object {
-
-        val ModuleDependencyGraph = NavPage(
-            pageId = "module_dependency_graph",
-            displayName = "Module Dependency Graph",
-            navIconSlug = "diagram-3",
-            navRouteParser = { parser(it) }
-        )
 
         private const val MODULE_PARAM = "module"
         private const val CONFIGURATION_PARAM = "configuration"

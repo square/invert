@@ -28,7 +28,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import navigation.CustomReport
+import navigation.CustomNavPage
 import navigation.LeftNavigationComposable
 import navigation.RemoteJsLoadingProgress
 import org.jetbrains.compose.web.renderComposable
@@ -54,21 +54,24 @@ import ui.UnusedModulesComposable
 
 
 fun invertComposeMain(
-  initialRoute: NavRoute,
-  routeManager: NavRouteManager,
-  navRouteRepo: NavRouteRepo,
-  customReports: List<CustomReport>
+    initialRoute: NavRoute,
+    routeManager: NavRouteManager,
+    navRouteRepo: NavRouteRepo,
+    customNavItems: List<CustomNavPage>
 ) {
   setupNavigation(routeManager, navRouteRepo)
 
+  println("OKAY1")
   renderComposable(rootElementId = "navigation") {
-    LeftNavigationComposable(initialRoute, navRouteRepo, customReports)
+    LeftNavigationComposable(initialRoute, navRouteRepo, customNavItems)
   }
 
+  println("OKAY2")
   renderComposable(rootElementId = "main_content") {
     MainContentComposable(routeManager, navRouteRepo)
   }
 
+  println("OKAY3")
   renderComposable(rootElementId = "navbar_content") {
     NavBarComposable(RemoteJsLoadingProgress.awaitingResults)
   }
@@ -89,24 +92,24 @@ fun registerDefaultParsers(
   navRouteManager: NavRouteManager,
 ) {
   with(navRouteManager) {
-    registerParser(AllModulesNavRoute.AllModules)
-    registerParser(LeafModulesNavRoute.LeafModules)
-    registerParser(ModuleDetailNavRoute.ModuleDetail)
-    registerParser(DependencyDiffNavRoute.DependencyDiff)
-    registerParser(OwnersNavRoute.Owners)
-    registerParser(OwnerDetailNavRoute.OwnerDetail)
-    registerParser(ArtifactsNavRoute.Artifacts)
-    registerParser(ArtifactDetailNavRoute.ArtifactDetail)
-    registerParser(AnnotationProcessorsNavRoute.AnnotationProcessors)
-    registerParser(PluginsNavRoute.Plugins)
-    registerParser(PluginDetailNavRoute.PluginDetail)
-    registerParser(StatDetailNavRoute.StatDetail)
-    registerParser(AllStatsNavRoute.AllStats)
-    registerParser(ModuleConsumptionNavRoute.ModuleConsumption)
-    registerParser(ArtifactsNavRoute.Artifacts)
-    registerParser(ConfigurationsNavRoute.Configurations)
-    registerParser(ModuleDependencyGraphNavRoute.ModuleDependencyGraph)
-    registerParser(UnusedModulesNavRoute.UnusedModules)
+    registerParser(AllModulesNavRoute().navPage)
+    registerParser(LeafModulesNavRoute.navPage)
+    registerParser(ModuleDetailNavRoute("").navPage)
+    registerParser(DependencyDiffNavRoute().navPage)
+    registerParser(OwnersNavRoute.navPage)
+    registerParser(OwnerDetailNavRoute("").navPage)
+    registerParser(ArtifactsNavRoute().navPage)
+    registerParser(ArtifactDetailNavRoute("", "", "").navPage)
+    registerParser(AnnotationProcessorsNavRoute.navPage)
+    registerParser(PluginsNavRoute.navPage)
+    registerParser(PluginDetailNavRoute("").navPage)
+    registerParser(StatDetailNavRoute(emptyList(), emptyList()).navPage)
+    registerParser(AllStatsNavRoute().navPage)
+    registerParser(ModuleConsumptionNavRoute().navPage)
+    registerParser(ArtifactsNavRoute().navPage)
+    registerParser(ConfigurationsNavRoute.navPage)
+    registerParser(ModuleDependencyGraphNavRoute().navPage)
+    registerParser(UnusedModulesNavRoute().navPage) // TODO
   }
 }
 

@@ -1,16 +1,15 @@
 package com.squareup.invert.common.navigation.routes
 
 import com.squareup.invert.common.navigation.NavPage
-import com.squareup.invert.common.navigation.NavRoute
 
 
-class LeafModulesNavRoute : BaseNavRoute(LeafModules.pageId) {
-  override fun toSearchParams() = toParamsWithOnlyPageId(this)
-
-  companion object {
-    val LeafModules = NavPage.LeafModules
-    fun parser(params: Map<String, String?>): NavRoute {
-      return LeafModulesNavRoute()
+object LeafModulesNavRoute : BaseNavRoute(NavPage(
+    pageId = "leaf_modules",
+    displayName = "Leaf Modules",
+    navIconSlug = "tree",
+    navRouteParser = {
+        LeafModulesNavRoute
     }
-  }
+)) {
+    override fun toSearchParams() = toParamsWithOnlyPageId(this)
 }

@@ -38,7 +38,7 @@ class NavRouteManager {
         return it
       }
     }
-    return HomeNavRoute()
+    return HomeNavRoute
   }
 
 

@@ -9,14 +9,14 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import ui.BootstrapNavItem
 import ui.BootstrapNavSectionHeader
 
-data class CustomReport(
+data class CustomNavPage(
   val text: String,
   val iconSlug: String,
   val navRoute: NavRoute
 )
 
 @Composable
-fun LeftNavigationComposable(initialRoute: NavRoute, navRouteRepo: NavRouteRepo, customReports: List<CustomReport>) {
+fun LeftNavigationComposable(initialRoute: NavRoute, navRouteRepo: NavRouteRepo, customReports: List<CustomNavPage>) {
   /** Entry Point */
   val navRoute by navRouteRepo.navRoute.collectAsState(initialRoute)
   NavPage
@@ -31,6 +31,7 @@ fun LeftNavigationComposable(initialRoute: NavRoute, navRouteRepo: NavRouteRepo,
       println(it.map { it?.pageId })
     }
     .forEach { rootNavItem: NavPage ->
+      println(rootNavItem)
       val displayName = rootNavItem.displayName
       val navIconSlug = rootNavItem.navIconSlug
       val newNavRoute = rootNavItem.navRouteParser(mapOf())

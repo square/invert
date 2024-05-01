@@ -8,7 +8,12 @@ data class ModuleConsumptionNavRoute(
   val pluginGroupByFilter: List<GradlePluginId> = listOf(),
   val configurations: List<ConfigurationName> = listOf(),
   val moduleQuery: String? = null,
-) : BaseNavRoute(ModuleConsumption.pageId) {
+) : BaseNavRoute(NavPage(
+      pageId = "consumption",
+        displayName = "Module Consumption",
+        navIconSlug = "bar-chart",
+        navRouteParser = { parser(it) }
+      )) {
   override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
     .apply {
       if (pluginGroupByFilter.isNotEmpty()) {
@@ -24,12 +29,6 @@ data class ModuleConsumptionNavRoute(
     }
 
   companion object {
-    val ModuleConsumption = NavPage(
-      pageId = "consumption",
-      displayName = "Module Consumption",
-      navIconSlug = "bar-chart",
-      navRouteParser = { parser(it) }
-    )
 
     private const val MODULE_QUERY_PARAM_NAME = "module"
     private const val PLUGIN_GROUP_BY_FILTER_QUERY_PARAM_NAME = "plugin_id"
