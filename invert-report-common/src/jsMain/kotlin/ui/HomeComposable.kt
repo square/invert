@@ -3,17 +3,23 @@ package ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.squareup.invert.common.DependencyGraph
 import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.AllModulesNavRoute
 import com.squareup.invert.common.navigation.routes.ArtifactsNavRoute
 import com.squareup.invert.common.navigation.routes.OwnersNavRoute
 import com.squareup.invert.common.navigation.routes.PluginsNavRoute
+import com.squareup.invert.common.pages.HomeReportPage
 import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.web.dom.*
 
 @Composable
-fun HomeComposable(reportDataRepo: ReportDataRepo, navRouteRepo: NavRouteRepo) {
+fun HomeComposable(
+    homeNavRoute: HomeReportPage.HomeNavRoute,
+    reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
+    navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo
+) {
     val moduleCount by reportDataRepo.allModules.map { it?.size }.collectAsState(null)
     val artifactCount by reportDataRepo.allArtifacts.map { it?.size }.collectAsState(null)
     val ownersCount by reportDataRepo.allOwnerNames.map { it?.size }.collectAsState(null)

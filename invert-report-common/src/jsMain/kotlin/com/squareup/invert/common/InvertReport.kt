@@ -1,10 +1,9 @@
 package com.squareup.invert.common
 
-import androidx.compose.runtime.Composable
-import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteManager
 import com.squareup.invert.common.navigation.NavRouteRepo
+import com.squareup.invert.common.pages.HomeReportPage
 import invertComposeMain
 import kotlinx.browser.window
 import kotlinx.coroutines.Dispatchers
@@ -23,16 +22,21 @@ fun <T : NavRoute> specialCaster(it: NavRoute, clazz: KClass<T>): T {
 
 class InvertReport(
     customNavItems: List<CustomNavItem> = emptyList(),
-    reportPages: List<InvertReportPage<out NavRoute>> = emptyList(),
+    customReportPages: List<InvertReportPage<out NavRoute>> = emptyList(),
 ) {
+
     private val routeManager = NavRouteManager()
+
+    val _defaultReportPages = listOf<InvertReportPage<*>>(HomeReportPage)
+
+    val allReportPages = _defaultReportPages + customReportPages
 
     init {
         registerDefaultNavPageParsers(routeManager)
-        reportPages.forEach { reportPage ->
+        allReportPages.forEach { reportPage ->
             routeManager.registerParser(reportPage.navPage)
         }
-        reportPages.forEach { reportPage ->
+        allReportPages.forEach { reportPage ->
             routeManager.registerRoute(
                 clazz = reportPage.navRouteKClass,
                 content = {
@@ -46,17 +50,18 @@ class InvertReport(
 
     val navRouteRepo = NavRouteRepo(initialRoute)
 
+    val collectedDataRepo = CollectedDataRepo(
+        coroutineDispatcher = Dispatchers.Default,
+        loadFileData = { jsFileKey, reportRepoData ->
+            RemoteJsLoadingProgress.loadJavaScriptFile(jsFileKey) { json ->
+                RemoteJsLoadingProgress.handleLoadedJsFile(reportRepoData, jsFileKey, json)
+            }
+        },
+    )
 
     val reportDataRepo = ReportDataRepo(
         navRoute = navRouteRepo.navRoute,
-        collectedDataRepo = CollectedDataRepo(
-            coroutineDispatcher = Dispatchers.Default,
-            loadFileData = { jsFileKey, reportRepoData ->
-                RemoteJsLoadingProgress.loadJavaScriptFile(jsFileKey) { json ->
-                    RemoteJsLoadingProgress.handleLoadedJsFile(reportRepoData, jsFileKey, json)
-                }
-            },
-        ),
+        collectedDataRepo = collectedDataRepo,
     )
 
     init {
@@ -72,4 +77,36 @@ class InvertReport(
             customNavItems = customNavItems,
         )
     }
+
+    init {
+        // REALLY HACKY Static DI Graph
+        DependencyGraph.initialize(
+            collectedDataRepo = collectedDataRepo,
+            navRouteRepo = navRouteRepo,
+            reportDataRepo = reportDataRepo,
+        )
+    }
+}
+
+/**
+ * REALLY HACKY Static DI Graph
+ */
+object DependencyGraph {
+    fun initialize(
+        collectedDataRepo: CollectedDataRepo,
+        navRouteRepo: NavRouteRepo,
+        reportDataRepo: ReportDataRepo,
+    ) {
+        _navRouteRepo = navRouteRepo
+        _reportDataRepo = reportDataRepo
+        _collectedDataRepo = collectedDataRepo
+    }
+
+    private lateinit var _navRouteRepo: NavRouteRepo
+    private lateinit var _collectedDataRepo: CollectedDataRepo
+    private lateinit var _reportDataRepo: ReportDataRepo
+
+    val navRouteRepo: NavRouteRepo get() = _navRouteRepo
+    val collectedDataRepo: CollectedDataRepo get() = _collectedDataRepo
+    val reportDataRepo: ReportDataRepo get() = _reportDataRepo
 }

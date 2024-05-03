@@ -115,7 +115,6 @@ fun registerDefaultInvertNavRoutes(
   navRouteRepo: NavRouteRepo
 ) {
   with(navRouteManager) {
-    registerRoute(HomeReportPage.HomeNavRoute::class) { HomeComposable(reportDataRepo, navRouteRepo) }
     registerRoute(OwnersNavRoute::class) { OwnersComposable(reportDataRepo, navRouteRepo) }
     registerRoute(OwnerDetailNavRoute::class) { OwnerDetailComposable(reportDataRepo, navRouteRepo, it) }
     registerRoute(UnusedModulesNavRoute::class) { UnusedModulesComposable(reportDataRepo, navRouteRepo, it) }

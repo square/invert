@@ -40,12 +40,10 @@ fun main() {
         ),
     )
 
-    val reportPages = listOf(
-        GitHubMarkdownReportPage
-    )
-
     InvertReport(
         customNavItems = customNavItems,
-        reportPages = reportPages,
+        customReportPages = listOf(
+            GitHubMarkdownReportPage
+        ),
     )
 }
