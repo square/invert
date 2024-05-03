@@ -16,11 +16,10 @@ import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
 
-class InvertReportPage<T : NavRoute>(
-    val navPage: NavPage,
-    val navRouteKClass: KClass<T>,
-    val composableContent: @Composable (NavRoute) -> Unit,
-)
+fun <T : NavRoute> specialCaster(it: NavRoute, clazz: KClass<T>): T {
+    return clazz.cast(it)
+}
+
 
 class InvertReport(
     customNavItems: List<CustomNavItem> = emptyList(),
@@ -37,13 +36,10 @@ class InvertReport(
             routeManager.registerRoute(
                 clazz = reportPage.navRouteKClass,
                 content = {
-                    reportPage.composableContent(reportPage.navRouteKClass.cast(it))
+                    reportPage.composableContentWithRouteCast(it)
                 }
             )
         }
-//        customComposables.entries.forEach { (key, value) ->
-//            routeManager.registerRoute(key, value)
-//        }
     }
 
     private val initialRoute: NavRoute = routeManager.parseUrlToRoute(window.location.toString())
