@@ -4,6 +4,7 @@ import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteManager
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.pages.AllModulesReportPage
+import com.squareup.invert.common.pages.AllStatsReportPage
 import com.squareup.invert.common.pages.HomeReportPage
 import invertComposeMain
 import kotlinx.browser.window
@@ -12,13 +13,6 @@ import navigation.CustomNavItem
 import navigation.RemoteJsLoadingProgress
 import registerDefaultInvertNavRoutes
 import registerDefaultNavPageParsers
-import kotlin.reflect.KClass
-import kotlin.reflect.cast
-
-
-fun <T : NavRoute> specialCaster(it: NavRoute, clazz: KClass<T>): T {
-    return clazz.cast(it)
-}
 
 
 class InvertReport(
@@ -28,14 +22,8 @@ class InvertReport(
 
     private val routeManager = NavRouteManager()
 
-    val _defaultReportPages = listOf<InvertReportPage<*>>(
-        AllModulesReportPage,
-        HomeReportPage,
-    )
-
-    val allReportPages = _defaultReportPages + customReportPages
-
     init {
+        val allReportPages = DEFAULT_REPORT_PAGES + customReportPages
         registerDefaultNavPageParsers(routeManager)
         allReportPages.forEach { reportPage ->
             routeManager.registerParser(reportPage.navPage)
@@ -90,27 +78,13 @@ class InvertReport(
             reportDataRepo = reportDataRepo,
         )
     }
-}
 
-/**
- * REALLY HACKY Static DI Graph
- */
-object DependencyGraph {
-    fun initialize(
-        collectedDataRepo: CollectedDataRepo,
-        navRouteRepo: NavRouteRepo,
-        reportDataRepo: ReportDataRepo,
-    ) {
-        _navRouteRepo = navRouteRepo
-        _reportDataRepo = reportDataRepo
-        _collectedDataRepo = collectedDataRepo
+    companion object {
+        private val DEFAULT_REPORT_PAGES = listOf<InvertReportPage<*>>(
+            AllModulesReportPage,
+            AllStatsReportPage,
+            HomeReportPage,
+        )
     }
-
-    private lateinit var _navRouteRepo: NavRouteRepo
-    private lateinit var _collectedDataRepo: CollectedDataRepo
-    private lateinit var _reportDataRepo: ReportDataRepo
-
-    val navRouteRepo: NavRouteRepo get() = _navRouteRepo
-    val collectedDataRepo: CollectedDataRepo get() = _collectedDataRepo
-    val reportDataRepo: ReportDataRepo get() = _reportDataRepo
 }
+

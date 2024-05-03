@@ -4,22 +4,7 @@ import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteManager
 import com.squareup.invert.common.navigation.NavRouteRepo
-import com.squareup.invert.common.navigation.routes.AllStatsNavRoute
-import com.squareup.invert.common.navigation.routes.AnnotationProcessorsNavRoute
-import com.squareup.invert.common.navigation.routes.ArtifactDetailNavRoute
-import com.squareup.invert.common.navigation.routes.ArtifactsNavRoute
-import com.squareup.invert.common.navigation.routes.ConfigurationsNavRoute
-import com.squareup.invert.common.navigation.routes.DependencyDiffNavRoute
-import com.squareup.invert.common.navigation.routes.LeafModulesNavRoute
-import com.squareup.invert.common.navigation.routes.ModuleConsumptionNavRoute
-import com.squareup.invert.common.navigation.routes.ModuleDependencyGraphNavRoute
-import com.squareup.invert.common.navigation.routes.ModuleDetailNavRoute
-import com.squareup.invert.common.navigation.routes.OwnerDetailNavRoute
-import com.squareup.invert.common.navigation.routes.OwnersNavRoute
-import com.squareup.invert.common.navigation.routes.PluginDetailNavRoute
-import com.squareup.invert.common.navigation.routes.PluginsNavRoute
-import com.squareup.invert.common.navigation.routes.StatDetailNavRoute
-import com.squareup.invert.common.navigation.routes.UnusedModulesNavRoute
+import com.squareup.invert.common.navigation.routes.*
 import history.JavaScriptNavigationAndHistory
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -29,23 +14,7 @@ import navigation.CustomNavItem
 import navigation.LeftNavigationComposable
 import navigation.RemoteJsLoadingProgress
 import org.jetbrains.compose.web.renderComposable
-import ui.AllStatsComposable
-import ui.AnnotationProcessorsComposable
-import ui.ArtifactDetailComposable
-import ui.ArtifactsComposable
-import ui.ConfigurationsComposable
-import ui.LeafModulesComposable
-import ui.ModuleConsumptionComposable
-import ui.ModuleDependencyDiffComposable
-import ui.ModuleDependencyGraphComposable
-import ui.ModuleDetailComposable
-import ui.NavBarComposable
-import ui.OwnerDetailComposable
-import ui.OwnersComposable
-import ui.PluginDetailComposable
-import ui.PluginsComposable
-import ui.StatDetailComposable
-import ui.UnusedModulesComposable
+import ui.*
 
 
 fun invertComposeMain(
@@ -95,7 +64,6 @@ fun registerDefaultNavPageParsers(
     registerParser(PluginsNavRoute.navPage)
     registerParser(PluginDetailNavRoute("").navPage)
     registerParser(StatDetailNavRoute(emptyList(), emptyList()).navPage)
-    registerParser(AllStatsNavRoute().navPage)
     registerParser(ModuleConsumptionNavRoute().navPage)
     registerParser(ArtifactsNavRoute().navPage)
     registerParser(ConfigurationsNavRoute.navPage)
@@ -130,7 +98,6 @@ fun registerDefaultInvertNavRoutes(
     }
     registerRoute(ModuleDetailNavRoute::class) { ModuleDetailComposable(reportDataRepo, navRouteRepo, it) }
     registerRoute(StatDetailNavRoute::class) { StatDetailComposable(reportDataRepo, navRouteRepo, it) }
-    registerRoute(AllStatsNavRoute::class) { AllStatsComposable(reportDataRepo, navRouteRepo, it) }
     registerRoute(ArtifactsNavRoute::class) { ArtifactsComposable(reportDataRepo, navRouteRepo, it) }
     registerRoute(ArtifactDetailNavRoute::class) { ArtifactDetailComposable(reportDataRepo, navRouteRepo, it) }
     registerRoute(PluginsNavRoute::class) { PluginsComposable(reportDataRepo, navRouteRepo) }
