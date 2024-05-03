@@ -97,8 +97,8 @@ fun HomeComposable(
 
             HomeCountComposable(
                 ownersCount,
-                OwnersNavRoute.navPage
-            ) { navRouteRepo.updateNavRoute(OwnersNavRoute) }
+                OwnersReportPage.navPage
+            ) { navRouteRepo.updateNavRoute(OwnersReportPage.OwnersNavRoute) }
 
             HomeCountComposable(
                 pluginIdsCount,

@@ -2,6 +2,7 @@ package com.squareup.invert.common.navigation.routes
 
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRoute
+import com.squareup.invert.common.pages.OwnersReportPage
 import com.squareup.invert.models.OwnerName
 
 data class OwnerDetailNavRoute(
@@ -24,7 +25,7 @@ data class OwnerDetailNavRoute(
             return if (!owner.isNullOrEmpty()) {
                 OwnerDetailNavRoute(owner)
             } else {
-                OwnersNavRoute
+                OwnersReportPage.OwnersNavRoute
             }
         }
     }

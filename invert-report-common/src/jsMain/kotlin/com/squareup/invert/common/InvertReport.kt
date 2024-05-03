@@ -3,10 +3,7 @@ package com.squareup.invert.common
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteManager
 import com.squareup.invert.common.navigation.NavRouteRepo
-import com.squareup.invert.common.pages.AllModulesReportPage
-import com.squareup.invert.common.pages.AllStatsReportPage
-import com.squareup.invert.common.pages.AnnotationProcessorsReportPage
-import com.squareup.invert.common.pages.HomeReportPage
+import com.squareup.invert.common.pages.*
 import invertComposeMain
 import kotlinx.browser.window
 import kotlinx.coroutines.Dispatchers
@@ -86,7 +83,7 @@ class InvertReport(
             AllStatsReportPage,
             AnnotationProcessorsReportPage,
             HomeReportPage,
+            OwnersReportPage,
         )
     }
 }
-
