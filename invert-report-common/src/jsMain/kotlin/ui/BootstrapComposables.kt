@@ -306,29 +306,6 @@ fun BootstrapNavSectionHeader(title: String, iconSlug: String? = null) {
     }
 }
 
-@Composable
-fun HomeCountComposable(count: Int?, navItem: NavPage, onClick: () -> Unit) {
-    P {
-        count?.let {
-            Text("$count")
-        } ?: BootstrapLoadingSpinner()
-
-        navItem.displayName?.let { displayName ->
-            AppLink({
-                onClick {
-                    onClick()
-                }
-            }) {
-                Button({
-                    classes("btn", "btn-link")
-                }) {
-                    Text(displayName)
-                }
-            }
-        }
-    }
-
-}
 
 @Composable
 fun BootstrapJumbotron(

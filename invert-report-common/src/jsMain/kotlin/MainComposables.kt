@@ -4,7 +4,6 @@ import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteManager
 import com.squareup.invert.common.navigation.NavRouteRepo
-import com.squareup.invert.common.navigation.routes.AllModulesNavRoute
 import com.squareup.invert.common.navigation.routes.AllStatsNavRoute
 import com.squareup.invert.common.navigation.routes.AnnotationProcessorsNavRoute
 import com.squareup.invert.common.navigation.routes.ArtifactDetailNavRoute
@@ -21,7 +20,6 @@ import com.squareup.invert.common.navigation.routes.PluginDetailNavRoute
 import com.squareup.invert.common.navigation.routes.PluginsNavRoute
 import com.squareup.invert.common.navigation.routes.StatDetailNavRoute
 import com.squareup.invert.common.navigation.routes.UnusedModulesNavRoute
-import com.squareup.invert.common.pages.HomeReportPage
 import history.JavaScriptNavigationAndHistory
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -36,13 +34,11 @@ import ui.AnnotationProcessorsComposable
 import ui.ArtifactDetailComposable
 import ui.ArtifactsComposable
 import ui.ConfigurationsComposable
-import ui.HomeComposable
 import ui.LeafModulesComposable
 import ui.ModuleConsumptionComposable
 import ui.ModuleDependencyDiffComposable
 import ui.ModuleDependencyGraphComposable
 import ui.ModuleDetailComposable
-import ui.ModulesComposable
 import ui.NavBarComposable
 import ui.OwnerDetailComposable
 import ui.OwnersComposable
@@ -88,7 +84,6 @@ fun registerDefaultNavPageParsers(
   navRouteManager: NavRouteManager,
 ) {
   with(navRouteManager) {
-    registerParser(AllModulesNavRoute().navPage)
     registerParser(LeafModulesNavRoute.navPage)
     registerParser(ModuleDetailNavRoute("").navPage)
     registerParser(DependencyDiffNavRoute().navPage)
@@ -119,7 +114,6 @@ fun registerDefaultInvertNavRoutes(
     registerRoute(OwnerDetailNavRoute::class) { OwnerDetailComposable(reportDataRepo, navRouteRepo, it) }
     registerRoute(UnusedModulesNavRoute::class) { UnusedModulesComposable(reportDataRepo, navRouteRepo, it) }
     registerRoute(LeafModulesNavRoute::class) { LeafModulesComposable(reportDataRepo, navRouteRepo, it) }
-    registerRoute(AllModulesNavRoute::class) { ModulesComposable(reportDataRepo, navRouteRepo, it) }
     registerRoute(AnnotationProcessorsNavRoute::class) {
       AnnotationProcessorsComposable(
         reportDataRepo,

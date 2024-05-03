@@ -1,6 +1,7 @@
 package com.squareup.invert.common.navigation
 
 import com.squareup.invert.common.navigation.routes.*
+import com.squareup.invert.common.pages.AllModulesReportPage
 import com.squareup.invert.common.pages.HomeReportPage
 
 typealias NavPageId = String
@@ -15,7 +16,7 @@ data class NavPage(
 
         val ROOT_NAV_ITEMS = setOf(
             HomeReportPage.navPage,
-            AllModulesNavRoute().navPage, // DONT USE DEFAULT CONSTRUCTOR TO GET NAVPAGE
+            AllModulesReportPage.navPage,
             OwnersNavRoute.navPage,
             PluginsNavRoute.navPage,
             ModuleConsumptionNavRoute().navPage, // DONT USE DEFAULT CONSTRUCTOR TO GET NAVPAGE

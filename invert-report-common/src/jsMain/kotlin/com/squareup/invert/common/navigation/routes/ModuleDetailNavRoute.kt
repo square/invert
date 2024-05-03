@@ -2,6 +2,7 @@ package com.squareup.invert.common.navigation.routes
 
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRoute
+import com.squareup.invert.common.pages.AllModulesReportPage
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.GradlePath
 
@@ -33,7 +34,7 @@ data class ModuleDetailNavRoute(
           configurationName = configurationName
         )
       } else {
-        AllModulesNavRoute()
+          AllModulesReportPage.AllModulesNavRoute()
       }
     }
   }
