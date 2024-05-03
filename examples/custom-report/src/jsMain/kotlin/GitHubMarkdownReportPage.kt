@@ -2,7 +2,7 @@ import androidx.compose.runtime.Composable
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import com.squareup.invert.common.navigation.routes.HomeNavRoute
+import com.squareup.invert.common.pages.HomeReportPage
 import org.jetbrains.compose.web.dom.H2
 import org.jetbrains.compose.web.dom.Text
 import ui.RemoteGitHubMarkdown
@@ -18,7 +18,7 @@ object GitHubMarkdownReportPage : InvertReportPage<GitHubMarkdownReportPage.Gith
             if (repo != null) {
                 GithubReadMeNavRoute(repo)
             } else {
-                HomeNavRoute
+                HomeReportPage.HomeNavRoute
             }
         }
     )

@@ -11,7 +11,6 @@ import com.squareup.invert.common.navigation.routes.ArtifactDetailNavRoute
 import com.squareup.invert.common.navigation.routes.ArtifactsNavRoute
 import com.squareup.invert.common.navigation.routes.ConfigurationsNavRoute
 import com.squareup.invert.common.navigation.routes.DependencyDiffNavRoute
-import com.squareup.invert.common.navigation.routes.HomeNavRoute
 import com.squareup.invert.common.navigation.routes.LeafModulesNavRoute
 import com.squareup.invert.common.navigation.routes.ModuleConsumptionNavRoute
 import com.squareup.invert.common.navigation.routes.ModuleDependencyGraphNavRoute
@@ -22,6 +21,7 @@ import com.squareup.invert.common.navigation.routes.PluginDetailNavRoute
 import com.squareup.invert.common.navigation.routes.PluginsNavRoute
 import com.squareup.invert.common.navigation.routes.StatDetailNavRoute
 import com.squareup.invert.common.navigation.routes.UnusedModulesNavRoute
+import com.squareup.invert.common.pages.HomeReportPage
 import history.JavaScriptNavigationAndHistory
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -115,7 +115,7 @@ fun registerDefaultInvertNavRoutes(
   navRouteRepo: NavRouteRepo
 ) {
   with(navRouteManager) {
-    registerRoute(HomeNavRoute::class) { HomeComposable(reportDataRepo, navRouteRepo) }
+    registerRoute(HomeReportPage.HomeNavRoute::class) { HomeComposable(reportDataRepo, navRouteRepo) }
     registerRoute(OwnersNavRoute::class) { OwnersComposable(reportDataRepo, navRouteRepo) }
     registerRoute(OwnerDetailNavRoute::class) { OwnerDetailComposable(reportDataRepo, navRouteRepo, it) }
     registerRoute(UnusedModulesNavRoute::class) { UnusedModulesComposable(reportDataRepo, navRouteRepo, it) }

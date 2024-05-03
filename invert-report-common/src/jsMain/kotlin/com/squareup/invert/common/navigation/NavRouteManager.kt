@@ -1,9 +1,8 @@
 package com.squareup.invert.common.navigation
 
 import androidx.compose.runtime.Composable
-import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import com.squareup.invert.common.navigation.routes.HomeNavRoute
+import com.squareup.invert.common.pages.HomeReportPage
 import history.JavaScriptNavigationAndHistory.toMap
 import org.w3c.dom.url.URL
 import kotlin.reflect.KClass
@@ -40,7 +39,7 @@ class NavRouteManager {
                 return it
             }
         }
-        return HomeNavRoute
+        return HomeReportPage.HomeNavRoute
     }
 
 
