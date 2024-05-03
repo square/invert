@@ -5,6 +5,7 @@ import com.squareup.invert.common.navigation.NavRouteManager
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.pages.AllModulesReportPage
 import com.squareup.invert.common.pages.AllStatsReportPage
+import com.squareup.invert.common.pages.AnnotationProcessorsReportPage
 import com.squareup.invert.common.pages.HomeReportPage
 import invertComposeMain
 import kotlinx.browser.window
@@ -83,6 +84,7 @@ class InvertReport(
         private val DEFAULT_REPORT_PAGES = listOf<InvertReportPage<*>>(
             AllModulesReportPage,
             AllStatsReportPage,
+            AnnotationProcessorsReportPage,
             HomeReportPage,
         )
     }

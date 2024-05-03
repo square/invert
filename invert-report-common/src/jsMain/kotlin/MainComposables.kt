@@ -23,104 +23,103 @@ fun invertComposeMain(
     navRouteRepo: NavRouteRepo,
     customNavItems: List<CustomNavItem>
 ) {
-  setupNavigation(routeManager, navRouteRepo)
+    setupNavigation(routeManager, navRouteRepo)
 
-  renderComposable(rootElementId = "navigation") {
-    LeftNavigationComposable(initialRoute, navRouteRepo, customNavItems)
-  }
+    renderComposable(rootElementId = "navigation") {
+        LeftNavigationComposable(initialRoute, navRouteRepo, customNavItems)
+    }
 
-  renderComposable(rootElementId = "main_content") {
-    MainContentComposable(routeManager, navRouteRepo)
-  }
+    renderComposable(rootElementId = "main_content") {
+        MainContentComposable(routeManager, navRouteRepo)
+    }
 
-  renderComposable(rootElementId = "navbar_content") {
-    NavBarComposable(RemoteJsLoadingProgress.awaitingResults)
-  }
+    renderComposable(rootElementId = "navbar_content") {
+        NavBarComposable(RemoteJsLoadingProgress.awaitingResults)
+    }
 }
 
 @OptIn(DelicateCoroutinesApi::class)
 fun setupNavigation(routeManager: NavRouteManager, navRouteRepo: NavRouteRepo) {
-  // Update Route on Every Change
-  navRouteRepo.navRoute.onEach {
-    JavaScriptNavigationAndHistory.setUrlFromNavRoute(it)
-  }.launchIn(GlobalScope)
+    // Update Route on Every Change
+    navRouteRepo.navRoute.onEach {
+        JavaScriptNavigationAndHistory.setUrlFromNavRoute(it)
+    }.launchIn(GlobalScope)
 
-  // Register for Browser Back/Forward Button Events
-  JavaScriptNavigationAndHistory.registerForPopstate(routeManager, navRouteRepo)
+    // Register for Browser Back/Forward Button Events
+    JavaScriptNavigationAndHistory.registerForPopstate(routeManager, navRouteRepo)
 }
 
 fun registerDefaultNavPageParsers(
-  navRouteManager: NavRouteManager,
+    navRouteManager: NavRouteManager,
 ) {
-  with(navRouteManager) {
-    registerParser(LeafModulesNavRoute.navPage)
-    registerParser(ModuleDetailNavRoute("").navPage)
-    registerParser(DependencyDiffNavRoute().navPage)
-    registerParser(OwnersNavRoute.navPage)
-    registerParser(OwnerDetailNavRoute("").navPage)
-    registerParser(ArtifactsNavRoute().navPage)
-    registerParser(ArtifactDetailNavRoute("", "", "").navPage)
-    registerParser(AnnotationProcessorsNavRoute.navPage)
-    registerParser(PluginsNavRoute.navPage)
-    registerParser(PluginDetailNavRoute("").navPage)
-    registerParser(StatDetailNavRoute(emptyList(), emptyList()).navPage)
-    registerParser(ModuleConsumptionNavRoute().navPage)
-    registerParser(ArtifactsNavRoute().navPage)
-    registerParser(ConfigurationsNavRoute.navPage)
-    registerParser(ModuleDependencyGraphNavRoute().navPage)
-    registerParser(UnusedModulesNavRoute().navPage) // TODO
-  }
+    with(navRouteManager) {
+        registerParser(LeafModulesNavRoute.navPage)
+        registerParser(ModuleDetailNavRoute("").navPage)
+        registerParser(DependencyDiffNavRoute().navPage)
+        registerParser(OwnersNavRoute.navPage)
+        registerParser(OwnerDetailNavRoute("").navPage)
+        registerParser(ArtifactsNavRoute().navPage)
+        registerParser(ArtifactDetailNavRoute("", "", "").navPage)
+        registerParser(PluginsNavRoute.navPage)
+        registerParser(PluginDetailNavRoute("").navPage)
+        registerParser(StatDetailNavRoute(emptyList(), emptyList()).navPage)
+        registerParser(ModuleConsumptionNavRoute().navPage)
+        registerParser(ArtifactsNavRoute().navPage)
+        registerParser(ConfigurationsNavRoute.navPage)
+        registerParser(ModuleDependencyGraphNavRoute().navPage)
+        registerParser(UnusedModulesNavRoute().navPage) // TODO
+    }
 }
 
 fun registerDefaultInvertNavRoutes(
-  navRouteManager: NavRouteManager,
-  reportDataRepo: ReportDataRepo,
-  navRouteRepo: NavRouteRepo
+    navRouteManager: NavRouteManager,
+    reportDataRepo: ReportDataRepo,
+    navRouteRepo: NavRouteRepo
 ) {
-  with(navRouteManager) {
-    registerRoute(OwnersNavRoute::class) { OwnersComposable(reportDataRepo, navRouteRepo) }
-    registerRoute(OwnerDetailNavRoute::class) { OwnerDetailComposable(reportDataRepo, navRouteRepo, it) }
-    registerRoute(UnusedModulesNavRoute::class) { UnusedModulesComposable(reportDataRepo, navRouteRepo, it) }
-    registerRoute(LeafModulesNavRoute::class) { LeafModulesComposable(reportDataRepo, navRouteRepo, it) }
-    registerRoute(AnnotationProcessorsNavRoute::class) {
-      AnnotationProcessorsComposable(
-        reportDataRepo,
-        navRouteRepo,
-        it
-      )
+    with(navRouteManager) {
+        registerRoute(OwnersNavRoute::class) { OwnersComposable(reportDataRepo, navRouteRepo) }
+        registerRoute(OwnerDetailNavRoute::class) { OwnerDetailComposable(reportDataRepo, navRouteRepo, it) }
+        registerRoute(UnusedModulesNavRoute::class) { UnusedModulesComposable(reportDataRepo, navRouteRepo, it) }
+        registerRoute(LeafModulesNavRoute::class) { LeafModulesComposable(reportDataRepo, navRouteRepo, it) }
+
+        registerRoute(DependencyDiffNavRoute::class) {
+            ModuleDependencyDiffComposable(
+                reportDataRepo,
+                navRouteRepo,
+                it
+            )
+        }
+        registerRoute(ModuleDetailNavRoute::class) { ModuleDetailComposable(reportDataRepo, navRouteRepo, it) }
+        registerRoute(StatDetailNavRoute::class) { StatDetailComposable(reportDataRepo, navRouteRepo, it) }
+        registerRoute(ArtifactsNavRoute::class) { ArtifactsComposable(reportDataRepo, navRouteRepo, it) }
+        registerRoute(ArtifactDetailNavRoute::class) { ArtifactDetailComposable(reportDataRepo, navRouteRepo, it) }
+        registerRoute(PluginsNavRoute::class) { PluginsComposable(reportDataRepo, navRouteRepo) }
+        registerRoute(PluginDetailNavRoute::class) { PluginDetailComposable(reportDataRepo, navRouteRepo, it) }
+        registerRoute(ConfigurationsNavRoute::class) { ConfigurationsComposable(reportDataRepo) }
+        registerRoute(ModuleConsumptionNavRoute::class) {
+            ModuleConsumptionComposable(
+                reportDataRepo,
+                navRouteRepo,
+                it
+            )
+        }
+        registerRoute(ModuleDependencyGraphNavRoute::class) {
+            ModuleDependencyGraphComposable(
+                reportDataRepo,
+                navRouteRepo,
+                it
+            )
+        }
     }
-    registerRoute(DependencyDiffNavRoute::class) {
-      ModuleDependencyDiffComposable(
-        reportDataRepo,
-        navRouteRepo,
-        it
-      )
-    }
-    registerRoute(ModuleDetailNavRoute::class) { ModuleDetailComposable(reportDataRepo, navRouteRepo, it) }
-    registerRoute(StatDetailNavRoute::class) { StatDetailComposable(reportDataRepo, navRouteRepo, it) }
-    registerRoute(ArtifactsNavRoute::class) { ArtifactsComposable(reportDataRepo, navRouteRepo, it) }
-    registerRoute(ArtifactDetailNavRoute::class) { ArtifactDetailComposable(reportDataRepo, navRouteRepo, it) }
-    registerRoute(PluginsNavRoute::class) { PluginsComposable(reportDataRepo, navRouteRepo) }
-    registerRoute(PluginDetailNavRoute::class) { PluginDetailComposable(reportDataRepo, navRouteRepo, it) }
-    registerRoute(ConfigurationsNavRoute::class) { ConfigurationsComposable(reportDataRepo) }
-    registerRoute(ModuleConsumptionNavRoute::class) {
-      ModuleConsumptionComposable(
-        reportDataRepo,
-        navRouteRepo,
-        it
-      )
-    }
-    registerRoute(ModuleDependencyGraphNavRoute::class) { ModuleDependencyGraphComposable(reportDataRepo, navRouteRepo, it) }
-  }
 }
 
 @Composable
 fun MainContentComposable(
-  navRouteManager: NavRouteManager,
-  navRouteRepo: NavRouteRepo
+    navRouteManager: NavRouteManager,
+    navRouteRepo: NavRouteRepo
 ) {
-  val navRouteCollected = navRouteRepo.navRoute.collectAsState(null)
-  navRouteCollected.value?.let { navRoute ->
-    navRouteManager.renderContentForRoute(navRoute)
-  }
+    val navRouteCollected = navRouteRepo.navRoute.collectAsState(null)
+    navRouteCollected.value?.let { navRoute ->
+        navRouteManager.renderContentForRoute(navRoute)
+    }
 }
