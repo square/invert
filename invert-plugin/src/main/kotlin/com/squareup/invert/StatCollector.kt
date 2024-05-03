@@ -1,5 +1,6 @@
 package com.squareup.invert
 
+import com.squareup.invert.models.Stat
 import com.squareup.invert.models.Stat.ClassDefinitionsStat
 import com.squareup.invert.models.Stat.HasImportStat
 import com.squareup.invert.models.StatInfo
@@ -37,4 +38,15 @@ sealed interface StatCollector : Named {
       kotlinSourceFiles: List<File>
     ): ClassDefinitionsStat?
   }
+
+    /**
+    * A [StatCollector] that collects [GenericStatCollector] data.
+    */
+    interface GenericStatCollector : StatCollector {
+        fun collect(
+            srcFolder: File,
+            projectPath: String,
+            kotlinSourceFiles: List<File>
+        ): Stat.GenericStat?
+    }
 }

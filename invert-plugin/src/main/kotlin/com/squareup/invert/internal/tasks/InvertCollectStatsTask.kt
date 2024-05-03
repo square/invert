@@ -2,8 +2,7 @@ package com.squareup.invert.internal.tasks
 
 import com.squareup.invert.InvertExtension
 import com.squareup.invert.StatCollector
-import com.squareup.invert.StatCollector.DefinitionsCollector
-import com.squareup.invert.StatCollector.HasImportStatCollector
+import com.squareup.invert.StatCollector.*
 import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.InvertFileUtils.addSlashAnd
 import com.squareup.invert.internal.models.CollectedStatsForProject
@@ -29,95 +28,108 @@ import java.io.File
  */
 internal abstract class InvertCollectStatsTask : DefaultTask() {
 
-  companion object {
-    const val TASK_NAME = "invertCollectStats"
-  }
-
-  @get:Input
-  abstract val projectPath: Property<String>
-
-  @get:Internal
-  abstract var statCollectors: List<StatCollector>?
-
-  @get:InputFiles
-  abstract val projectMainSrcDirectory: DirectoryProperty
-
-  @get:OutputFile
-  abstract val projectBuildReportStatsFile: RegularFileProperty
-
-  @TaskAction
-  internal fun execute() {
-    val projectPath = projectPath.get()
-
-    // Only select files from main source (we don't want stats from tests).
-    val mainSrcFolder = projectMainSrcDirectory.get().asFile
-    val srcFolder = mainSrcFolder.parentFile.parentFile
-    if (mainSrcFolder.exists()) {
-      val kotlinSourceFiles = mainSrcFolder
-        .walk()
-        .filter { it.extension == "kt" }
-        .toList()
-
-      val statInfoMap = mutableMapOf<StatKey, StatInfo>()
-
-      val collectedStats: Map<StatKey, Stat> =
-        mutableMapOf<StatKey, Stat>().also { collectedStats ->
-          val hasImportStatCollectors = this.statCollectors
-            ?.filterIsInstance<HasImportStatCollector>() ?: listOf()
-          hasImportStatCollectors.forEach { statCollector ->
-            val statKey = statCollector.statInfo.name
-            statInfoMap[statKey] = statCollector.statInfo
-            statCollector.collect(
-              kotlinSourceFiles
-            )?.let {
-              collectedStats[statKey] = it
-            }
-          }
-          val classDefinitionCollectors = this.statCollectors
-            ?.filterIsInstance<DefinitionsCollector>() ?: listOf()
-          classDefinitionCollectors.forEach { statCollector ->
-            val statKey = statCollector.statInfo.name
-            statInfoMap[statKey] = statCollector.statInfo
-            statCollector.collect(
-              srcFolder,
-              projectPath,
-              kotlinSourceFiles
-            )?.let {
-              collectedStats[statKey] = it
-            }
-          }
-        }
-
-      InvertJsonReportWriter.writeJsonFile(
-        logger,
-        InvertPluginFileKey.STATS,
-        this.projectBuildReportStatsFile.get().asFile,
-        CollectedStatsForProject.serializer(),
-        CollectedStatsForProject(
-          path = projectPath,
-          statInfos = statInfoMap,
-          stats = collectedStats,
-        )
-      )
+    companion object {
+        const val TASK_NAME = "invertCollectStats"
     }
-  }
 
-  fun setParams(
-    project: Project,
-    extension: InvertExtension,
-  ) {
-    val projectPath = project.path
-    this.projectPath.set(projectPath)
-    this.projectMainSrcDirectory.set(
-      File(project.layout.projectDirectory.asFile.path + "/src/main")
-    )
+    @get:Input
+    abstract val projectPath: Property<String>
 
-    projectBuildReportStatsFile.set(
-      project.layout.buildDirectory.file(
-        InvertFileUtils.REPORTS_SLASH_INVERT_PATH.addSlashAnd(InvertPluginFileKey.STATS.filename)
-      )
-    )
+    @get:Internal
+    abstract var statCollectors: List<StatCollector>?
 
-    statCollectors = extension.getStatCollectors().toList()
-  }
+    @get:InputFiles
+    abstract val projectMainSrcDirectory: DirectoryProperty
+
+    @get:OutputFile
+    abstract val projectBuildReportStatsFile: RegularFileProperty
+
+    @TaskAction
+    internal fun execute() {
+        val projectPath = projectPath.get()
+
+        // Only select files from main source (we don't want stats from tests).
+        val mainSrcFolder = projectMainSrcDirectory.get().asFile
+        val srcFolder = mainSrcFolder.parentFile.parentFile
+        if (mainSrcFolder.exists()) {
+            val kotlinSourceFiles = mainSrcFolder
+                .walk()
+                .filter { it.extension == "kt" }
+                .toList()
+
+            val statInfoMap = mutableMapOf<StatKey, StatInfo>()
+
+            val collectedStats: Map<StatKey, Stat> =
+                mutableMapOf<StatKey, Stat>().also { collectedStats ->
+                    val hasImportStatCollectors = this.statCollectors
+                        ?.filterIsInstance<HasImportStatCollector>() ?: listOf()
+                    hasImportStatCollectors.forEach { statCollector ->
+                        val statKey = statCollector.statInfo.name
+                        statInfoMap[statKey] = statCollector.statInfo
+                        statCollector.collect(
+                            kotlinSourceFiles
+                        )?.let {
+                            collectedStats[statKey] = it
+                        }
+                    }
+                    val stringToListStatCollectors = this.statCollectors
+                        ?.filterIsInstance<GenericStatCollector>() ?: listOf()
+                    stringToListStatCollectors.forEach { statCollector ->
+                        val statKey = statCollector.statInfo.name
+                        statInfoMap[statKey] = statCollector.statInfo
+                        statCollector.collect(
+                            srcFolder,
+                            projectPath,
+                            kotlinSourceFiles
+                        )?.let {
+                            collectedStats[statKey] = it
+                        }
+                    }
+                    val classDefinitionCollectors = this.statCollectors
+                        ?.filterIsInstance<DefinitionsCollector>() ?: listOf()
+                    classDefinitionCollectors.forEach { statCollector ->
+                        val statKey = statCollector.statInfo.name
+                        statInfoMap[statKey] = statCollector.statInfo
+                        statCollector.collect(
+                            srcFolder,
+                            projectPath,
+                            kotlinSourceFiles
+                        )?.let {
+                            collectedStats[statKey] = it
+                        }
+                    }
+                }
+
+            InvertJsonReportWriter.writeJsonFile(
+                logger,
+                InvertPluginFileKey.STATS,
+                this.projectBuildReportStatsFile.get().asFile,
+                CollectedStatsForProject.serializer(),
+                CollectedStatsForProject(
+                    path = projectPath,
+                    statInfos = statInfoMap,
+                    stats = collectedStats,
+                )
+            )
+        }
+    }
+
+    fun setParams(
+        project: Project,
+        extension: InvertExtension,
+    ) {
+        val projectPath = project.path
+        this.projectPath.set(projectPath)
+        this.projectMainSrcDirectory.set(
+            File(project.layout.projectDirectory.asFile.path + "/src/main")
+        )
+
+        projectBuildReportStatsFile.set(
+            project.layout.buildDirectory.file(
+                InvertFileUtils.REPORTS_SLASH_INVERT_PATH.addSlashAnd(InvertPluginFileKey.STATS.filename)
+            )
+        )
+
+        statCollectors = extension.getStatCollectors().toList()
+    }
 }

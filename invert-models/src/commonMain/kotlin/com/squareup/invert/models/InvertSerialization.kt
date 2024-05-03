@@ -24,8 +24,8 @@ object InvertSerialization {
       )
       polymorphic(
         baseClass = Stat::class,
-        actualClass = Stat.StringToListStat::class,
-        actualSerializer = Stat.StringToListStat.serializer()
+        actualClass = Stat.GenericStat::class,
+        actualSerializer = Stat.GenericStat.serializer()
       )
     }
   }

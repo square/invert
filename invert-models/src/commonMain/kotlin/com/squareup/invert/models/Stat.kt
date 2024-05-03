@@ -25,9 +25,9 @@ sealed interface Stat {
   }
 
   @Serializable
-  @SerialName("string_to_list_stat")
-  data class StringToListStat(
-    val map: Map<String, List<String>>
+  @SerialName("generic_stat")
+  data class GenericStat(
+    val stat: String,
   ) : Stat
 
   @Serializable

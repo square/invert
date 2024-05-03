@@ -102,7 +102,7 @@ fun StatDetailComposable(
                   stat.value.toString()
                 }
 
-                is Stat.StringToListStat -> {
+                is Stat.GenericStat -> {
                   buildString {
                     val scopeToBindings = stat.map
                     scopeToBindings.forEach { (key, values) ->

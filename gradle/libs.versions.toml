@@ -5,6 +5,7 @@
 [versions]
 coroutines = "1.8.0-RC"
 kotlin = "2.0.0-RC1"
+kotlin-one = "1.9.23"
 kotlinx-serialization = "1.6.3"
 vanniktech-maven-publish = "0.28.0"
 jetbrains-compose = "1.6.10-beta01"
@@ -15,6 +16,8 @@ jetbrains-compose = "1.6.10-beta01"
 #    id("org.jetbrains.compose").version(extra["compose.version"] as String)
 
 [libraries]
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+kotlin-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin-one" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
