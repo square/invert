@@ -1,6 +1,12 @@
 // Use external functions to call JS functions defined in global scope
 
 external fun externalLoadJavaScriptFile(key: String, callback: (json: String) -> Unit)
+
+
+external fun loadJsFileAsync(url: String, callback: () -> Unit)
+
+external fun markdownToHtml(markdown: String) : String
+
 external fun keysForObject(any: Any): Array<String>
 
 

@@ -1,89 +1,15 @@
 <!doctype html>
 <html lang="en" data-bs-theme="auto">
 <head>
-    <script type="text/javascript">
-        window.invert_report = window.invert_report || {};
 
-        window.keysForObject = function (obj) {
-            let newKeys = []
-            let keys = obj.keys()
-            let nextKey = keys.next();
-            while (!nextKey.done) {
-                newKeys.push(nextKey.value)
-                nextKey = keys.next();
-            }
-            return newKeys
-        }
-
-        let DEBUG_LOGGING = false
-
-        window.loadJsFileAsync = function (url, notifyCompleteCallback) {
-            let s = document.createElement('script');
-            s.setAttribute('src', url);
-            s.onload = function () {
-                notifyCompleteCallback()
-            };
-            document.body.appendChild(s);
-        }
-
-        window.externalLoadJavaScriptFile = function (key, callback) {
-            let src = "js/" + key + ".js"
-            const start = Date.now();
-            loadJsFileAsync(src, function () {
-                let json = JSON.stringify(window.invert_report[key])
-                if (DEBUG_LOGGING) {
-                    const end = Date.now();
-                    console.log(`${end - start}ms *** Finished JSON Stringify ${key}`);
-                }
-                callback(json)
-            })
-        }
-    </script>
-
-    <style>
-        [data-bs-theme="dark"] img.bootstrap-icon {
-            filter: invert(100);
-        }
-    </style>
-
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <title>Custom Report</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-
-    <!-- Favicons -->
-    <meta name="theme-color" content="#712cf9">
-
-    <!-- Custom styles for this template -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
-    <!-- Custom styles for this template -->
-    <style>
-        @media (min-width: 768px) {
-            .sidebar .offcanvas-lg {
-                position: -webkit-sticky;
-                position: sticky;
-                top: 48px;
-            }
-        }
-
-        .sidebar .nav-link {
-            font-size: .875rem;
-            font-weight: 500;
-            text-align: left;
-        }
-
-        .sidebar-heading {
-            font-size: .75rem;
-        }
-
-        .navbar-brand {
-            padding-top: .75rem;
-            padding-bottom: .75rem;
-        }
-
-    </style>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="description" content=""/>
+    <meta name="theme-color" content="#712cf9"/>
+    <title>Invert Report</title>
+    <link href="invert.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css" rel="stylesheet"/>
 </head>
 <body>
 
@@ -109,54 +35,15 @@
         </div>
     </main>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-
-<script type="text/javascript">
-    // https://github.com/vasturiano/force-graph
-    // https://unpkg.com/force-graph
-    window.render3dGraph = function (domElementId, graphDataJson, width, height) {
-        if(window.ForceGraph == undefined) {
-            loadJsFileAsync("https://unpkg.com/force-graph", function (obj) {
-                const graphData = JSON.parse(graphDataJson)
-                const Graph = ForceGraph()
-                (document.getElementById(domElementId))
-                .graphData(graphData)
-                .nodeId('id')
-                .nodeAutoColorBy('group')
-                .dagMode('rl')
-                .width(width)
-                .height(height)
-                .nodeCanvasObject((node, ctx, globalScale) => {
-                    const label = node.id;
-                    const fontSize = 12 / globalScale;
-                    ctx.font = `${fontSize}px Sans-Serif`;
-                    const textWidth = ctx.measureText(label).width;
-                    const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2);
-
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                    ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
-
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillStyle = node.color;
-                    ctx.fillText(label, node.x, node.y);
-
-                    node.__bckgDimensions = bckgDimensions;
-                })
-                .onNodeClick(node => {
-                    Graph.centerAt(node.x, node.y, 1000);
-                    Graph.zoom(8, 2000);
-                })
-                .nodePointerAreaPaint((node, color, ctx) => {
-                    ctx.fillStyle = color;
-                    const bckgDimensions = node.__bckgDimensions;
-                    bckgDimensions && ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
-                });
-            });
-        }
-    }
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="invert.js"></script>
 <script src="invert_web.js"></script>
+<script type="text/javascript">
+</script>
 </body>
 </html>
+
+
+<script type="text/javascript">
+
+</script>

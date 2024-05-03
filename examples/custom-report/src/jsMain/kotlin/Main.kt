@@ -1,16 +1,17 @@
-import com.squareup.af.analysis.navigation.routes.InvertOnGithubNavRoute
+import com.squareup.af.analysis.navigation.routes.GithubReadMeNavRoute
 import com.squareup.invert.common.InvertReport
+import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.routes.DependencyDiffNavRoute
 import com.squareup.invert.common.navigation.routes.ModuleConsumptionNavRoute
-import navigation.CustomNavPage
-import ui.AndroidModuleMetricsDashboard
-import ui.FullScreenIframe
+import navigation.CustomNavItem
+import org.jetbrains.compose.web.dom.H2
+import org.jetbrains.compose.web.dom.Text
+import ui.RemoteGitHubMarkdown
 
 fun main() {
-
-    val customNavPages = listOf(
-        CustomNavPage(
+    val customNavItems = listOf(
+        CustomNavItem(
             text = "What Demo Apps?",
             iconSlug = "question-circle",
             navRoute = ModuleConsumptionNavRoute(
@@ -21,7 +22,7 @@ fun main() {
                 moduleQuery = ":features:checkout-v2:"
             ),
         ),
-        CustomNavPage(
+        CustomNavItem(
             text = "Dependency Diff :invert-models w/js & jvm",
             iconSlug = "question-circle",
             navRoute = DependencyDiffNavRoute(
@@ -33,23 +34,34 @@ fun main() {
                 showMatching = false,
             ),
         ),
-        CustomNavPage(
-            text = "Invert on GitHub",
+        CustomNavItem(
+            text = "Anvil GitHub README",
             iconSlug = "bar-chart",
-            navRoute = InvertOnGithubNavRoute,
+            navRoute = GithubReadMeNavRoute("square/anvil"),
+        ),
+        CustomNavItem(
+            text = "Papa GitHub README",
+            iconSlug = "bar-chart",
+            navRoute = GithubReadMeNavRoute("square/papa"),
         ),
     )
 
-    InvertReport(
-        customNavItems = customNavPages,
-        customComposables = mapOf(
-            InvertOnGithubNavRoute::class to {
-                // Your Composable content here
-                FullScreenIframe("https://github.com/squareup/invert")
+    val reportPages = listOf(
+        InvertReportPage(
+            GithubReadMeNavRoute().navPage,
+            GithubReadMeNavRoute::class
+        ) {
+            val navRoute = it as GithubReadMeNavRoute
+            // Your Composable content here
+            H2 {
+                Text("README for ${navRoute.orgSlashRepo}")
             }
-        ),
-        customPages = listOf<NavPage>(
-            InvertOnGithubNavRoute.navPage,
-        )
+            RemoteGitHubMarkdown("https://api.github.com/repos/${navRoute.orgSlashRepo}/contents/README.md")
+        }
+    )
+
+    InvertReport(
+        customNavItems = customNavItems,
+        reportPages = reportPages,
     )
 }

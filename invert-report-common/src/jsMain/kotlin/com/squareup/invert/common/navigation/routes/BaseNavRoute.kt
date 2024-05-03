@@ -5,7 +5,7 @@ import com.squareup.invert.common.navigation.NavPageId
 import com.squareup.invert.common.navigation.NavRoute
 
 abstract class BaseNavRoute(
-    override val navPage: NavPage,
+    final override val navPage: NavPage,
 ) : NavRoute {
     override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
 

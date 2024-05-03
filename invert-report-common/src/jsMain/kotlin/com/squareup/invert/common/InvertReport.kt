@@ -8,22 +8,48 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import invertComposeMain
 import kotlinx.browser.window
 import kotlinx.coroutines.Dispatchers
-import navigation.CustomNavPage
+import navigation.CustomNavItem
 import navigation.RemoteJsLoadingProgress
 import registerDefaultInvertNavRoutes
-import registerDefaultParsers
+import registerDefaultNavPageParsers
 import kotlin.reflect.KClass
+import kotlin.reflect.cast
+
+
+class InvertReportPage<T : NavRoute>(
+    val navPage: NavPage,
+    val navRouteKClass: KClass<T>,
+    val composableContent: @Composable (NavRoute) -> Unit,
+)
 
 class InvertReport(
-    customPages: List<NavPage> = emptyList(),
-    customNavItems: List<CustomNavPage> = emptyList(),
-    customComposables: Map<KClass<*>, @Composable () -> Unit> = emptyMap(),
+    customNavItems: List<CustomNavItem> = emptyList(),
+    reportPages: List<InvertReportPage<out NavRoute>> = emptyList(),
 ) {
     private val routeManager = NavRouteManager()
+
+    init {
+        registerDefaultNavPageParsers(routeManager)
+        reportPages.forEach { reportPage ->
+            routeManager.registerParser(reportPage.navPage)
+        }
+        reportPages.forEach { reportPage ->
+            routeManager.registerRoute(
+                clazz = reportPage.navRouteKClass,
+                content = {
+                    reportPage.composableContent(reportPage.navRouteKClass.cast(it))
+                }
+            )
+        }
+//        customComposables.entries.forEach { (key, value) ->
+//            routeManager.registerRoute(key, value)
+//        }
+    }
 
     private val initialRoute: NavRoute = routeManager.parseUrlToRoute(window.location.toString())
 
     val navRouteRepo = NavRouteRepo(initialRoute)
+
 
     val reportDataRepo = ReportDataRepo(
         navRoute = navRouteRepo.navRoute,
@@ -38,12 +64,6 @@ class InvertReport(
     )
 
     init {
-        routeManager.apply {
-            registerDefaultParsers(this)
-            customPages.forEach {
-                registerParser(it)
-            }
-        }
         registerDefaultInvertNavRoutes(
             navRouteManager = routeManager,
             reportDataRepo = reportDataRepo,

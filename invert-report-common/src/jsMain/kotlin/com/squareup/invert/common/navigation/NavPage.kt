@@ -13,7 +13,7 @@ data class NavPage(
     companion object {
 
         val ROOT_NAV_ITEMS = setOf(
-            HomeNavRoute.navPage, // ISNT SHOWING UP???
+            HomeNavRoute.navPage,
             AllModulesNavRoute().navPage, // DONT USE DEFAULT CONSTRUCTOR TO GET NAVPAGE
             OwnersNavRoute.navPage,
             PluginsNavRoute.navPage,

@@ -1,0 +1,26 @@
+[data-bs-theme="dark"] img.bootstrap-icon {
+    filter: invert(100);
+}
+
+@media (min-width: 768px) {
+    .sidebar .offcanvas-lg {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 48px;
+    }
+}
+
+.sidebar .nav-link {
+    font-size: .875rem;
+    font-weight: 500;
+    text-align: left;
+}
+
+.sidebar-heading {
+    font-size: .75rem;
+}
+
+.navbar-brand {
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+}

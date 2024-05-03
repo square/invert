@@ -1,7 +1,6 @@
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import com.squareup.invert.common.ReportDataRepo
-import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteManager
 import com.squareup.invert.common.navigation.NavRouteRepo
@@ -28,7 +27,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import navigation.CustomNavPage
+import navigation.CustomNavItem
 import navigation.LeftNavigationComposable
 import navigation.RemoteJsLoadingProgress
 import org.jetbrains.compose.web.renderComposable
@@ -57,21 +56,18 @@ fun invertComposeMain(
     initialRoute: NavRoute,
     routeManager: NavRouteManager,
     navRouteRepo: NavRouteRepo,
-    customNavItems: List<CustomNavPage>
+    customNavItems: List<CustomNavItem>
 ) {
   setupNavigation(routeManager, navRouteRepo)
 
-  println("OKAY1")
   renderComposable(rootElementId = "navigation") {
     LeftNavigationComposable(initialRoute, navRouteRepo, customNavItems)
   }
 
-  println("OKAY2")
   renderComposable(rootElementId = "main_content") {
     MainContentComposable(routeManager, navRouteRepo)
   }
 
-  println("OKAY3")
   renderComposable(rootElementId = "navbar_content") {
     NavBarComposable(RemoteJsLoadingProgress.awaitingResults)
   }
@@ -88,7 +84,7 @@ fun setupNavigation(routeManager: NavRouteManager, navRouteRepo: NavRouteRepo) {
   JavaScriptNavigationAndHistory.registerForPopstate(routeManager, navRouteRepo)
 }
 
-fun registerDefaultParsers(
+fun registerDefaultNavPageParsers(
   navRouteManager: NavRouteManager,
 ) {
   with(navRouteManager) {
