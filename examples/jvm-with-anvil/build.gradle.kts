@@ -1,7 +1,5 @@
 plugins {
-    kotlin("jvm")
-    id("org.jetbrains.compose")
-    kotlin("plugin.serialization")
+    alias(libs.plugins.kotlin.jvm)
 }
 
 dependencies {
