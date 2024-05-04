@@ -6,6 +6,9 @@ build
 ## Kotlin
 .kotlin
 
+## Clones
+/clones
+
 ### Mac OS ###
 .DS_Store
 /local.properties

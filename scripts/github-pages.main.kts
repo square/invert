@@ -155,6 +155,10 @@ val ALL_REPOS = listOf<TargetRepo>(
         project = "nowinandroid"
     ),
     TargetRepo(
+        org = "duckduckgo",
+        project = "Android"
+    ),
+    TargetRepo(
         org = "square",
         project = "anvil",
         buildDirPath = "build/root-build"

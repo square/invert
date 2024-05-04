@@ -21,6 +21,9 @@ settingsEvaluated {
         }
         afterEvaluate {
             plugins.apply("com.squareup.invert")
+            invert {
+                addStatCollector(com.squareup.invert.RealAnvilContributesBindingStatCollector())
+            }
         }
     }
 }

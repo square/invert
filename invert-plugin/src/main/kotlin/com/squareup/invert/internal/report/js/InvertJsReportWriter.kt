@@ -87,6 +87,8 @@ class InvertJsReportWriter(
 
         listOf(
             "index.html",
+            "invert.css",
+            "invert.js",
             "invert_web.js"
         ).forEach { filename ->
             val contents = classLoader.getResource("META-INF/$filename")?.readBytes()

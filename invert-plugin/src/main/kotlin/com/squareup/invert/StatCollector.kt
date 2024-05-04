@@ -47,6 +47,6 @@ sealed interface StatCollector : Named {
             srcFolder: File,
             projectPath: String,
             kotlinSourceFiles: List<File>
-        ): Stat.GenericStat?
+        ): Stat.StringStat?
     }
 }

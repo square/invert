@@ -25,8 +25,8 @@ sealed interface Stat {
   }
 
   @Serializable
-  @SerialName("generic_stat")
-  data class GenericStat(
+  @SerialName("string_stat")
+  data class StringStat(
     val stat: String,
   ) : Stat
 

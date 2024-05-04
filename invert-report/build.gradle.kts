@@ -28,8 +28,6 @@ kotlin {
                 implementation(compose.html.core)
                 implementation(compose.runtime)
             }
-//            this.kotlin.srcDir(File(rootDir, "invert-report-common/src/jsMain/kotlin"))
-//            this.resources.srcDir(File(rootDir, "invert-report-common/src/jsMain/resources"))
         }
     }
 }
