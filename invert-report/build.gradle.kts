@@ -29,6 +29,7 @@ kotlin {
                 implementation(compose.runtime)
             }
         }
+        jsMain.resources.srcDir(File(rootProject.rootDir, "invert-report-common/src/jsMain/resources"))
     }
 }
 
