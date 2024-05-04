@@ -17,6 +17,7 @@ settingsEvaluated {
 
             dependencies {
                 classpath("com.squareup.invert:invert-plugin:0.0.1-dev-SNAPSHOT")
+                classpath("com.squareup.invert:invert-plugin:0.0.1-dev-SNAPSHOT")
             }
         }
         afterEvaluate {
