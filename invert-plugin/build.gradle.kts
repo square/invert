@@ -50,3 +50,34 @@ tasks {
     }
 }
 
+
+// ---------
+val invertPluginProject = project
+val invertReportProject = rootProject.project(":invert-report")
+val invertReportCommonProject = rootProject.project(":invert-report-common")
+
+
+val pluginProcessResourcesTask = invertPluginProject.tasks.named("processResources")
+
+
+val copyInvertJsFilesTask = invertReportProject.tasks.register<Copy>("copyInvertJs") {
+    val rootProjectDir = rootProject.layout.projectDirectory.asFile
+    val sourceDir = File(rootProjectDir, "invert-report/build/dist/js/invert_web")
+    val destDir = File(rootProjectDir, "invert-plugin/src/main/resources/META-INF")
+    from(sourceDir) {
+        include("*.js", "*.css", "*.html")
+    }
+    into(destDir)
+
+    outputs.upToDateWhen { false }
+
+    finalizedBy(pluginProcessResourcesTask)
+}
+
+
+invertReportProject.afterEvaluate {
+    val reportWebpackTask = invertReportProject.tasks.named("jsBrowserDevelopmentWebpack")
+    copyInvertJsFilesTask.configure {
+        dependsOn(reportWebpackTask)
+    }
+}
