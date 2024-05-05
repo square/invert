@@ -1,6 +1,5 @@
 pluginManagement {
     repositories {
-        mavenLocal()
         google()
         gradlePluginPortal()
         mavenCentral()
@@ -8,3 +7,4 @@ pluginManagement {
 }
 
 include(":jvm-with-anvil")
+includeBuild("../") // Include all of the invert plugin repo
