@@ -12,3 +12,9 @@ interface Authenticator
 
 @ContributesBinding(AppScope::class)
 class RealAuthenticator @Inject constructor() : Authenticator
+
+
+interface Analytics
+
+@ContributesBinding(AppScope::class)
+class RealAnalytics @Inject constructor() : Analytics

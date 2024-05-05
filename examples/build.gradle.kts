@@ -1,4 +1,5 @@
-//import com.squareup.invert.InvertExtension
+import com.squareup.invert.InvertExtension
+import com.squareup.invert.RealAnvilContributesBindingStatCollector
 
 buildscript {
     repositories {
@@ -6,6 +7,11 @@ buildscript {
         mavenCentral()
         google()
         gradlePluginPortal()
+    }
+    dependencies {
+        val invertVersion = "0.0.1-dev-SNAPSHOT"
+//        classpath("com.squareup.invert:invert-plugin:$invertVersion")
+        classpath("com.squareup.invert:collectors-anvil-dagger:$invertVersion")
     }
 }
 
@@ -21,4 +27,6 @@ plugins {
     id("com.squareup.invert") version "0.0.1-dev-SNAPSHOT"
 }
 
-invert {}
+invert {
+    addStatCollector(RealAnvilContributesBindingStatCollector())
+}
