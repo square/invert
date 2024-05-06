@@ -1,0 +1,1 @@
+Implementation from https://github.com/pgreze/kowners
