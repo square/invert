@@ -7,6 +7,7 @@ pluginManagement {
 }
 
 include(":collectors-anvil-dagger")
+include(":collectors-kotlin-java-loc")
 include(":custom-report")
 include(":invert-models")
 include(":invert-plugin")

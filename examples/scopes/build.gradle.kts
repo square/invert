@@ -4,7 +4,6 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":scopes"))
     implementation(libs.kotlinx.serialization.json)
     implementation("com.squareup.anvil:annotations:2.4.9")
     implementation("javax.inject:javax.inject:1")

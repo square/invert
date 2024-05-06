@@ -9,11 +9,11 @@ buildscript {
         gradlePluginPortal()
     }
 
-    dependencies {
-        val invertVersion = "0.0.1-dev-SNAPSHOT"
-        classpath("com.squareup.invert:invert-plugin:$invertVersion")
-        classpath("com.squareup.invert:collectors-anvil-dagger-jvm:$invertVersion")
-    }
+//    dependencies {
+//        val invertVersion = "0.0.1-dev-SNAPSHOT"
+//        classpath("com.squareup.invert:invert-plugin:$invertVersion")
+//        classpath("com.squareup.invert:collectors-anvil-dagger-jvm:$invertVersion")
+//    }
 }
 
 allprojects {

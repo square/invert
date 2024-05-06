@@ -1,6 +1,5 @@
 import com.squareup.invert.InvertExtension
-import com.squareup.invert.RealAnvilContributesBindingStatCollector
-
+import com.squareup.invert.LinesOfCodeStatCollector
 buildscript {
     repositories {
         mavenLocal()
@@ -10,8 +9,9 @@ buildscript {
     }
     dependencies {
         val invertVersion = "0.0.1-dev-SNAPSHOT"
-//        classpath("com.squareup.invert:invert-plugin:$invertVersion")
+        classpath("com.squareup.invert:invert-plugin:$invertVersion")
         classpath("com.squareup.invert:collectors-anvil-dagger:$invertVersion")
+        classpath("com.squareup.invert:collectors-kotlin-java-loc:$invertVersion")
     }
 }
 
@@ -28,5 +28,6 @@ plugins {
 }
 
 invert {
-    addStatCollector(RealAnvilContributesBindingStatCollector())
+    addStatCollector(com.squareup.invert.RealAnvilContributesBindingStatCollector())
+    addStatCollector(com.squareup.invert.LinesOfCodeStatCollector())
 }

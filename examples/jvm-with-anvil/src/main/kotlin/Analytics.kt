@@ -2,6 +2,7 @@ import com.squareup.anvil.annotations.ContributesBinding
 import com.squareup.anvil.annotations.ContributesTo
 import javax.inject.Inject
 
-fun main() {
-    println("hi")
-}
+interface Analytics
+
+@ContributesBinding(AppScope::class)
+class RealAnalytics @Inject constructor() : Analytics

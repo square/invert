@@ -14,34 +14,34 @@ import java.io.File
  */
 sealed interface StatCollector : Named {
 
-  /**
-   * Metadata about what data is being collected
-   */
-  val statInfo: StatInfo
-
-  /**
-   * A [StatCollector] that collects [HasImportStat] data.
-   */
-  interface HasImportStatCollector : StatCollector {
-    fun collect(
-      kotlinSourceFiles: List<File>
-    ): HasImportStat?
-  }
-
-  /**
-   * A [StatCollector] that collects [DefinitionsCollector] data.
-   */
-  interface DefinitionsCollector : StatCollector {
-    fun collect(
-      srcFolder: File,
-      projectPath: String,
-      kotlinSourceFiles: List<File>
-    ): ClassDefinitionsStat?
-  }
+    /**
+     * Metadata about what data is being collected
+     */
+    val statInfo: StatInfo
 
     /**
-    * A [StatCollector] that collects [GenericStatCollector] data.
-    */
+     * A [StatCollector] that collects [HasImportStat] data.
+     */
+    interface HasImportStatCollector : StatCollector {
+        fun collect(
+            kotlinSourceFiles: List<File>
+        ): HasImportStat?
+    }
+
+    /**
+     * A [StatCollector] that collects [DefinitionsCollector] data.
+     */
+    interface DefinitionsCollector : StatCollector {
+        fun collect(
+            srcFolder: File,
+            projectPath: String,
+            kotlinSourceFiles: List<File>
+        ): ClassDefinitionsStat?
+    }
+
+    /**
+     * A [StatCollector] that collects [GenericStatCollector] data.
+     */
     interface GenericStatCollector : StatCollector {
         fun collect(
             srcFolder: File,
