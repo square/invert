@@ -1,5 +1,6 @@
 import com.squareup.invert.InvertExtension
 import com.squareup.invert.LinesOfCodeStatCollector
+
 buildscript {
     repositories {
         mavenLocal()
@@ -12,6 +13,7 @@ buildscript {
         classpath("com.squareup.invert:invert-plugin:$invertVersion")
         classpath("com.squareup.invert:collectors-anvil-dagger:$invertVersion")
         classpath("com.squareup.invert:collectors-kotlin-java-loc:$invertVersion")
+        classpath("com.squareup.invert:owners-github-codeowners:$invertVersion")
     }
 }
 
@@ -28,6 +30,7 @@ plugins {
 }
 
 invert {
+    ownershipCollector(com.squareup.invert.GitHubCodeOwnersInvertOwnershipCollector)
     addStatCollector(com.squareup.invert.RealAnvilContributesBindingStatCollector())
     addStatCollector(com.squareup.invert.LinesOfCodeStatCollector())
 }

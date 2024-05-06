@@ -15,7 +15,7 @@ class LinesOfCodeStatCollector : StatCollector.GenericStatCollector {
                 var kotlinLoc = 0
                 kotlinSourceFiles
                     .filter { it.isFile && it.extension == "kt" }
-                    .map { it.readText().lines().filter { line -> line.isNotBlank() } }
+                    .map { it.readLines().filter { line -> line.isNotBlank() } }
                     .forEach {
                         kotlinLoc += it.size
                     }
