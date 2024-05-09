@@ -2,7 +2,7 @@ package com.squareup.invert.common
 
 import com.squareup.invert.common.PerformanceAndTiming.computeMeasureDuration
 import com.squareup.invert.common.navigation.NavRoute
-import com.squareup.invert.common.navigation.routes.ModuleConsumptionNavRoute
+import com.squareup.invert.common.pages.ModuleConsumptionNavRoute
 import com.squareup.invert.common.utils.DependencyComputations
 import com.squareup.invert.models.*
 import com.squareup.invert.models.js.MetadataJsReportModel
