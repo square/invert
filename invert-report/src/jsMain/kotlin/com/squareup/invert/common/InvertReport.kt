@@ -9,8 +9,6 @@ import kotlinx.browser.window
 import kotlinx.coroutines.Dispatchers
 import navigation.CustomNavItem
 import navigation.RemoteJsLoadingProgress
-import registerDefaultInvertNavRoutes
-import registerDefaultNavPageParsers
 
 class InvertReport(
     customNavItems: List<CustomNavItem> = emptyList(),
@@ -20,7 +18,6 @@ class InvertReport(
 
     init {
         val allReportPages = DEFAULT_REPORT_PAGES + customReportPages
-        registerDefaultNavPageParsers(routeManager)
         allReportPages.forEach { reportPage ->
             routeManager.registerParser(reportPage.navPage)
         }
@@ -53,11 +50,6 @@ class InvertReport(
     )
 
     init {
-        registerDefaultInvertNavRoutes(
-            navRouteManager = routeManager,
-            reportDataRepo = reportDataRepo,
-            navRouteRepo = navRouteRepo
-        )
         invertComposeMain(
             initialRoute = initialRoute,
             routeManager = routeManager,
@@ -93,6 +85,7 @@ class InvertReport(
             OwnersReportPage,
             PluginDetailReportPage,
             PluginsReportPage,
+            StatDetailReportPage,
             UnusedModulesReportPage,
         )
     }

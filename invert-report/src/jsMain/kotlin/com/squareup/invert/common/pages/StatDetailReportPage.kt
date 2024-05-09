@@ -1,26 +1,79 @@
-package ui
+package com.squareup.invert.common.pages
+
 
 import PagingConstants
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.squareup.invert.common.DependencyGraph
+import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ReportDataRepo
+import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
-import com.squareup.invert.common.navigation.routes.StatDetailNavRoute
-import com.squareup.invert.common.pages.ModuleDetailNavRoute
+import com.squareup.invert.common.navigation.routes.BaseNavRoute
+import com.squareup.invert.common.pages.StatDetailNavRoute.Companion.parser
+import com.squareup.invert.models.GradlePluginId
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatInfo
 import com.squareup.invert.models.StatKey
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.Text
+import ui.*
+import kotlin.reflect.KClass
 
+data class StatDetailNavRoute(
+    val pluginIds: List<GradlePluginId>,
+    val statKeys: List<String>,
+    val moduleQuery: String? = null
+) : BaseNavRoute(StatDetailReportPage.navPage) {
+
+    override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
+        .also { params ->
+            params[PLUGIN_IDS_PARAM] = pluginIds.joinToString(separator = ",")
+            params[STATKEYS_PARAM] = statKeys.joinToString(separator = ",")
+            moduleQuery?.let {
+                params[MODULE_QUERY_PARAM] = it
+            }
+        }
+
+    companion object {
+
+        private const val PLUGIN_IDS_PARAM = "plugins"
+        private const val STATKEYS_PARAM = "statkeys"
+        private const val MODULE_QUERY_PARAM = "modulequery"
+
+        fun parser(params: Map<String, String?>): StatDetailNavRoute {
+            val pluginIds = params[PLUGIN_IDS_PARAM]?.split(",")?.filter { it.isNotBlank() } ?: listOf()
+            val statKeys = params[STATKEYS_PARAM]?.split(",")?.filter { it.isNotBlank() } ?: listOf()
+            val moduleQuery = params[MODULE_QUERY_PARAM]
+            return StatDetailNavRoute(
+                pluginIds = pluginIds,
+                statKeys = statKeys,
+                moduleQuery = moduleQuery
+            )
+        }
+    }
+}
+
+object StatDetailReportPage : InvertReportPage<StatDetailNavRoute> {
+    override val navPage: NavPage = NavPage(
+        pageId = "stat_detail",
+        navRouteParser = { parser(it) }
+    )
+
+    override val navRouteKClass: KClass<StatDetailNavRoute> = StatDetailNavRoute::class
+
+    override val composableContent: @Composable (StatDetailNavRoute) -> Unit = { navRoute ->
+        StatDetailComposable(navRoute)
+    }
+}
 
 @Composable
 fun StatDetailComposable(
-    reportDataRepo: ReportDataRepo,
-    navRouteRepo: NavRouteRepo,
-    statsNavRoute: StatDetailNavRoute
+    statsNavRoute: StatDetailNavRoute,
+    reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
+    navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
     val allPluginIds by reportDataRepo.allPluginIds.collectAsState(null)
     val statsData by reportDataRepo.statsData.collectAsState(null)
@@ -105,6 +158,7 @@ fun StatDetailComposable(
                                 is Stat.StringStat -> {
                                     stat.stat
                                 }
+
                                 else -> ""
                             }
                         }

@@ -49,25 +49,6 @@ fun setupNavigation(routeManager: NavRouteManager, navRouteRepo: NavRouteRepo) {
     JavaScriptNavigationAndHistory.registerForPopstate(routeManager, navRouteRepo)
 }
 
-fun registerDefaultNavPageParsers(
-    navRouteManager: NavRouteManager,
-) {
-    with(navRouteManager) {
-        registerParser(StatDetailNavRoute(emptyList(), emptyList()).navPage)
-    }
-}
-
-fun registerDefaultInvertNavRoutes(
-    navRouteManager: NavRouteManager,
-    reportDataRepo: ReportDataRepo,
-    navRouteRepo: NavRouteRepo
-) {
-    with(navRouteManager) {
-        registerRoute(StatDetailNavRoute::class) { StatDetailComposable(reportDataRepo, navRouteRepo, it) }
-
-    }
-}
-
 @Composable
 fun MainContentComposable(
     navRouteManager: NavRouteManager,
