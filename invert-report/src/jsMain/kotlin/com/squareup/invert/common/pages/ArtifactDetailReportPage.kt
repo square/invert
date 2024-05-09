@@ -1,7 +1,10 @@
 package com.squareup.invert.common.pages
 
 
+import PagingConstants
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.squareup.invert.common.DependencyGraph
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ReportDataRepo
@@ -10,11 +13,12 @@ import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.ArtifactsNavRoute
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
+import com.squareup.invert.common.navigation.routes.ModuleDetailNavRoute
 import com.squareup.invert.common.pages.ArtifactDetailReportPage.navPage
-import org.jetbrains.compose.web.dom.Br
-import org.jetbrains.compose.web.dom.H1
-import org.jetbrains.compose.web.dom.H3
-import org.jetbrains.compose.web.dom.Text
+import com.squareup.invert.models.DependencyId
+import org.jetbrains.compose.web.dom.*
+import ui.BootstrapLoadingMessageWithSpinner
+import ui.BootstrapTable
 import kotlin.reflect.KClass
 
 object ArtifactDetailReportPage : InvertReportPage<ArtifactDetailNavRoute> {
@@ -71,8 +75,48 @@ fun ArtifactDetailComposable(
     reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
     navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
+    val allDependencyIds by reportDataRepo.allDependencyIds.collectAsState(null)
 
-    H1 { Text("Artifact Detail ${navRoute.group}:${navRoute.artifact}") }
+    if (allDependencyIds == null) {
+        BootstrapLoadingMessageWithSpinner()
+        return
+    }
+
+
+    val versions = allDependencyIds!!.filter { it.startsWith(navRoute.group + ":" + navRoute.artifact + ":") }
+
+    if (versions.isEmpty()) {
+        Text("Could Not Find any Dependencies matching $navRoute")
+        return
+    }
+
+    val allInvertedDependencies by reportDataRepo.allInvertedDependencies.collectAsState(null)
+
+    if (allInvertedDependencies == null) {
+        BootstrapLoadingMessageWithSpinner()
+    }
+    H1 {
+        Text(navRoute.group + ":" + navRoute.artifact)
+    }
     Br()
-    H3 { Text("...") }
+    versions.forEach { dependencyId: DependencyId ->
+        H4 {
+            Text("Version ${dependencyId.substringAfterLast(":")}")
+        }
+        val whoDependsOnThis = allInvertedDependencies?.get(dependencyId)
+        BootstrapTable(
+            headers = listOf("Module", "Configurations"),
+            rows = whoDependsOnThis?.map {
+                listOf(
+                    it.key,
+                    it.value.joinToString("\n"),
+                )
+            } ?: listOf(),
+            types = listOf(String::class, String::class),
+            maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
+            onItemClick = {
+                navRouteRepo.updateNavRoute(ModuleDetailNavRoute(it[0]))
+            }
+        )
+    }
 }
