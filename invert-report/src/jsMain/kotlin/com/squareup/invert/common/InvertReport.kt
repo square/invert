@@ -82,10 +82,12 @@ class InvertReport(
             AllModulesReportPage,
             AllStatsReportPage,
             ArtifactDetailReportPage,
+            ArtifactsReportPage,
             AnnotationProcessorsReportPage,
             ConfigurationsReportPage,
             HomeReportPage,
             LeafModulesReportPage,
+            ModuleDetailReportPage,
             OwnersReportPage,
         )
     }

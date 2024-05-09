@@ -14,17 +14,14 @@ import kotlinx.browser.window
 import ui.*
 import kotlin.reflect.KClass
 
-object ConfigurationsNavRoute : BaseNavRoute(NavPage(
-    pageId = "configurations",
-    displayName = "Configurations",
-    navIconSlug = "gear",
-    navRouteParser = { ConfigurationsNavRoute }
-))
+object ConfigurationsNavRoute : BaseNavRoute(ConfigurationsReportPage.navPage)
 
 object ConfigurationsReportPage : InvertReportPage<ConfigurationsNavRoute> {
     override val navPage: NavPage = NavPage(
-        pageId = "blank",
-        navRouteParser = { OwnersNavRoute }
+        pageId = "configurations",
+        displayName = "Configurations",
+        navIconSlug = "gear",
+        navRouteParser = { ConfigurationsNavRoute }
     )
     override val navRouteKClass: KClass<ConfigurationsNavRoute> = ConfigurationsNavRoute::class
 
@@ -32,7 +29,6 @@ object ConfigurationsReportPage : InvertReportPage<ConfigurationsNavRoute> {
         ConfigurationsComposable(navRoute)
     }
 
-    object OwnersNavRoute : BaseNavRoute(navPage)
 }
 
 

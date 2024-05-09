@@ -53,7 +53,6 @@ fun registerDefaultNavPageParsers(
     navRouteManager: NavRouteManager,
 ) {
     with(navRouteManager) {
-        registerParser(ModuleDetailNavRoute("").navPage)
         registerParser(DependencyDiffNavRoute().navPage)
         registerParser(OwnerDetailNavRoute("").navPage)
         registerParser(PluginsNavRoute.navPage)
@@ -81,7 +80,6 @@ fun registerDefaultInvertNavRoutes(
                 it
             )
         }
-        registerRoute(ModuleDetailNavRoute::class) { ModuleDetailComposable(reportDataRepo, navRouteRepo, it) }
         registerRoute(StatDetailNavRoute::class) { StatDetailComposable(reportDataRepo, navRouteRepo, it) }
         registerRoute(PluginsNavRoute::class) { PluginsComposable(reportDataRepo, navRouteRepo) }
         registerRoute(PluginDetailNavRoute::class) { PluginDetailComposable(reportDataRepo, navRouteRepo, it) }

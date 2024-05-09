@@ -11,6 +11,7 @@ import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
+import com.squareup.invert.common.pages.ArtifactsNavRoute.Companion.parser
 import ui.BootstrapLoadingMessageWithSpinner
 import ui.BootstrapSearchBox
 import ui.BootstrapTable
@@ -19,12 +20,7 @@ import kotlin.reflect.KClass
 
 data class ArtifactsNavRoute(
     val query: String? = null,
-) : BaseNavRoute(NavPage(
-    pageId = "artifacts",
-    displayName = "Artifacts",
-    navIconSlug = "newspaper",
-    navRouteParser = { parser(it) }
-)) {
+) : BaseNavRoute(ArtifactsReportPage.navPage) {
 
     override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
         .also { params ->
@@ -47,16 +43,16 @@ data class ArtifactsNavRoute(
 
 object ArtifactsReportPage : InvertReportPage<ArtifactsNavRoute> {
     override val navPage: NavPage = NavPage(
-        pageId = "blank",
-        navRouteParser = { OwnersNavRoute }
+        pageId = "artifacts",
+        displayName = "Artifacts",
+        navIconSlug = "newspaper",
+        navRouteParser = { parser(it) }
     )
     override val navRouteKClass: KClass<ArtifactsNavRoute> = ArtifactsNavRoute::class
 
     override val composableContent: @Composable (ArtifactsNavRoute) -> Unit = { navRoute ->
         ArtifactsComposable(navRoute)
     }
-
-    object OwnersNavRoute : BaseNavRoute(navPage)
 }
 
 @Composable

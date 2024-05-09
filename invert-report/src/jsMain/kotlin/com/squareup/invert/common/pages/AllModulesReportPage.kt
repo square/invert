@@ -12,7 +12,6 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import com.squareup.invert.common.navigation.routes.ModuleDetailNavRoute
 import com.squareup.invert.common.pages.AllModulesReportPage.navPage
 import com.squareup.invert.models.GradlePath
 import org.jetbrains.compose.web.dom.H1

@@ -6,8 +6,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavRouteRepo
-import com.squareup.invert.common.navigation.routes.ModuleDetailNavRoute
 import com.squareup.invert.common.navigation.routes.OwnerDetailNavRoute
+import com.squareup.invert.common.pages.ModuleDetailNavRoute
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Text
 
