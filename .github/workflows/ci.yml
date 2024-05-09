@@ -47,7 +47,7 @@ jobs:
         uses: actions/upload-pages-artifact@v2
         with:
           # Upload the generated pages
-          path: './build/reports/invert'
+          path: './examples/build/reports/invert'
 
       - name: Deploy to GitHub Pages
         id: deployment

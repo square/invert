@@ -42,6 +42,7 @@ compose {
     }
 }
 
+// Ensure that we generate the latest report JS when the plugin is built, so it can be included in the binary
 project(":invert-report") {
     val isCI = System.getenv().containsKey("GITHUB_ACTIONS")
     val webpackTaskName = if (isCI) {
