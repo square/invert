@@ -22,19 +22,6 @@ import ui.BootstrapLoadingMessageWithSpinner
 import ui.BootstrapTable
 import kotlin.reflect.KClass
 
-object ArtifactDetailReportPage : InvertReportPage<ArtifactDetailNavRoute> {
-    override val navPage: NavPage = NavPage(
-        pageId = "artifact_detail",
-        navRouteParser = { ArtifactDetailNavRoute.parser(it) }
-    )
-
-    override val navRouteKClass: KClass<ArtifactDetailNavRoute> = ArtifactDetailNavRoute::class
-
-    override val composableContent: @Composable (ArtifactDetailNavRoute) -> Unit = { navRoute ->
-        ArtifactDetailComposable(navRoute)
-    }
-}
-
 data class ArtifactDetailNavRoute(
     val group: String,
     val artifact: String,
@@ -66,6 +53,19 @@ data class ArtifactDetailNavRoute(
                 ArtifactsNavRoute()
             }
         }
+    }
+}
+
+object ArtifactDetailReportPage : InvertReportPage<ArtifactDetailNavRoute> {
+    override val navPage: NavPage = NavPage(
+        pageId = "artifact_detail",
+        navRouteParser = { ArtifactDetailNavRoute.parser(it) }
+    )
+
+    override val navRouteKClass: KClass<ArtifactDetailNavRoute> = ArtifactDetailNavRoute::class
+
+    override val composableContent: @Composable (ArtifactDetailNavRoute) -> Unit = { navRoute ->
+        ArtifactDetailComposable(navRoute)
     }
 }
 

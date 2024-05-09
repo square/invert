@@ -85,6 +85,7 @@ class InvertReport(
             ArtifactsReportPage,
             AnnotationProcessorsReportPage,
             ConfigurationsReportPage,
+            DependencyDiffReportPage,
             HomeReportPage,
             LeafModulesReportPage,
             ModuleDetailReportPage,
