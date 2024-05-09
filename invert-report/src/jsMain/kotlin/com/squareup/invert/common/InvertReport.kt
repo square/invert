@@ -93,6 +93,7 @@ class InvertReport(
             OwnersReportPage,
             PluginDetailReportPage,
             PluginsReportPage,
+            UnusedModulesReportPage,
         )
     }
 }
