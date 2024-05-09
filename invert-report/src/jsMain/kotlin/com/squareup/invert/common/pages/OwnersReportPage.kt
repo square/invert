@@ -11,7 +11,6 @@ import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import com.squareup.invert.common.navigation.routes.OwnerDetailNavRoute
 import com.squareup.invert.models.GradlePath
 import com.squareup.invert.models.OwnerName
 import org.jetbrains.compose.web.dom.H1

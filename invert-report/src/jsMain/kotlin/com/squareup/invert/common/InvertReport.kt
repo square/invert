@@ -90,6 +90,7 @@ class InvertReport(
             LeafModulesReportPage,
             ModuleDetailReportPage,
             ModuleConsumptionReportPage,
+            OwnerDetailReportPage,
             OwnersReportPage,
         )
     }

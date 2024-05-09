@@ -12,7 +12,6 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import com.squareup.invert.common.navigation.routes.OwnerDetailNavRoute
 import com.squareup.invert.common.pages.ModuleDetailNavRoute.Companion.parser
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.GradlePath
