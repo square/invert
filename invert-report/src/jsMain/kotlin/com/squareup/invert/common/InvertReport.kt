@@ -81,11 +81,12 @@ class InvertReport(
         private val DEFAULT_REPORT_PAGES = listOf<InvertReportPage<*>>(
             AllModulesReportPage,
             AllStatsReportPage,
-            AnnotationProcessorsReportPage,
-            HomeReportPage,
-            OwnersReportPage,
             ArtifactDetailReportPage,
+            AnnotationProcessorsReportPage,
+            ConfigurationsReportPage,
+            HomeReportPage,
             LeafModulesReportPage,
+            OwnersReportPage,
         )
     }
 }
