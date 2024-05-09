@@ -12,12 +12,10 @@ import navigation.RemoteJsLoadingProgress
 import registerDefaultInvertNavRoutes
 import registerDefaultNavPageParsers
 
-
 class InvertReport(
     customNavItems: List<CustomNavItem> = emptyList(),
     customReportPages: List<InvertReportPage<out NavRoute>> = emptyList(),
 ) {
-
     private val routeManager = NavRouteManager()
 
     init {
@@ -92,6 +90,7 @@ class InvertReport(
             ModuleConsumptionReportPage,
             OwnerDetailReportPage,
             OwnersReportPage,
+            PluginDetailReportPage,
             PluginsReportPage,
         )
     }

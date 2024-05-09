@@ -11,7 +11,6 @@ import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import com.squareup.invert.common.navigation.routes.PluginDetailNavRoute
 import ui.BootstrapClickableList
 import ui.BootstrapLoadingSpinner
 import ui.TitleRow
