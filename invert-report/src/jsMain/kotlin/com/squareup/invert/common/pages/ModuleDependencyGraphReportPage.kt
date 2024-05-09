@@ -1,11 +1,16 @@
-package ui
+package com.squareup.invert.common.pages
+
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.squareup.invert.common.DependencyGraph
+import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ReportDataRepo
+import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
-import com.squareup.invert.common.navigation.routes.ModuleDependencyGraphNavRoute
+import com.squareup.invert.common.navigation.routes.BaseNavRoute
+import com.squareup.invert.common.pages.ModuleDependencyGraphNavRoute.Companion.parser
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.InvertSerialization
@@ -16,25 +21,60 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.web.attributes.list
 import org.jetbrains.compose.web.attributes.placeholder
-import org.jetbrains.compose.web.css.Color
-import org.jetbrains.compose.web.css.LineStyle
-import org.jetbrains.compose.web.css.border
-import org.jetbrains.compose.web.css.height
-import org.jetbrains.compose.web.css.px
-import org.jetbrains.compose.web.css.style
-import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.dom.Datalist
-import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Fieldset
-import org.jetbrains.compose.web.dom.H1
-import org.jetbrains.compose.web.dom.Label
-import org.jetbrains.compose.web.dom.Legend
-import org.jetbrains.compose.web.dom.Option
-import org.jetbrains.compose.web.dom.P
-import org.jetbrains.compose.web.dom.Text
-import org.jetbrains.compose.web.dom.TextInput
+import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.*
 import render3dGraph
+import ui.BootstrapColumn
+import ui.BootstrapLoadingMessageWithSpinner
+import ui.BootstrapRow
 import kotlin.random.Random
+import kotlin.reflect.KClass
+
+data class ModuleDependencyGraphNavRoute(
+    val module: String? = null,
+    val configuration: String? = null,
+) : BaseNavRoute(ModuleDependencyGraphReportPage.navPage) {
+
+    override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
+        .also { params ->
+            module?.let {
+                params[MODULE_PARAM] = module
+            }
+            configuration?.let {
+                params[CONFIGURATION_PARAM] = configuration
+            }
+        }
+
+    companion object {
+
+        private const val MODULE_PARAM = "module"
+        private const val CONFIGURATION_PARAM = "configuration"
+
+        fun parser(params: Map<String, String?>): ModuleDependencyGraphNavRoute {
+            return ModuleDependencyGraphNavRoute(
+                module = params[MODULE_PARAM],
+                configuration = params[CONFIGURATION_PARAM]
+            )
+        }
+    }
+}
+
+
+object ModuleDependencyGraphReportPage : InvertReportPage<ModuleDependencyGraphNavRoute> {
+    override val navPage: NavPage = NavPage(
+        pageId = "module_dependency_graph",
+        displayName = "Module Dependency Graph",
+        navIconSlug = "diagram-3",
+        navRouteParser = { parser(it) }
+    )
+
+    override val navRouteKClass: KClass<ModuleDependencyGraphNavRoute> = ModuleDependencyGraphNavRoute::class
+
+    override val composableContent: @Composable (ModuleDependencyGraphNavRoute) -> Unit = { navRoute ->
+        ModuleDependencyGraphComposable(navRoute)
+    }
+}
+
 
 @Serializable
 data class GraphNode(
@@ -57,9 +97,9 @@ data class GraphData(
 
 @Composable
 fun ModuleDependencyGraphComposable(
-    reportDataRepo: ReportDataRepo,
-    navRouteRepo: NavRouteRepo,
-    dependencyGraphNavRoute: ModuleDependencyGraphNavRoute
+    dependencyGraphNavRoute: ModuleDependencyGraphNavRoute,
+    reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
+    navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
     val rootModulePath = dependencyGraphNavRoute.module ?: ":api:sales-report:impl"
     val allDirectDeps by reportDataRepo.allDirectDependencies.collectAsState(null)
@@ -204,3 +244,4 @@ fun ModuleDependencyGraphComposable(
         )
     }
 }
+
