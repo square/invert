@@ -1,7 +1,6 @@
 import com.squareup.invert.common.InvertReport
-import com.squareup.invert.common.navigation.routes.DependencyDiffNavRoute
-import com.squareup.invert.common.navigation.routes.ModuleConsumptionNavRoute
 import com.squareup.invert.common.pages.DependencyDiffNavRoute
+import com.squareup.invert.common.pages.ModuleConsumptionNavRoute
 import navigation.CustomNavItem
 
 fun main() {

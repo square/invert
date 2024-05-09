@@ -8,12 +8,12 @@ kotlin {
     js {
         binaries.executable()
         browser {
-            runTask {
-                mainOutputFileName.set("invert_web.js")
-            }
-            webpackTask {
-                mainOutputFileName.set("invert_web.js")
-            }
+            runTask(Action {
+                mainOutputFileName.set("custom_invert_web.js")
+            })
+            webpackTask(Action {
+                mainOutputFileName.set("custom_invert_web.js")
+            })
         }
     }
     sourceSets {
@@ -26,7 +26,7 @@ kotlin {
                 implementation(compose.runtime)
             }
         }
-        jsMain.resources.srcDir(File(rootProject.rootDir, "invert-gradle-plugin/src/main/resources/META-INF"))
+//        jsMain.resources.srcDir(File(rootProject.rootDir, "invert-gradle-plugin/src/main/resources/META-INF"))
     }
 }
 

@@ -1,6 +1,5 @@
 package com.squareup.invert.common.navigation
 
-import com.squareup.invert.common.navigation.routes.*
 import com.squareup.invert.common.pages.*
 
 typealias NavPageId = String
@@ -20,13 +19,13 @@ data class NavPage(
             AnnotationProcessorsReportPage.navPage,
             OwnersReportPage.navPage,
             PluginsNavRoute.navPage,
-            ModuleConsumptionNavRoute().navPage, // DONT USE DEFAULT CONSTRUCTOR TO GET NAVPAGE
-            ArtifactsNavRoute().navPage, // DONT USE DEFAULT CONSTRUCTOR TO GET NAVPAGE
+            ModuleConsumptionReportPage.navPage,
+            ArtifactsReportPage.navPage,
             ConfigurationsNavRoute.navPage,
-            DependencyDiffNavRoute().navPage, // DONT USE DEFAULT CONSTRUCTOR TO GET NAVPAGE
+            DependencyDiffReportPage.navPage,
             LeafModulesNavRoute.navPage,
-            UnusedModulesNavRoute().navPage,// DONT USE DEFAULT CONSTRUCTOR TO GET NAVPAGE
-            ModuleDependencyGraphNavRoute().navPage,// DONT USE DEFAULT CONSTRUCTOR TO GET NAVPAGE
+            UnusedModulesReportPage.navPage,
+            ModuleDependencyGraphReportPage.navPage,
         ).filterNotNull()
     }
 }
