@@ -8,16 +8,16 @@ import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import org.jetbrains.compose.web.dom.Text
 import kotlin.reflect.KClass
 
-class BlankNavRoute : BaseNavRoute(BlankReportPage.navPage)
+class BlankNavRoute : BaseNavRoute(ArtifactsReportPage.navPage)
 
-object BlankReportPage : InvertReportPage<BlankNavRoute> {
+object BlankReportPage : InvertReportPage<ArtifactsNavRoute> {
     override val navPage: NavPage = NavPage(
         pageId = "blank",
         navRouteParser = { OwnersNavRoute }
     )
-    override val navRouteKClass: KClass<BlankNavRoute> = BlankNavRoute::class
+    override val navRouteKClass: KClass<ArtifactsNavRoute> = ArtifactsNavRoute::class
 
-    override val composableContent: @Composable (BlankNavRoute) -> Unit = { navRoute ->
+    override val composableContent: @Composable (ArtifactsNavRoute) -> Unit = { navRoute ->
         Text(navRoute.toString())
     }
 

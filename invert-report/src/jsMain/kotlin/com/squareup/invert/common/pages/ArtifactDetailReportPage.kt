@@ -11,12 +11,14 @@ import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
-import com.squareup.invert.common.navigation.routes.ArtifactsNavRoute
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.navigation.routes.ModuleDetailNavRoute
 import com.squareup.invert.common.pages.ArtifactDetailReportPage.navPage
 import com.squareup.invert.models.DependencyId
-import org.jetbrains.compose.web.dom.*
+import org.jetbrains.compose.web.dom.Br
+import org.jetbrains.compose.web.dom.H1
+import org.jetbrains.compose.web.dom.H4
+import org.jetbrains.compose.web.dom.Text
 import ui.BootstrapLoadingMessageWithSpinner
 import ui.BootstrapTable
 import kotlin.reflect.KClass

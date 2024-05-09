@@ -1,16 +1,70 @@
-package ui
+package com.squareup.invert.common.pages
+
 
 import PagingConstants.MAX_RESULTS
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.squareup.invert.common.DependencyGraph
+import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ReportDataRepo
+import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
-import com.squareup.invert.common.navigation.routes.ArtifactsNavRoute
-import com.squareup.invert.common.pages.ArtifactDetailNavRoute
+import com.squareup.invert.common.navigation.routes.BaseNavRoute
+import ui.BootstrapLoadingMessageWithSpinner
+import ui.BootstrapSearchBox
+import ui.BootstrapTable
+import ui.TitleRow
+import kotlin.reflect.KClass
+
+data class ArtifactsNavRoute(
+    val query: String? = null,
+) : BaseNavRoute(NavPage(
+    pageId = "artifacts",
+    displayName = "Artifacts",
+    navIconSlug = "newspaper",
+    navRouteParser = { parser(it) }
+)) {
+
+    override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
+        .also { params ->
+            query?.let {
+                params[QUERY_PARAM] = query
+            }
+        }
+
+    companion object {
+
+        private const val QUERY_PARAM = "query"
+
+        fun parser(params: Map<String, String?>): ArtifactsNavRoute {
+            return ArtifactsNavRoute(
+                query = params[QUERY_PARAM]
+            )
+        }
+    }
+}
+
+object ArtifactsReportPage : InvertReportPage<ArtifactsNavRoute> {
+    override val navPage: NavPage = NavPage(
+        pageId = "blank",
+        navRouteParser = { OwnersNavRoute }
+    )
+    override val navRouteKClass: KClass<ArtifactsNavRoute> = ArtifactsNavRoute::class
+
+    override val composableContent: @Composable (ArtifactsNavRoute) -> Unit = { navRoute ->
+        ArtifactsComposable(navRoute)
+    }
+
+    object OwnersNavRoute : BaseNavRoute(navPage)
+}
 
 @Composable
-fun ArtifactsComposable(reportDataRepo: ReportDataRepo, navRouteRepo: NavRouteRepo, navRoute: ArtifactsNavRoute) {
+fun ArtifactsComposable(
+    navRoute: ArtifactsNavRoute,
+    reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
+    navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo
+) {
     val query = navRoute.query ?: ""
     val allArtifactsCollected by reportDataRepo.allArtifacts.collectAsState(null)
 
