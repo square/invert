@@ -108,7 +108,7 @@ jobs:
         uses: gradle/actions/wrapper-validation@v3
 
       - name: Publish Snapshot
-        run: ./gradlew :invert-models:publish :invert-gradle-plugin:publish :invert-report-common:publish --no-configuration-cache --stacktrace
+        run: ./gradlew :invert-models:publish :invert-gradle-plugin:publish --no-configuration-cache --stacktrace
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}

@@ -25,8 +25,9 @@ kotlin {
     sourceSets {
         val jsMain by getting {
             dependencies {
-                implementation(project(":invert-report-common"))
+                implementation(project(":invert-models"))
                 implementation(libs.kotlinx.serialization.json)
+                implementation(libs.kotlinx.coroutines.core)
                 implementation("org.jetbrains.kotlinx:kotlinx-html-js:0.9.1")
                 implementation(compose.html.core)
                 implementation(compose.runtime)
