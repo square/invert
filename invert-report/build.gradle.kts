@@ -7,16 +7,19 @@ plugins {
 kotlin {
     js {
         binaries.executable()
+        val pluginResourcesDir =
+            rootProject.layout.projectDirectory.file("invert-gradle-plugin/src/main/resources/META-INF").asFile
         browser {
-            runTask(Action {
+            runTask {
                 mainOutputFileName.set("invert_web.js")
-            })
-            webpackTask(Action {
+            }
+            webpackTask {
                 mainOutputFileName.set("invert_web.js")
-            })
-            distribution(Action {
-                distributionName.set("invert_web")
-            })
+            }
+
+            commonWebpackConfig {
+                outputPath = pluginResourcesDir
+            }
         }
     }
     sourceSets {
@@ -29,11 +32,24 @@ kotlin {
                 implementation(compose.runtime)
             }
         }
-        jsMain.resources.srcDir(File(rootProject.rootDir, "invert-report-common/src/jsMain/resources"))
+        jsMain.resources.srcDir(File(rootProject.rootDir, "invert-gradle-plugin/src/main/resources/META-INF"))
     }
 }
 
 compose {
     web {
+    }
+}
+
+project(":invert-report") {
+    val isCI = System.getenv().containsKey("GITHUB_ACTIONS")
+    val webpackTaskName = if (isCI) {
+        "jsBrowserProductionWebpack"
+    } else {
+        "jsBrowserDevelopmentWebpack"
+    }
+    val reportWebpackTask = tasks.named(webpackTaskName)
+    project(":invert-gradle-plugin").tasks.named("processResources").configure {
+        dependsOn(reportWebpackTask)
     }
 }

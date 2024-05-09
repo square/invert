@@ -18,3 +18,7 @@ yarn.lock
 invert-report/src/jsMain/resources/js
 af-analysis-report/src/jsMain/resources/js
 invert-plugin/src/main/resources/META-INF
+
+# Large Compiled Binaries
+invert-gradle-plugin/src/main/resources/META-INF/invert_web.js
+invert-gradle-plugin/src/main/resources/META-INF/invert_web.js.map
