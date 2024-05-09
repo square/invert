@@ -10,7 +10,7 @@ buildscript {
     }
     dependencies {
         val invertVersion = "0.0.1-dev-SNAPSHOT"
-        classpath("com.squareup.invert:invert-plugin:$invertVersion")
+        classpath("com.squareup.invert:invert-gradle-plugin:$invertVersion")
         classpath("com.squareup.invert:collectors-anvil-dagger:$invertVersion")
         classpath("com.squareup.invert:collectors-kotlin-java-loc:$invertVersion")
         classpath("com.squareup.invert:owners-github-codeowners:$invertVersion")
@@ -26,7 +26,7 @@ allprojects {
 }
 
 plugins {
-    id("com.squareup.invert") version "0.0.1-dev-SNAPSHOT"
+    id("com.squareup.invert")
 }
 
 invert {

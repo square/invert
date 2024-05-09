@@ -19,7 +19,7 @@ kotlin {
                 api(libs.kotlinx.serialization.json)
                 implementation(libs.kotlin.compiler.embeddable)
                 implementation(project(":invert-models"))
-                implementation(project(":invert-plugin"))
+                implementation(project(":invert-gradle-plugin"))
             }
         }
         val jvmTest by getting {
