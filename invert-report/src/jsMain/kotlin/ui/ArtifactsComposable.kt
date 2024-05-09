@@ -6,8 +6,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavRouteRepo
-import com.squareup.invert.common.navigation.routes.ArtifactDetailNavRoute
 import com.squareup.invert.common.navigation.routes.ArtifactsNavRoute
+import com.squareup.invert.common.pages.ArtifactDetailNavRoute
 
 @Composable
 fun ArtifactsComposable(reportDataRepo: ReportDataRepo, navRouteRepo: NavRouteRepo, navRoute: ArtifactsNavRoute) {

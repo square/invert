@@ -84,6 +84,7 @@ class InvertReport(
             AnnotationProcessorsReportPage,
             HomeReportPage,
             OwnersReportPage,
+            ArtifactDetailReportPage,
         )
     }
 }

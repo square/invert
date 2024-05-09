@@ -13,13 +13,35 @@ import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.navigation.routes.ModuleDetailNavRoute
+import com.squareup.invert.common.pages.AllModulesReportPage.navPage
 import com.squareup.invert.models.GradlePath
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Text
 import ui.*
 import kotlin.reflect.KClass
 
-object AllModulesReportPage : InvertReportPage<AllModulesReportPage.AllModulesNavRoute> {
+
+data class AllModulesNavRoute(
+    val query: String? = null,
+) : BaseNavRoute(navPage) {
+    override fun toSearchParams() = toParamsWithOnlyPageId(this).also { map ->
+        query?.let {
+            map[QUERY_PARAM] = it
+        }
+    }
+
+    companion object {
+
+        private const val QUERY_PARAM = "query"
+        fun parser(params: Map<String, String?>): NavRoute {
+            val queryParam = params[QUERY_PARAM]
+            return AllModulesNavRoute(queryParam)
+        }
+    }
+}
+
+
+object AllModulesReportPage : InvertReportPage<AllModulesNavRoute> {
     override val navPage: NavPage = NavPage(
         pageId = "modules",
         displayName = "Modules",
@@ -33,33 +55,12 @@ object AllModulesReportPage : InvertReportPage<AllModulesReportPage.AllModulesNa
     override val composableContent: @Composable (AllModulesNavRoute) -> Unit = { navRoute ->
         ModulesComposable(navRoute)
     }
-
-    data class AllModulesNavRoute(
-        val query: String? = null,
-    ) : BaseNavRoute(navPage) {
-        override fun toSearchParams() = toParamsWithOnlyPageId(this)
-            .also { map ->
-                query?.let {
-                    map[QUERY_PARAM] = it
-                }
-            }
-
-        companion object {
-
-            private const val QUERY_PARAM = "query"
-            fun parser(params: Map<String, String?>): NavRoute {
-                val queryParam = params[QUERY_PARAM]
-                return AllModulesNavRoute(queryParam)
-            }
-        }
-    }
-
 }
 
 
 @Composable
 fun ModulesComposable(
-    modulesNavRoute: AllModulesReportPage.AllModulesNavRoute,
+    modulesNavRoute: AllModulesNavRoute,
     reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
     navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo
 ) {

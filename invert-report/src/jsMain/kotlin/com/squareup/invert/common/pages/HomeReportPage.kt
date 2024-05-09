@@ -87,12 +87,12 @@ fun HomeComposable(
             }
             HomeCountComposable(
                 moduleCount,
-                AllModulesReportPage.navPage // TODO DONT USE DEFAULT CONSTRUCTOR
-            ) { navRouteRepo.updateNavRoute(AllModulesReportPage.AllModulesNavRoute()) }
+                AllModulesReportPage.navPage
+            ) { navRouteRepo.updateNavRoute(AllModulesNavRoute()) }
 
             HomeCountComposable(
                 artifactCount,
-                ArtifactsNavRoute().navPage // TODO DONT USE DEFAULT CONSTRUCTOR
+                ArtifactsNavRoute().navPage
             ) { navRouteRepo.updateNavRoute(ArtifactsNavRoute()) }
 
             HomeCountComposable(
