@@ -85,6 +85,7 @@ class InvertReport(
             HomeReportPage,
             OwnersReportPage,
             ArtifactDetailReportPage,
+            LeafModulesReportPage,
         )
     }
 }
