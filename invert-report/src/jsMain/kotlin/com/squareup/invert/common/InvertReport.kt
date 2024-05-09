@@ -92,6 +92,7 @@ class InvertReport(
             ModuleConsumptionReportPage,
             OwnerDetailReportPage,
             OwnersReportPage,
+            PluginsReportPage,
         )
     }
 }

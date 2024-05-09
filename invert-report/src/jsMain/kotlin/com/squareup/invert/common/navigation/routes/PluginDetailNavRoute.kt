@@ -2,6 +2,7 @@ package com.squareup.invert.common.navigation.routes
 
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRoute
+import com.squareup.invert.common.pages.PluginsNavRoute
 import com.squareup.invert.models.GradlePluginId
 
 data class PluginDetailNavRoute(

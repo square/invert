@@ -9,7 +9,6 @@ import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import com.squareup.invert.common.navigation.routes.PluginsNavRoute
 import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.web.dom.*
 import ui.AppLink
