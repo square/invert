@@ -183,6 +183,10 @@ val ALL_REPOS = listOf<TargetRepo>(
         org = "spring-projects",
         project = "spring-boot"
     ),
+    TargetRepo(
+        org = "SonarSource",
+        project = "sonar-kotlin",
+    )
 ).filter { it.enabled }
 
 val CLONES_DIR = File("build/clones").apply {
