@@ -1,5 +1,4 @@
 import com.squareup.invert.InvertExtension
-import com.squareup.invert.LinesOfCodeStatCollector
 
 buildscript {
     repositories {
