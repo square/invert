@@ -25,11 +25,13 @@ object GitHubMarkdownReportPage : InvertReportPage<GitHubMarkdownReportPage.Gith
     override val navRouteKClass: KClass<GithubReadMeNavRoute> = GithubReadMeNavRoute::class
 
     override val composableContent: @Composable (GithubReadMeNavRoute) -> Unit = { navRoute ->
+        println("RENDER ${navRoute.orgSlashRepo}")
         // Your Composable content here
         H2 {
             Text("README for ${navRoute.orgSlashRepo}")
         }
-        RemoteGitHubMarkdown("https://api.github.com/repos/${navRoute.orgSlashRepo}/contents/README.md")
+        val url = "https://api.github.com/repos/${navRoute.orgSlashRepo}/contents/README.md"
+        RemoteGitHubMarkdown(url)
     }
 
     private const val REPO_KEY = "repo"

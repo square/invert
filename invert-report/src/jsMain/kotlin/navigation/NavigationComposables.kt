@@ -21,17 +21,7 @@ fun LeftNavigationComposable(initialRoute: NavRoute, navRouteRepo: NavRouteRepo,
   val navRoute by navRouteRepo.navRoute.collectAsState(initialRoute)
   NavPage
     .ROOT_NAV_ITEMS
-    .also {
-      println(it.size)
-      println(it.map { it?.pageId })
-    }
-//    .filterNotNull()
-    .also {
-      println(it.size)
-      println(it.map { it?.pageId })
-    }
     .forEach { rootNavItem: NavPage ->
-      println(rootNavItem)
       val displayName = rootNavItem.displayName
       val navIconSlug = rootNavItem.navIconSlug
       val newNavRoute = rootNavItem.navRouteParser(mapOf())
