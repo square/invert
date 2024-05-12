@@ -22,3 +22,5 @@ invert-plugin/src/main/resources/META-INF
 # Large Compiled Binaries
 invert-gradle-plugin/src/main/resources/META-INF/invert_web.js
 invert-gradle-plugin/src/main/resources/META-INF/invert_web.js.map
+/invert-gradle-plugin/src/main/resources/META-INF/invert-report.js
+/invert-gradle-plugin/src/main/resources/META-INF/invert-report.js.map
