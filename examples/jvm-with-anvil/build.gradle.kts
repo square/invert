@@ -1,25 +1,20 @@
+import io.gitlab.arturbosch.detekt.Detekt
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     id("com.squareup.anvil") version "2.4.9"
     id("io.gitlab.arturbosch.detekt") version ("1.23.3")
 }
 
-detekt {
-//    allRules = true
-//    debug = true
-
-    reports {
-        xml.required = false
-        html.required = true
-        txt.required = false
-        sarif.required = false
-        md.required = false
-        custom {
-            // The simple class name of your custom report.
-            reportId = "sam"
-            val samsReportFile = file("build/reports/detekt/sam.txt")
-            println("samsReportFile $samsReportFile")
-            outputLocation.set(samsReportFile)
+tasks {
+    withType<Detekt> {
+        reports {
+            custom {
+                reportId = "sam"
+                // This tells detekt, where it should write the report to,
+                // you have to specify this file in the gitlab pipeline config.
+                outputLocation.set(file(layout.buildDirectory.file("reports/detekt/sam.txt")))
+            }
         }
     }
 }

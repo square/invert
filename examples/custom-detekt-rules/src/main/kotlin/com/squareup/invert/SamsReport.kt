@@ -5,7 +5,7 @@ import io.gitlab.arturbosch.detekt.api.*
 class SamsReport : OutputReport() {
 
     override val id: String = "sam"
-    override val ending: String = "txt"
+    override val ending: String = "sam"
 
     private lateinit var config: Config
 
