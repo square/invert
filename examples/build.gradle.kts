@@ -14,7 +14,6 @@ buildscript {
         classpath("com.squareup.invert:collectors-kotlin-java-loc:$invertVersion")
         classpath("com.squareup.invert:owners-github-codeowners:$invertVersion")
         classpath("com.squareup.invert:owners-github-codeowners:$invertVersion")
-        classpath("com.squareup.invert:custom-detekt-rules:0.0.1-dev-SNAPSHOT")
     }
 }
 
