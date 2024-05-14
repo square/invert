@@ -1,5 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
@@ -27,10 +25,4 @@ kotlin {
             }
         }
     }
-}
-
-mavenPublishing {
-    pomFromGradleProperties()
-    signAllPublications()
-    publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
 }

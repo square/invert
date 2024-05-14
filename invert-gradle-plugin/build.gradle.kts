@@ -34,12 +34,6 @@ kotlin {
     }
 }
 
-mavenPublishing {
-    pomFromGradleProperties()
-    signAllPublications()
-    publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
-}
-
 // Allow overwriting of HTML & JS files in resources/META-INF during publishing
 tasks {
     named<Copy>("processResources") {

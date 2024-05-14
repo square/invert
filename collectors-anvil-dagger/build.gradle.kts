@@ -29,9 +29,3 @@ kotlin {
         }
     }
 }
-
-mavenPublishing {
-    pomFromGradleProperties()
-    signAllPublications()
-    publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
-}

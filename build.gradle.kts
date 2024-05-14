@@ -34,14 +34,18 @@ if (hasProperty("buildScan")) {
 }
 
 subprojects
-    .filter { it.plugins.hasPlugin("com.vanniktech.maven.publish.base") }
     .forEach {
-        val extension = it.extensions.getByType(MavenPublishBaseExtension::class.java)
-        extension.apply {
-            // publishToMavenCentral(SonatypeHost.DEFAULT)
-            // or when publishing to https://s01.oss.sonatype.org
-            publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
-            // or when publishing to https://central.sonatype.com/
-            signAllPublications()
+        it.afterEvaluate {
+            val hasPublishPlugin = it.plugins.hasPlugin("com.vanniktech.maven.publish.base")
+            if (hasPublishPlugin) {
+                val extension = it.extensions.getByType(MavenPublishBaseExtension::class.java)
+                extension.apply {
+                    // publishToMavenCentral(SonatypeHost.DEFAULT)
+                    // or when publishing to https://s01.oss.sonatype.org
+                    publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
+                    // or when publishing to https://central.sonatype.com/
+                    signAllPublications()
+                }
+            }
         }
     }

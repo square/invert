@@ -1,5 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
@@ -22,10 +20,4 @@ dependencies {
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spek")
     testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spek")
     testImplementation(kotlin("reflect"))
-}
-
-mavenPublishing {
-    pomFromGradleProperties()
-    signAllPublications()
-    publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
 }
