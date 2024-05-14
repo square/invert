@@ -17,6 +17,7 @@ class RealAnalytics @Inject constructor() : Analytics {
         }
     }
 
+    @Suppress("SomeRule2")
     fun amazing(): String {
         return "abcd".length.toString()
     }

@@ -13,7 +13,7 @@ tasks {
                 reportId = "sam"
                 // This tells detekt, where it should write the report to,
                 // you have to specify this file in the gitlab pipeline config.
-                outputLocation.set(file(layout.buildDirectory.file("reports/detekt/sam.txt")))
+                outputLocation.set(file(layout.buildDirectory.file("reports/detekt/invert.txt")))
             }
         }
     }

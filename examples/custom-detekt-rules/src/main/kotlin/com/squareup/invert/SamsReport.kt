@@ -5,7 +5,7 @@ import io.gitlab.arturbosch.detekt.api.*
 class SamsReport : OutputReport() {
 
     override val id: String = "sam"
-    override val ending: String = "sam"
+    override val ending: String = "txt"
 
     private lateinit var config: Config
 
@@ -28,7 +28,18 @@ class SamsReport : OutputReport() {
         println("SamsReport::render()")
         return buildString {
             appendLine("Sams Report")
-            appendLine(detektion.metrics.map { it.toString() })
+            detektion.metrics.forEach {
+                appendLine(it.toString())
+            }
+            detektion.findings.forEach {
+                appendLine(it.toString())
+            }
+            val suppressions = detektion.getData(SamsFileProcessListener.suppressionsKey) ?: emptyList()
+            suppressions.forEach { suppression->
+                appendLine("Suppressed: ${suppression.type} at file:/${suppression.filePath}:${suppression.startOffset}")
+            }
+        }.also {
+            println(it)
         }
     }
 }
