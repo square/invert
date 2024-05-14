@@ -21,7 +21,7 @@ object PluginsNavRoute : BaseNavRoute(PluginsReportPage.navPage)
 object PluginsReportPage : InvertReportPage<PluginsNavRoute> {
     override val navPage: NavPage = NavPage(
         pageId = "plugins",
-        displayName = "Plugins",
+        displayName = "Gradle Plugins",
         navIconSlug = "plugin",
         navRouteParser = { PluginsNavRoute },
     )

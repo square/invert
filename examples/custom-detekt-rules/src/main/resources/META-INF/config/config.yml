@@ -1,0 +1,8 @@
+InvertRulesProvider:
+  active: true
+SamsRule:
+  active: true
+SamsFileProcessListener:
+  active: true
+SamsReport:
+  active: true

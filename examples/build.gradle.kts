@@ -13,6 +13,8 @@ buildscript {
         classpath("com.squareup.invert:collectors-anvil-dagger:$invertVersion")
         classpath("com.squareup.invert:collectors-kotlin-java-loc:$invertVersion")
         classpath("com.squareup.invert:owners-github-codeowners:$invertVersion")
+        classpath("com.squareup.invert:owners-github-codeowners:$invertVersion")
+        classpath("com.squareup.invert:custom-detekt-rules:0.0.1-dev-SNAPSHOT")
     }
 }
 
@@ -21,6 +23,7 @@ allprojects {
         mavenCentral()
         google()
         gradlePluginPortal()
+        maven { url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content") } // SNAPSHOT Versions for statik
     }
 }
 

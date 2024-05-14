@@ -17,7 +17,7 @@ gradlePlugin {
 }
 
 java {
-    withSourcesJar()
+//    withSourcesJar()
 }
 
 dependencies {

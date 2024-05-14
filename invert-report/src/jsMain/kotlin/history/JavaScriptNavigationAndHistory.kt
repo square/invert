@@ -76,14 +76,10 @@ object JavaScriptNavigationAndHistory {
       val isNewPage =
         currUrlParamsMap[BaseNavRoute.PAGE_ID_PARAM] != newNavRouteParamsMap[BaseNavRoute.PAGE_ID_PARAM]
       if (isNewPage) {
-        println("window.history.pushState: ${navRoute::class.simpleName} $newNavRouteParamsMap")
         window.history.pushState(jsonState, "", newUrl.toString())
       } else {
-        println("window.history.replaceState: ${navRoute::class.simpleName} $newNavRouteParamsMap")
         window.history.replaceState(jsonState, "", newUrl.toString())
       }
     }
   }
-
-
 }
