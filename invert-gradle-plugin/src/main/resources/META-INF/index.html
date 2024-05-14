@@ -9,31 +9,53 @@
     <link href="invert.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css" rel="stylesheet"/>
+    <link href="https://getbootstrap.com/docs/5.3/examples/sidebars/sidebars.css" rel="stylesheet"/>
+    <style>
+        .my-sticky-top {
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            height: 40px;
+        }
+
+        .dashboard-sidebar {
+            height: 100vh; /* Full height */
+            width: 280px; /* Set the width of the sidebar */
+            position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+            z-index: 1; /* Stay on top */
+            top: 40px; /* Stay at the top */
+            left: 0;
+            overflow-x: hidden; /* Disable horizontal scroll */
+            padding-top: 20px;
+        }
+
+        .main-content {
+            margin-left: 280px; /* Same as the width of the sidebar */
+        }
+
+        #main_content {
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
 
-<header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
-    <a class="navbar-brand col-md-3 me-0 px-3 fs-6 text-white" href="#">Android Foundation Reports</a>
+<header class="navbar my-sticky-top p-0 bg-light border">
+    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 fw-semibold" href="#">Invert Report</a>
+
     <!-- Loading Progress Renders Here -->
-    <div id="navbar_content" class="navbar-text pe-4 col-md-9 text-end">
-    </div>
+    <div id="navbar_content"></div>
 </header>
 
-<div class="row">
-    <div class="col-lg-2 p-0">
-        <div class="sidebar border border-right bg-body-tertiary">
-            <div class="d-flex flex-column p-3 bg-body-tertiary">
-                <ul class="nav nav-pills flex-column mb-auto" id="navigation">
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <main class="col-lg-10">
-        <div id="main_content" class="p-3">
-        </div>
-    </main>
+<div class="sidebar border bg-body-tertiary dashboard-sidebar p-2">
+    <ul class="nav nav-pills flex-column mb-auto" id="navigation">
+    </ul>
 </div>
+
+<div class="main-content">
+    <div id="main_content"></div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="invert.js"></script>
 <script src="invert-report.js"></script>
