@@ -136,7 +136,6 @@ internal abstract class InvertCollectDependenciesTask : DefaultTask() {
     monitoredConfigurationsMap.set(resolvedMonitoredConfigurationsMap)
 
     val annotationProcessors = setOf("kapt", "ksp", "annotationProcessor")
-    val kotlinCompilerPlugins = setOf("kotlinCompilerPluginClasspath")
 
     directDependencies.set(
       project.configurations
@@ -144,7 +143,7 @@ internal abstract class InvertCollectDependenciesTask : DefaultTask() {
         .filter {
           filteredConfigurationNames.contains(it.name)
                   || annotationProcessors.contains(it.name)
-                  || kotlinCompilerPlugins.contains(it.name)
+                  || it.name.contains("kotlinCompilerPluginClasspath")
         }
         .associate { configuration ->
           configuration.name to configuration.allDependencies.mapNotNull { dependency: Dependency ->

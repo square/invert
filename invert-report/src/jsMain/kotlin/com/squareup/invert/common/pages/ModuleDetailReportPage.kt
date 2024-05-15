@@ -129,10 +129,13 @@ fun ModuleDetailComposable(
         }
         return
     }
+    H1 { Text("Direct Dependencies") }
+    BootstrapTabPane(tabs)
 
+    val tabs2 = mutableListOf<BootstrapTabData>()
     val configurationToDependencyMap = configurationToDependencyMapCollected!!
     configurationToDependencyMap.keys.forEach { configurationName ->
-        tabs.add(
+        tabs2.add(
             BootstrapTabData("Transitive Dependencies for $configurationName") {
                 val rows = configurationToDependencyMap[configurationName]
                     ?.filter { it.startsWith(":") }
@@ -149,13 +152,15 @@ fun ModuleDetailComposable(
             }
         )
     }
-    tabs.add(BootstrapTabData("Module Used By...") {
+    H1 { Text("Transitive Dependencies") }
+    BootstrapTabPane(tabs2)
+    H1 { Text("Module Used By...") }
         val moduleUsageCollected by reportDataRepo.moduleUsedBy(modulePath).collectAsState(null)
         if (moduleUsageCollected == null) {
             H1 {
                 BootstrapLoadingMessageWithSpinner("Loading Module Usage...")
             }
-            return@BootstrapTabData
+            return
         }
         val moduleUsage = moduleUsageCollected!!
         BootstrapTable(
@@ -171,6 +176,5 @@ fun ModuleDetailComposable(
                 )
             }
         )
-    })
-    BootstrapTabPane(tabs)
+
 }

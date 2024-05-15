@@ -60,17 +60,13 @@ fun KotlinCompilerPluginsComposable(
     val configurationNameToDependencyIdAndGradlePaths =
         mutableMapOf<ConfigurationName, MutableMap<DependencyId, MutableSet<GradlePath>>>()
 
-    val annotationProcessorConfigs = setOf("kotlinCompilerPluginClasspath")
-
     allDirectDependencies.forEach { (gradlePath, configNameToDepIds) ->
-        configNameToDepIds.filterKeys { annotationProcessorConfigs.contains(it) }
+        configNameToDepIds
+            .filterKeys { it.contains("kotlinCompilerPluginClasspath") }
             .forEach { (configName, dependencyIds) ->
-                println("THIS $configName")
-                //
                 val curr = configNameToAnnotationProcessorMap[configName] ?: mutableSetOf()
                 configNameToAnnotationProcessorMap[configName] = curr.apply { addAll(dependencyIds) }
 
-                // -----
                 dependencyIds.forEach { dependencyId ->
                     val currOne = configurationNameToDependencyIdAndGradlePaths[configName] ?: mutableMapOf()
                     currOne[dependencyId] = (currOne[dependencyId] ?: mutableSetOf()).apply { add(gradlePath) }
