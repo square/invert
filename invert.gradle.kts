@@ -1,36 +1,67 @@
-/**
- * Invert Gradle init-script which applies the plugin to an existing Gradle project.
- *
- * Run it with the following:
- * ./gradlew --init-script invert.gradle.kts :invert
- */
-settingsEvaluated {
-    rootProject {
-        buildscript {
-            repositories {
-                mavenCentral()
-                gradlePluginPortal()
-                google()
-                mavenLocal()
-                maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") } // SNAPSHOT Versions
-            }
+import com.squareup.invert.InvertGradlePlugin
+import com.squareup.invert.InvertExtension
 
-            dependencies {
-                val invertVersion = "0.0.1-dev-SNAPSHOT"
-                classpath("com.squareup.invert:invert-gradle-plugin:$invertVersion")
-                classpath("com.squareup.invert:collectors-anvil-dagger:$invertVersion")
+initscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
+        google()
+        maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") } // SNAPSHOT Versions
+    }
+    dependencies {
+        val invertVersion = "0.0.1-dev-SNAPSHOT"
+        classpath("com.squareup.invert:invert-gradle-plugin:$invertVersion")
+        classpath("com.squareup.invert:collectors-anvil-dagger:$invertVersion")
+        classpath("com.squareup.invert:collectors-kotlin-java-loc:$invertVersion")
+        classpath("com.squareup.invert:owners-github-codeowners:$invertVersion")
+    }
+}
+
+apply<EnterpriseRepositoryPlugin>()
+
+class EnterpriseRepositoryPlugin : Plugin<Gradle> {
+
+    override fun apply(gradle: Gradle) {
+        // ONLY Maven Local FOR DEPENDENCIES
+        gradle.allprojects {
+            repositories {
+                add(mavenLocal())
             }
         }
-        allprojects {
-            repositories {
-                mavenCentral()
-                google()
-                gradlePluginPortal()
-            }
-        }
+        gradle.settingsEvaluated {
+            gradle.rootProject {
+                buildscript {
+                    repositories {
+                        mavenCentral()
+                        gradlePluginPortal()
+                        google()
+                        mavenLocal()
+                        maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") } // SNAPSHOT Versions
+                    }
 
-        afterEvaluate {
-            plugins.apply("com.squareup.invert")
+                    dependencies {
+                        val invertVersion = "0.0.1-dev-SNAPSHOT"
+                        classpath("com.squareup.invert:invert-gradle-plugin:$invertVersion")
+                        classpath("com.squareup.invert:collectors-anvil-dagger:$invertVersion")
+                        classpath("com.squareup.invert:collectors-kotlin-java-loc:$invertVersion")
+                        classpath("com.squareup.invert:owners-github-codeowners:$invertVersion")
+                    }
+                }
+            }
+
+            gradle.rootProject {
+                afterEvaluate {
+                    println("All PROJECT $this")
+                    plugins.apply(com.squareup.invert.InvertGradlePlugin::class.java)
+                    this.extensions.getByType(com.squareup.invert.InvertExtension::class.java).apply {
+                        println("Invert Gradle Plugin: $this")
+                        ownershipCollector(com.squareup.invert.GitHubCodeOwnersInvertOwnershipCollector)
+                        addStatCollector(com.squareup.invert.RealAnvilContributesBindingStatCollector())
+                        addStatCollector(com.squareup.invert.LinesOfCodeStatCollector())
+                    }
+                }
+            }
         }
     }
 }
