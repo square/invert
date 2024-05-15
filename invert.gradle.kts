@@ -6,8 +6,6 @@ initscript {
         mavenLocal()
         mavenCentral()
         maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") } // SNAPSHOT Versions
-//        gradlePluginPortal()
-//        google()
     }
     dependencies {
         val invertVersion = "+"
@@ -18,17 +16,11 @@ initscript {
     }
 }
 
-apply<EnterpriseRepositoryPlugin>()
+apply<InvertInitScriptPlugin>()
 
-class EnterpriseRepositoryPlugin : Plugin<Gradle> {
+class InvertInitScriptPlugin : Plugin<Gradle> {
 
     override fun apply(gradle: Gradle) {
-        // ONLY Maven Local FOR DEPENDENCIES
-//        gradle.allprojects {
-//            repositories {
-//                add(mavenLocal())
-//            }
-//        }
         gradle.settingsEvaluated {
             gradle.rootProject {
                 buildscript {
@@ -52,10 +44,8 @@ class EnterpriseRepositoryPlugin : Plugin<Gradle> {
 
             gradle.rootProject {
                 afterEvaluate {
-                    println("All PROJECT $this")
                     plugins.apply(com.squareup.invert.InvertGradlePlugin::class.java)
                     this.extensions.getByType(com.squareup.invert.InvertExtension::class.java).apply {
-                        println("Invert Gradle Plugin: $this")
                         ownershipCollector(com.squareup.invert.GitHubCodeOwnersInvertOwnershipCollector)
                         addStatCollector(com.squareup.invert.RealAnvilContributesBindingStatCollector())
                         addStatCollector(com.squareup.invert.LinesOfCodeStatCollector())

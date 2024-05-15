@@ -9,6 +9,7 @@ import com.squareup.invert.common.DependencyGraph
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
+import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import kotlinx.browser.window
 import ui.*
@@ -35,7 +36,8 @@ object ConfigurationsReportPage : InvertReportPage<ConfigurationsNavRoute> {
 @Composable
 fun ConfigurationsComposable(
     navRoute: ConfigurationsNavRoute,
-    reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo
+    reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
+    navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
     val allAvailableConfigurationNamesOrig by reportDataRepo.allAvailableConfigurationNames.collectAsState(null)
     val allAvailableConfigurationNames = allAvailableConfigurationNamesOrig
@@ -53,7 +55,7 @@ fun ConfigurationsComposable(
     BootstrapRow {
         BootstrapColumn(12) {
             BootstrapClickableList("Analyzed Configurations", list, MAX_RESULTS) { item ->
-                window.alert("Clicked $item")
+                navRouteRepo.updateNavRoute(ConfigurationDetailNavRoute(item))
             }
         }
     }

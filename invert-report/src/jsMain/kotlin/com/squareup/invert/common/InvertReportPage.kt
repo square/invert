@@ -8,6 +8,9 @@ import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
 
+/**
+ * Represents any page that can be displayed in an Invert Report.
+ */
 interface InvertReportPage<T : NavRoute> {
 
     val navPage: NavPage
@@ -15,7 +18,6 @@ interface InvertReportPage<T : NavRoute> {
     val navRouteKClass: KClass<T>
 
     val composableContent: @Composable (T) -> Unit
-
 
     /**
      * This is how we were able to get Generics to work.  It might not be the correct way.
