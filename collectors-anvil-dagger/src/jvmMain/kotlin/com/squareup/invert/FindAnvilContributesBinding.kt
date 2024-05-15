@@ -97,6 +97,12 @@ class FindAnvilContributesBinding {
             val ktFile = file.toKtFile()
             val fileName = file.name
 
+            ktFile.accept(object :KtTreeVisitorVoid() {
+                override fun visitConstructorDelegationCall(call: KtConstructorDelegationCall) {
+                    super.visitConstructorDelegationCall(call)
+                }
+            })
+
             ktFile.classesAndInnerClasses()
                 .toList()
                 .forEach { ktClassOrObject ->

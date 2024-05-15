@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.vanniktech.maven.publish)
 }
 
-
 kotlin {
     jvm {
         withSourcesJar()

@@ -6,6 +6,8 @@ import org.jetbrains.kotlin.com.intellij.openapi.util.Key
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.com.intellij.psi.util.PsiTreeUtil
 import org.jetbrains.kotlin.psi.*
+import org.jetbrains.kotlin.psi.psiUtil.getChildOfType
+import org.jetbrains.kotlin.psi.psiUtil.getChildrenOfType
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 import org.jetbrains.kotlin.resolve.BindingContext
 
@@ -100,6 +102,8 @@ class SamsFileProcessListener : FileProcessListener {
             super.visitAnnotationEntry(annotationEntry)
 
             val annotationClassType = PsiTreeUtil.findChildOfType(annotationEntry, KtTypeReference::class.java)
+            annotationEntry.getChildOfType<KtTypeReference>()
+            annotationEntry.getChildrenOfType<KtTypeReference>()
 
             val annotationArgumentList: List<String> =
                 PsiTreeUtil.findChildOfType(

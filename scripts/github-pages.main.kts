@@ -109,7 +109,7 @@ data class TargetRepo(
     val url = "https://github.com/$org/$project"
 }
 
-val ALL_REPOS = listOf<TargetRepo>(
+val ALL_REPOS = listOf(
     TargetRepo(
         org = "JetBrains",
         project = "kotlin",
@@ -143,18 +143,24 @@ val ALL_REPOS = listOf<TargetRepo>(
                     }
                 }
             }
-        }
+        },
+        runOnGitHubAction = false,
     ),
-//    TargetRepo(
-//        org = "InsertKoinIO",
-//        project = "koin",
-//        runInvert = { projectCloneDir ->
-//            executeCmd(
-//                DEFAULT_INIT_SCRIPT_LINE,
-//                File(projectCloneDir, "projects")
-//            )
-//        }
-//    ),
+    TargetRepo(
+        org = "InsertKoinIO",
+        project = "koin",
+        runInvert = { projectCloneDir ->
+            executeCmd(
+                DEFAULT_INIT_SCRIPT_LINE,
+                File(projectCloneDir, "projects")
+            )
+        },
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "ZacSweers",
+        project = "CatchUp",
+    ),
     TargetRepo(
         org = "apereo",
         project = "cas",
@@ -162,7 +168,8 @@ val ALL_REPOS = listOf<TargetRepo>(
     ),
     TargetRepo(
         org = "android",
-        project = "nowinandroid"
+        project = "nowinandroid",
+        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "duckduckgo",
@@ -171,15 +178,18 @@ val ALL_REPOS = listOf<TargetRepo>(
     TargetRepo(
         org = "square",
         project = "anvil",
-        buildDirPath = "build/root-build"
+        buildDirPath = "build/root-build",
+        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "square",
-        project = "okhttp"
+        project = "okhttp",
+        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "skydoves",
-        project = "pokedex-compose"
+        project = "pokedex-compose",
+        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "slackhq",
@@ -187,7 +197,17 @@ val ALL_REPOS = listOf<TargetRepo>(
     ),
     TargetRepo(
         org = "chrisbanes",
-        project = "tivi"
+        project = "tivi",
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "androidx",
+        project = "androidx",
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "rickbusarow",
+        project = "ModuleCheck"
     ),
     TargetRepo(
         org = "gradle",
@@ -196,20 +216,25 @@ val ALL_REPOS = listOf<TargetRepo>(
             // ignoreBuildJavaVersionCheck=true is needed for https://github.com/gradle/gradle for the Java 11/Java 17 mix
             "$DEFAULT_INIT_SCRIPT_LINE -Dorg.gradle.ignoreBuildJavaVersionCheck=true"
         },
+        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "spring-projects",
-        project = "spring-boot"
+        project = "spring-boot",
+        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "SonarSource",
         project = "sonar-kotlin",
+        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "detekt",
         project = "detekt",
+        runOnGitHubAction = false,
     ),
-).filter { it.runOnGitHubAction }
+)
+    .filter { it.runOnGitHubAction }
 
 val CLONES_DIR = File("build/clones").apply {
     if (!exists()) {
