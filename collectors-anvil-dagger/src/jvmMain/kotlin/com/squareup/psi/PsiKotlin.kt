@@ -95,10 +95,10 @@ val PsiElement.fqNameSet: Set<FqName>
     }
 
 fun PsiElement.requireFqName(): FqName {
-    val fqNameList = requireFqNameList()
+    val fqNameList = requireFqNameList().toSet()
     when (fqNameList.size) {
         1 -> return fqNameList.first()
-        else -> throw IllegalArgumentException("Multiple imports for $text")
+        else -> throw IllegalArgumentException("Multiple imports for $text $fqNameList")
     }
 }
 
