@@ -94,7 +94,7 @@ val DEFAULT_INIT_SCRIPT_LINE = "./gradlew --init-script ${INVERT_INIT_SCRIPT.can
 data class TargetRepo(
     val org: String,
     val project: String,
-    val enabled: Boolean = true,
+    val runOnGitHubAction: Boolean = true,
     val buildDirPath: String = "build",
     val invertGradleCmd: () -> String = { DEFAULT_INIT_SCRIPT_LINE },
     val postCheckout: (File) -> Unit = { projectCloneDir -> },
@@ -110,88 +110,88 @@ data class TargetRepo(
 }
 
 val ALL_REPOS = listOf<TargetRepo>(
-//    TargetRepo(
-//        org = "JetBrains",
-//        project = "kotlin",
-//        invertGradleCmd = {
-//            "./gradlew :invert"
-//        },
-//        postCheckout = { clonedProjectDir ->
-//            // Remove Dependency Verification
-//            File(clonedProjectDir, "gradle/verification-metadata.xml").apply {
-//                if (exists()) delete()
-//            }
-//
-//            // Add Maven Local Repo
-//            File(clonedProjectDir, "settings.gradle").apply {
-//                readText().also { text ->
-//                    val toFind = "gradlePluginPortal()"
-//                    val toReplace = "$toFind\nmavenLocal()"
-//                    if (!text.contains(toReplace)) {
-//                        writeText(text.replace(toFind, toReplace))
-//                    }
-//                }
-//            }
-//
-//            // Add Invert Plugin
-//            File(clonedProjectDir, "build.gradle.kts").apply {
-//                readText().also { text ->
-//                    val toFind = "plugins {"
-//                    val toReplace = "$toFind\nid(\"com.squareup.invert\") version \"$INVERT_VERSION\""
-//                    if (!text.contains(toReplace)) {
-//                        writeText(text.replace(toFind, toReplace))
-//                    }
-//                }
-//            }
-//        }
-//    ),
-//    TargetRepo(
-//        org = "apereo",
-//        project = "cas",
-//        enabled = false,
-//    ),
-//    TargetRepo(
-//        org = "android",
-//        project = "nowinandroid"
-//    ),
-//    TargetRepo(
-//        org = "duckduckgo",
-//        project = "Android"
-//    ),
+    TargetRepo(
+        org = "JetBrains",
+        project = "kotlin",
+        invertGradleCmd = {
+            "./gradlew :invert"
+        },
+        postCheckout = { clonedProjectDir ->
+            // Remove Dependency Verification
+            File(clonedProjectDir, "gradle/verification-metadata.xml").apply {
+                if (exists()) delete()
+            }
+
+            // Add Maven Local Repo
+            File(clonedProjectDir, "settings.gradle").apply {
+                readText().also { text ->
+                    val toFind = "gradlePluginPortal()"
+                    val toReplace = "$toFind\nmavenLocal()"
+                    if (!text.contains(toReplace)) {
+                        writeText(text.replace(toFind, toReplace))
+                    }
+                }
+            }
+
+            // Add Invert Plugin
+            File(clonedProjectDir, "build.gradle.kts").apply {
+                readText().also { text ->
+                    val toFind = "plugins {"
+                    val toReplace = "$toFind\nid(\"com.squareup.invert\") version \"$INVERT_VERSION\""
+                    if (!text.contains(toReplace)) {
+                        writeText(text.replace(toFind, toReplace))
+                    }
+                }
+            }
+        }
+    ),
+    TargetRepo(
+        org = "apereo",
+        project = "cas",
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "android",
+        project = "nowinandroid"
+    ),
+    TargetRepo(
+        org = "duckduckgo",
+        project = "Android",
+    ),
     TargetRepo(
         org = "square",
         project = "anvil",
         buildDirPath = "build/root-build"
     ),
-//    TargetRepo(
-//        org = "square",
-//        project = "okhttp"
-//    ),
-//    TargetRepo(
-//        org = "chrisbanes",
-//        project = "tivi"
-//    ),
-//    TargetRepo(
-//        org = "gradle",
-//        project = "gradle",
-//        invertGradleCmd = {
-//            // ignoreBuildJavaVersionCheck=true is needed for https://github.com/gradle/gradle for the Java 11/Java 17 mix
-//            "$DEFAULT_INIT_SCRIPT_LINE -Dorg.gradle.ignoreBuildJavaVersionCheck=true"
-//        },
-//    ),
-//    TargetRepo(
-//        org = "spring-projects",
-//        project = "spring-boot"
-//    ),
-//    TargetRepo(
-//        org = "SonarSource",
-//        project = "sonar-kotlin",
-//    ),
+    TargetRepo(
+        org = "square",
+        project = "okhttp"
+    ),
+    TargetRepo(
+        org = "chrisbanes",
+        project = "tivi"
+    ),
+    TargetRepo(
+        org = "gradle",
+        project = "gradle",
+        invertGradleCmd = {
+            // ignoreBuildJavaVersionCheck=true is needed for https://github.com/gradle/gradle for the Java 11/Java 17 mix
+            "$DEFAULT_INIT_SCRIPT_LINE -Dorg.gradle.ignoreBuildJavaVersionCheck=true"
+        },
+    ),
+    TargetRepo(
+        org = "spring-projects",
+        project = "spring-boot"
+    ),
+    TargetRepo(
+        org = "SonarSource",
+        project = "sonar-kotlin",
+    ),
     TargetRepo(
         org = "detekt",
         project = "detekt",
     ),
-).filter { it.enabled }
+).filter { it.runOnGitHubAction }
 
 val CLONES_DIR = File("build/clones").apply {
     if (!exists()) {
@@ -216,6 +216,7 @@ ALL_REPOS.forEach { targetRepo ->
             PROJECT_CLONE_DIR.parentFile.apply { if (!exists()) mkdirs() }
         )
     } else {
+        executeCmd("git reset --hard HEAD", PROJECT_CLONE_DIR)
         executeCmd("git pull", PROJECT_CLONE_DIR)
     }
 
