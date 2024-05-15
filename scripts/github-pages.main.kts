@@ -145,6 +145,16 @@ val ALL_REPOS = listOf<TargetRepo>(
             }
         }
     ),
+//    TargetRepo(
+//        org = "InsertKoinIO",
+//        project = "koin",
+//        runInvert = { projectCloneDir ->
+//            executeCmd(
+//                DEFAULT_INIT_SCRIPT_LINE,
+//                File(projectCloneDir, "projects")
+//            )
+//        }
+//    ),
     TargetRepo(
         org = "apereo",
         project = "cas",
@@ -166,6 +176,14 @@ val ALL_REPOS = listOf<TargetRepo>(
     TargetRepo(
         org = "square",
         project = "okhttp"
+    ),
+    TargetRepo(
+        org = "skydoves",
+        project = "pokedex-compose"
+    ),
+    TargetRepo(
+        org = "slackhq",
+        project = "circuit"
     ),
     TargetRepo(
         org = "chrisbanes",
