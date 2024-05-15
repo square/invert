@@ -38,7 +38,8 @@ jobs:
           java-version: 17
 
       - name: Run Invert on Test Projects and Generate GitHub Pages
-        run: cd examples && ./gradlew :invert && cd ..
+#        run: cd examples && ./gradlew :invert && cd ..
+        run: ./scripts/github-pages.main.kts
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
@@ -47,7 +48,8 @@ jobs:
         uses: actions/upload-pages-artifact@v2
         with:
           # Upload the generated pages
-          path: './examples/build/reports/invert'
+#          path: './examples/build/reports/invert'
+          path: './build/static'
 
       - name: Deploy to GitHub Pages
         id: deployment
