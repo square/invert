@@ -20,13 +20,37 @@ class RealAnvilContributesBindingStatCollector : StatCollector.GenericStatCollec
         return if (bindings.isNotEmpty()) {
             StringStat(
                 buildString {
-                    val bindingsByScope = bindings
-                        .groupBy { it.scope }
-                    bindingsByScope.keys.sorted().forEach { scope ->
-                        appendLine("SCOPE: " + scope)
-                        val bindings = bindingsByScope[scope]
-                        bindings?.map { "${it.boundType} ➡️ ${it.boundImplementation}" }?.sorted()
-                            ?.forEach { appendLine(it) }
+//                    val bindingsByScope = bindings.groupBy { it.scope }
+//                    bindingsByScope.keys.sorted().forEach { scope ->
+//                        appendLine("SCOPE: " + scope)
+//                        val bindings = bindingsByScope[scope]
+//                        bindings?.map { "${it.boundType} ➡️ ${it.boundImplementation}" }?.sorted()
+//                            ?.forEach { appendLine(it) }
+//                    }
+                    findAnvil.getCollectedContributionsAndConsumptions().forEach { injections ->
+                        appendLine("---- Class ${injections.classFqName} in file: ${injections.fileName} at line ${injections.lineNumber} ----")
+                        if (injections.contributions.isNotEmpty()) {
+                            injections.contributions.forEach {
+                                appendLine("Provides:")
+                                appendLine("* ${it.boundType} ➡\uFE0F ${it.boundImplementation} for Scope ➡\uFE0F ${it.scope}")
+                            }
+                        }
+                        if (injections.consumptions.isNotEmpty()) {
+                            appendLine("Injects:")
+                            injections.consumptions.forEach {
+                                appendLine("* ${it.type}")
+                            }
+                        }
+                        appendLine()
+//                        val contributionsByScope = injections.contributions.groupBy { it.scope }
+//                        appendLine(contributionsByScope.toString())
+//                        contributionsByScope.keys.sorted().forEach { scope ->
+//                            appendLine("SCOPE: " + scope)
+//                            val contributionsForScope = contributionsByScope[scope]
+//                            contributionsForScope?.map { "${it.boundType} ➡️ ${it.boundImplementation}" }?.sorted()
+//                                ?.forEach { appendLine(it) }
+//                        }
+//                        appendLine(injections.toString().replace(",", "\n").replace("(", "\n"))
                     }
                 }
 

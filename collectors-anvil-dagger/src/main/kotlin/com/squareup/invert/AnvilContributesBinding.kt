@@ -12,5 +12,21 @@ data class AnvilContributesBinding(
     val boundImplementation: String,
     val boundType: String,
     val replaces: List<String>,
+)
+
+/**
+ * Represents the data in an Anvil ContributesBinding Annotation Usage
+ */
+@Serializable
+data class AnvilInjection(
+    val type: String,
+)
+
+@Serializable
+data class AnvilContributionAndConsumption(
+    val classFqName: String,
+    val contributions: List<AnvilContributesBinding>,
+    val consumptions: List<AnvilInjection>,
     val fileName: String,
+    val lineNumber: Int,
 )

@@ -1,10 +1,17 @@
 package com.squareup.invert
 
+import com.rickbusarow.statik.InternalStatikApi
+import com.rickbusarow.statik.element.kotlin.psi.utils.traversal.PsiTreePrinter
 import com.squareup.psi.classesAndInnerClasses
 import com.squareup.psi.requireFqName
 import com.squareup.psi.toKtFile
+import org.jetbrains.kotlin.diagnostics.DiagnosticUtils.getLineAndColumnRangeInPsiFile
 import org.jetbrains.kotlin.psi.*
+import org.jetbrains.kotlin.psi.psiUtil.findDescendantOfType
+import org.jetbrains.kotlin.psi.psiUtil.forEachDescendantOfType
+import org.jetbrains.kotlin.psi.psiUtil.getChildOfType
 import java.io.File
+
 
 /**
  * Utility Class responsible for collecting all Anvil @ContributesBinding annotations
@@ -13,6 +20,13 @@ import java.io.File
 class FindAnvilContributesBinding {
 
     private val allBindings = mutableListOf<AnvilContributesBinding>()
+
+
+    private val contributionAndConsumption = mutableListOf<AnvilContributionAndConsumption>()
+
+    fun getCollectedContributionsAndConsumptions(): List<AnvilContributionAndConsumption> {
+        return contributionAndConsumption
+    }
 
     fun getCollectedContributesBindings(): List<AnvilContributesBinding> {
         return allBindings
@@ -97,7 +111,7 @@ class FindAnvilContributesBinding {
             val ktFile = file.toKtFile()
             val fileName = file.name
 
-            ktFile.accept(object :KtTreeVisitorVoid() {
+            ktFile.accept(object : KtTreeVisitorVoid() {
                 override fun visitConstructorDelegationCall(call: KtConstructorDelegationCall) {
                     super.visitConstructorDelegationCall(call)
                 }
@@ -106,7 +120,8 @@ class FindAnvilContributesBinding {
             ktFile.classesAndInnerClasses()
                 .toList()
                 .forEach { ktClassOrObject ->
-                    val className = ktClassOrObject.fqName?.asString() ?: ktClassOrObject.name!!
+                    val bindingsInClassOrObject = mutableListOf<AnvilContributesBinding>()
+                    val classOrObjectFqName = ktClassOrObject.fqName?.asString() ?: ktClassOrObject.name!!
 
                     val supertypes = ktClassOrObject.getSuperTypeList()?.entries
                         ?.map { it.requireFqName().asString() }
@@ -126,7 +141,7 @@ class FindAnvilContributesBinding {
                         val anvilContributesBinding = AnvilContributesBinding(
                             annotation = contributeBindingAnnotationInfo.type,
                             scope = (scope as AnnotationArg.AnnotationArgSingle).value,
-                            boundImplementation = className,
+                            boundImplementation = classOrObjectFqName,
                             boundType = if (boundType != null && boundType is AnnotationArg.AnnotationArgSingle) {
                                 boundType.value
                             } else {
@@ -137,33 +152,51 @@ class FindAnvilContributesBinding {
                             } else {
                                 listOf()
                             },
-                            fileName = fileName,
                         )
-                        bindingsInFile.add(anvilContributesBinding)
+                        bindingsInClassOrObject.add(anvilContributesBinding)
                     }
+
+                    //Inject Constructor
+
+                    val consumptions = findConstructorInjections(ktClassOrObject)
+
+
+                    val lineAndColumnRange = getLineAndColumnRangeInPsiFile(ktFile, ktClassOrObject.textRange)
+                    if (bindingsInClassOrObject.isNotEmpty() || consumptions.isNotEmpty()) {
+                        contributionAndConsumption.add(
+                            AnvilContributionAndConsumption(
+                                fileName = fileName,
+                                contributions = bindingsInClassOrObject,
+                                consumptions = consumptions,
+                                lineNumber = lineAndColumnRange.start.line,
+                                classFqName = classOrObjectFqName,
+                            )
+                        )
+                    }
+                    bindingsInFile.addAll(bindingsInClassOrObject)
                 }
         }
         allBindings.addAll(bindingsInFile)
     }
 
-    fun handleDirectory(directory: File) {
-        if (directory.exists()) {
-            directory.listFiles()?.forEach { childFile ->
-                if (childFile.isDirectory) {
-                    if (directory.name == "src" && childFile.name.contains("test", true)) {
-                        // Ignoring test folder
-                    } else if (directory.name == "build" && childFile.name == "anvil") {
-                        // Ignoring Anvil build folder
-                    } else {
-                        handleDirectory(childFile)
-                    }
-                } else {
-                    if (childFile.extension == "kt") {
-                        handleKotlinFile(childFile)
-                    }
+    private fun findConstructorInjections(ktClassOrObject: KtClassOrObject): List<AnvilInjection> {
+        val anvilInjections = mutableListOf<AnvilInjection>()
+        println("ktClassOrObject $ktClassOrObject")
+        ktClassOrObject.primaryConstructor?.let { primaryConstructor ->
+            val ktParameterList = primaryConstructor.findDescendantOfType<KtParameterList>()!!
+            ktParameterList.forEachDescendantOfType<KtParameter> { ktParameter ->
+                ktParameter.getChildOfType<KtTypeReference>().also { ktTypeReference ->
+                    val paramFqName = ktTypeReference!!.requireFqName().asString()
+                    println(paramFqName)
+                    anvilInjections.add(
+                        AnvilInjection(
+                            type = paramFqName
+                        )
+                    )
                 }
             }
         }
+        return anvilInjections
     }
 
     companion object {

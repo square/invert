@@ -1,7 +1,9 @@
 @file:Suppress("NewLineAtEndOfFile", "MagicNumber")
 
+package com
+
+import scopes.AppScope
 import com.squareup.anvil.annotations.ContributesBinding
-import com.squareup.anvil.annotations.ContributesTo
 import javax.inject.Inject
 
 interface Analytics
