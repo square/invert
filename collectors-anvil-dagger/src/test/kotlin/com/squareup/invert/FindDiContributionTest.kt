@@ -1,9 +1,9 @@
 package com.squareup.invert
 
+
+import com.squareup.invert.models.Stat.ProvidesAndInjectsStat.DiContribution
 import com.squareup.invert.testutils.InvertTestUtils.assertEqualsAndPrintDiff
 import kotlinx.serialization.builtins.ListSerializer
-
-
 import java.io.File
 import kotlin.test.Test
 
@@ -29,17 +29,16 @@ class FindDiContributionTest {
 
         assertEqualsAndPrintDiff(
             expected = listOf(
-                AnvilContributesBinding(
+                DiContribution(
                     annotation = "com.squareup.anvil.annotations.ContributesBinding",
                     scope = "com.squareup.dagger.AppScope",
                     boundImplementation = "com.squareup.test.AccountStatusRootAuthenticator",
                     boundType = "com.squareup.test.RootAuthenticator1",
                     replaces = listOf(),
-                    fileName = ktFile.name
                 )
             ),
             actual = findAnvil.getCollectedContributesBindings(),
-            serializer = ListSerializer(AnvilContributesBinding.serializer())
+            serializer = ListSerializer(DiContribution.serializer())
         )
     }
 
@@ -62,17 +61,16 @@ class FindDiContributionTest {
 
         assertEqualsAndPrintDiff(
             expected = listOf(
-                AnvilContributesBinding(
+                DiContribution(
                     annotation = "com.squareup.anvil.annotations.ContributesBinding",
                     scope = "com.squareup.dagger.AppScope",
                     boundImplementation = "com.squareup.test.AccountStatusRootAuthenticator",
                     boundType = "com.squareup.test.RootAuthenticator",
                     replaces = listOf(),
-                    fileName = ktFile.name
                 )
             ),
             actual = findAnvil.getCollectedContributesBindings(),
-            serializer = ListSerializer(AnvilContributesBinding.serializer())
+            serializer = ListSerializer(DiContribution.serializer())
         )
     }
 
@@ -101,25 +99,23 @@ class FindDiContributionTest {
 
         assertEqualsAndPrintDiff(
             expected = listOf(
-                AnvilContributesBinding(
+                DiContribution(
                     annotation = "com.squareup.anvil.annotations.ContributesBinding",
                     scope = "com.squareup.dagger.AppScope",
                     boundImplementation = "com.squareup.test.AccountStatusRootAuthenticator1",
                     boundType = "com.squareup.test.RootAuthenticator1",
                     replaces = listOf(),
-                    fileName = ktFile.name
                 ),
-                AnvilContributesBinding(
+                DiContribution(
                     annotation = "com.squareup.anvil.annotations.ContributesBinding",
                     scope = "com.squareup.test.OtherScope",
                     boundImplementation = "com.squareup.test.AccountStatusRootAuthenticator2",
                     boundType = "com.squareup.test.RootAuthenticator2",
                     replaces = listOf(),
-                    fileName = ktFile.name
                 )
             ),
             actual = findAnvil.getCollectedContributesBindings(),
-            serializer = ListSerializer(AnvilContributesBinding.serializer())
+            serializer = ListSerializer(DiContribution.serializer())
         )
     }
 
@@ -144,7 +140,7 @@ class FindDiContributionTest {
 
         assertEqualsAndPrintDiff(
             expected = listOf(
-                AnvilContributesBinding(
+                DiContribution(
                     annotation = "com.squareup.anvil.annotations.ContributesBinding",
                     scope = "com.squareup.dagger.AppScope",
                     boundImplementation = "com.squareup.test.AccountStatusRootAuthenticator",
@@ -152,11 +148,10 @@ class FindDiContributionTest {
                     replaces = listOf(
                         "com.squareup.test.ToBeReplaced"
                     ),
-                    fileName = ktFile.name
                 )
             ),
             actual = findAnvil.getCollectedContributesBindings(),
-            serializer = ListSerializer(AnvilContributesBinding.serializer())
+            serializer = ListSerializer(DiContribution.serializer())
         )
     }
 
@@ -182,7 +177,7 @@ class FindDiContributionTest {
 
         assertEqualsAndPrintDiff(
             expected = listOf(
-                AnvilContributesBinding(
+                DiContribution(
                     annotation = "com.squareup.anvil.annotations.ContributesBinding",
                     scope = "com.squareup.dagger.AppScope",
                     boundImplementation = "com.squareup.test.AccountStatusRootAuthenticator",
@@ -191,11 +186,10 @@ class FindDiContributionTest {
                         "com.squareup.test.ToBeReplaced1",
                         "com.squareup.test.ToBeReplaced2"
                     ),
-                    fileName = ktFile.name
                 )
             ),
             actual = findAnvil.getCollectedContributesBindings(),
-            serializer = ListSerializer(AnvilContributesBinding.serializer())
+            serializer = ListSerializer(DiContribution.serializer())
         )
     }
 
@@ -218,7 +212,7 @@ class FindDiContributionTest {
         assertEqualsAndPrintDiff(
             expected = listOf(),
             actual = findAnvil.getCollectedContributesBindings(),
-            serializer = ListSerializer(AnvilContributesBinding.serializer())
+            serializer = ListSerializer(DiContribution.serializer())
         )
     }
 
