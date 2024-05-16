@@ -9,13 +9,14 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class MetadataJsReportModel(
-  val time: Long,
-  val timezoneId: String,
-  val timeStr: String,
-  val gitSha: GitSha?,
-  val branchName: GitBranch?,
-  val currentBranch: String,
-  val currentBranchHash: GitSha,
-  val remoteRepoGit: String,
-  val remoteRepoUrl: String,
+    val time: Long,
+    val timezoneId: String,
+    val timeStr: String,
+    val gitSha: GitSha?,
+    val branchName: GitBranch?,
+    val currentBranch: String,
+    val currentBranchHash: GitSha,
+    val remoteRepoGit: String,
+    val remoteRepoUrl: String,
+    val mavenRepoUrls: List<String>
 )

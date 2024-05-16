@@ -73,6 +73,28 @@ fun exec(
     return TerminalExecRunnerResult(stdout, stderr, exitCode)
 }
 
+val slackRemoveExclusiveContentPostCheckout: (File) -> Unit = { clonedProjectDir ->
+    val settingsKts = File(clonedProjectDir, "settings.gradle.kts")
+    var waitForClosingBracket = false
+    settingsKts.readLines().mapNotNull { line ->
+        if (line.trim().startsWith("exclusiveContent")) {
+            waitForClosingBracket = true
+            null
+        } else if (waitForClosingBracket) {
+            if (line.startsWith("    }")) {
+                waitForClosingBracket = false
+                "gradlePluginPortal()"
+            } else {
+                null
+            }
+        } else {
+            line
+        }
+    }.also { lines ->
+        settingsKts.writeText(lines.joinToString("\n"))
+    }
+}
+
 /**
  * Runs a terminal command that returns [TerminalExecRunnerResult] when the process finishes.
  *
@@ -168,27 +190,76 @@ val ALL_REPOS = listOf(
         runOnGitHubAction = false,
     ),
     TargetRepo(
+        org = "apereo",
+        project = "cas",
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "android",
+        project = "nowinandroid",
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "square",
+        project = "anvil",
+        buildDirPath = "build/root-build",
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "square",
+        project = "okhttp",
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "skydoves",
+        project = "pokedex-compose",
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "slackhq",
+        project = "circuit",
+        postCheckout = slackRemoveExclusiveContentPostCheckout,
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "chrisbanes",
+        project = "tivi",
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "androidx",
+        project = "androidx",
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "gradle",
+        project = "gradle",
+        invertGradleCmd = {
+            // ignoreBuildJavaVersionCheck=true is needed for https://github.com/gradle/gradle for the Java 11/Java 17 mix
+            "$DEFAULT_INIT_SCRIPT_LINE -Dorg.gradle.ignoreBuildJavaVersionCheck=true"
+        },
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "spring-projects",
+        project = "spring-boot",
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "detekt",
+        project = "detekt",
+        runOnGitHubAction = false,
+    ),
+    // Current issue when running this one
+//    TargetRepo(
+//        org = "SonarSource",
+//        project = "sonar-kotlin",
+//        runOnGitHubAction = false,
+//    ),
+    TargetRepo(
         org = "ZacSweers",
         project = "CatchUp",
-        postCheckout = { clonedProjectDir ->
-            val settingsKts = File(clonedProjectDir, "settings.gradle.kts")
-            var waitForClosingBracket = false
-            settingsKts.readLines().mapNotNull { line ->
-                if (line.trim().startsWith("exclusiveContent")) {
-                    waitForClosingBracket = true
-                    null
-                } else if (waitForClosingBracket) {
-                    if (line.startsWith("    }")) {
-                        waitForClosingBracket = false
-                    }
-                    null
-                } else {
-                    line
-                }
-            }.also { lines ->
-                settingsKts.writeText(lines.joinToString("\n"))
-            }
-        },
+        postCheckout = slackRemoveExclusiveContentPostCheckout,
         runInvert = { clonedProjectDir ->
             val envVars = mutableMapOf<String, String>().apply {
                 val javaHome = System.getenv("JAVA_HOME")
@@ -210,79 +281,17 @@ val ALL_REPOS = listOf(
         }
     ),
     TargetRepo(
-        org = "apereo",
-        project = "cas",
-        runOnGitHubAction = false,
-    ),
-    TargetRepo(
-        org = "android",
-        project = "nowinandroid",
-        runOnGitHubAction = false,
+        org = "rickbusarow",
+        project = "ModuleCheck"
     ),
     TargetRepo(
         org = "duckduckgo",
         project = "Android",
     ),
-    TargetRepo(
-        org = "square",
-        project = "anvil",
-        buildDirPath = "build/root-build",
-        runOnGitHubAction = false,
-    ),
-    TargetRepo(
-        org = "square",
-        project = "okhttp",
-        runOnGitHubAction = false,
-    ),
-    TargetRepo(
-        org = "skydoves",
-        project = "pokedex-compose",
-        runOnGitHubAction = false,
-    ),
-    TargetRepo(
-        org = "slackhq",
-        project = "circuit"
-    ),
-    TargetRepo(
-        org = "chrisbanes",
-        project = "tivi",
-        runOnGitHubAction = false,
-    ),
-    TargetRepo(
-        org = "androidx",
-        project = "androidx",
-        runOnGitHubAction = false,
-    ),
-    TargetRepo(
-        org = "rickbusarow",
-        project = "ModuleCheck"
-    ),
-    TargetRepo(
-        org = "gradle",
-        project = "gradle",
-        invertGradleCmd = {
-            // ignoreBuildJavaVersionCheck=true is needed for https://github.com/gradle/gradle for the Java 11/Java 17 mix
-            "$DEFAULT_INIT_SCRIPT_LINE -Dorg.gradle.ignoreBuildJavaVersionCheck=true"
-        },
-        runOnGitHubAction = false,
-    ),
-    TargetRepo(
-        org = "spring-projects",
-        project = "spring-boot",
-        runOnGitHubAction = false,
-    ),
-    TargetRepo(
-        org = "SonarSource",
-        project = "sonar-kotlin",
-        runOnGitHubAction = false,
-    ),
-    TargetRepo(
-        org = "detekt",
-        project = "detekt",
-        runOnGitHubAction = false,
-    ),
 )
-    .filter { it.runOnGitHubAction }
+    .filter {
+        !(System.getenv().containsKey("GITHUB_ACTIONS") && it.runOnGitHubAction)
+    }
 
 val CLONES_DIR = File("build/clones").apply {
     if (!exists()) {

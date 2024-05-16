@@ -104,6 +104,12 @@ fun HomeComposable(
                 pluginIdsCount,
                 PluginsNavRoute.navPage
             ) { navRouteRepo.updateNavRoute(PluginsNavRoute) }
+
+            Pre {
+                Text(
+                    metadata.mavenRepoUrls.joinToString("\n")
+                )
+            }
         }
     })
 }
