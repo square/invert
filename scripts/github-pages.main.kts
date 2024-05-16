@@ -38,11 +38,20 @@ fun readStream(inputStream: InputStream): String {
  *
  * @param [command] shell command split into a list that includes the program and it's arguments.
  */
-fun exec(command: List<String>, workingDir: File): TerminalExecRunnerResult {
+fun exec(
+    command: List<String>,
+    workingDir: File,
+    envVars: Map<String, String> = emptyMap()
+): TerminalExecRunnerResult {
     println("*****\nBEGIN ${command.joinToString(" ")}")
     println("CWD ${workingDir.path}")
     val process = ProcessBuilder(command)
         .directory(workingDir)
+        .apply {
+            envVars.entries.forEach {
+                environment()[it.key] = it.value
+            }
+        }
         .start()
 
     val executor = Executors.newFixedThreadPool(2)
@@ -74,7 +83,7 @@ fun exec(command: List<String>, workingDir: File): TerminalExecRunnerResult {
  *
  * @param [command] shell command as you would enter it in the terminal.
  */
-fun executeCmd(command: String, workingDir: File): TerminalExecRunnerResult {
+fun executeCmd(command: String, workingDir: File, envVars: Map<String, String> = mapOf()): TerminalExecRunnerResult {
     return exec(
         // https://stackoverflow.com/a/51356605
         // This regex splits strings only outside of double quotes.
@@ -83,7 +92,8 @@ fun executeCmd(command: String, workingDir: File): TerminalExecRunnerResult {
                 // Strip surrounding double quotes.
                 it.trim('"')
             },
-        workingDir
+        workingDir,
+        envVars,
     )
 }
 
@@ -160,6 +170,44 @@ val ALL_REPOS = listOf(
     TargetRepo(
         org = "ZacSweers",
         project = "CatchUp",
+        postCheckout = { clonedProjectDir ->
+            val settingsKts = File(clonedProjectDir, "settings.gradle.kts")
+            var waitForClosingBracket = false
+            settingsKts.readLines().mapNotNull { line ->
+                if (line.trim().startsWith("exclusiveContent")) {
+                    waitForClosingBracket = true
+                    null
+                } else if (waitForClosingBracket) {
+                    if (line.startsWith("    }")) {
+                        waitForClosingBracket = false
+                    }
+                    null
+                } else {
+                    line
+                }
+            }.also { lines ->
+                settingsKts.writeText(lines.joinToString("\n"))
+            }
+        },
+        runInvert = { clonedProjectDir ->
+            val envVars = mutableMapOf<String, String>().apply {
+                val javaHome = System.getenv("JAVA_HOME")
+                if (!javaHome.contains("21")) {
+                    val home = System.getenv("HOME")
+                    val javaHome21 =
+                        File("$home/Library/Java/JavaVirtualMachines/azul-21.0.3/Contents/Home")
+                    if (!javaHome21.exists()) {
+                        throw IllegalStateException("Java 21 is required.")
+                    }
+                    put("JAVA_HOME", javaHome21.absolutePath)
+                }
+            }
+            executeCmd(
+                DEFAULT_INIT_SCRIPT_LINE,
+                clonedProjectDir,
+                envVars,
+            )
+        }
     ),
     TargetRepo(
         org = "apereo",
