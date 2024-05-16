@@ -1,5 +1,3 @@
-import com.squareup.invert.InvertExtension
-
 ext.set("invertVersion", "0.0.1-dev-SNAPSHOT")
 
 buildscript {
@@ -36,7 +34,7 @@ plugins {
 
 invert {
     ownershipCollector(com.squareup.invert.GitHubCodeOwnersInvertOwnershipCollector)
-    addStatCollector(com.squareup.invert.RealAnvilContributesBindingStatCollector())
+    addStatCollector(com.squareup.invert.DiProvidesAndInjectsStatCollector())
     addStatCollector(com.squareup.invert.suppress.SupressionsStatCollector())
     addStatCollector(com.squareup.invert.LinesOfCodeStatCollector())
 }

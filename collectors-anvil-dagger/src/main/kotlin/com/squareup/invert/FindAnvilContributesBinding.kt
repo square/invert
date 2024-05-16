@@ -1,7 +1,7 @@
 package com.squareup.invert
 
 import com.rickbusarow.statik.InternalStatikApi
-import com.rickbusarow.statik.element.kotlin.psi.utils.traversal.PsiTreePrinter.Companion.printEverything
+import com.squareup.invert.models.Stat.ProvidesAndInjectsStat.*
 import com.squareup.psi.classesAndInnerClasses
 import com.squareup.psi.requireFqName
 import com.squareup.psi.toKtFile
@@ -12,23 +12,21 @@ import org.jetbrains.kotlin.psi.psiUtil.getChildOfType
 import org.jetbrains.kotlin.psi.psiUtil.getChildrenOfType
 import java.io.File
 
-
 /**
  * Utility Class responsible for collecting all Anvil @ContributesBinding annotations
  * on classes in a Kotlin file.
  */
 class FindAnvilContributesBinding {
 
-    private val allBindings = mutableListOf<AnvilContributesBinding>()
+    private val allBindings = mutableListOf<DiContribution>()
 
+    private val contributionAndConsumption = mutableListOf<ProvidesAndInjects>()
 
-    private val contributionAndConsumption = mutableListOf<AnvilContributionAndConsumption>()
-
-    fun getCollectedContributionsAndConsumptions(): List<AnvilContributionAndConsumption> {
+    fun getCollectedContributionsAndConsumptions(): List<ProvidesAndInjects> {
         return contributionAndConsumption
     }
 
-    fun getCollectedContributesBindings(): List<AnvilContributesBinding> {
+    fun getCollectedContributesBindings(): List<DiContribution> {
         return allBindings
     }
 
@@ -89,7 +87,7 @@ class FindAnvilContributesBinding {
             val annotationFqClassName = ktAnnotationEntry.requireFqName().asString()
             val annotationInfo = when (annotationFqClassName) {
                 ANVIL_CONTRIBUTES_BINDING_ANNOTATION_CLASS_NAME,
-                // TODO Do we need to note when it is a multibinding?
+                    // TODO Do we need to note when it is a multibinding?
                 ANVIL_CONTRIBUTES_MULTIBINDING_ANNOTATION_CLASS_NAME -> AnnotationInfo(
                     type = annotationFqClassName,
                     args = ktAnnotationEntry.extractContributesBindingAnnotationArgs()
@@ -108,7 +106,7 @@ class FindAnvilContributesBinding {
     }
 
     fun handleKotlinFile(file: File) {
-        val bindingsInFile = mutableListOf<AnvilContributesBinding>()
+        val bindingsInFile = mutableListOf<DiContribution>()
         if (file.exists()) {
             val ktFile = file.toKtFile()
             val fileName = file.name
@@ -122,7 +120,7 @@ class FindAnvilContributesBinding {
             ktFile.classesAndInnerClasses()
                 .toList()
                 .forEach { ktClassOrObject ->
-                    val bindingsInClassOrObject = mutableListOf<AnvilContributesBinding>()
+                    val bindingsInClassOrObject = mutableListOf<DiContribution>()
                     val classOrObjectFqName = ktClassOrObject.fqName?.asString() ?: ktClassOrObject.name!!
 
                     val supertypes = ktClassOrObject.getSuperTypeList()?.entries
@@ -140,7 +138,7 @@ class FindAnvilContributesBinding {
                         val replaces =
                             contributeBindingAnnotationInfo.args?.firstOrNull { it.name == "replaces" }
 
-                        val anvilContributesBinding = AnvilContributesBinding(
+                        val anvilContributesBinding = DiContribution(
                             annotation = contributeBindingAnnotationInfo.type,
                             scope = (scope as AnnotationArg.AnnotationArgSingle).value,
                             boundImplementation = classOrObjectFqName,
@@ -166,7 +164,7 @@ class FindAnvilContributesBinding {
                     val lineAndColumnRange = getLineAndColumnRangeInPsiFile(ktFile, ktClassOrObject.textRange)
                     if (bindingsInClassOrObject.isNotEmpty() || consumptions.isNotEmpty()) {
                         contributionAndConsumption.add(
-                            AnvilContributionAndConsumption(
+                            ProvidesAndInjects(
                                 fileName = fileName,
                                 contributions = bindingsInClassOrObject,
                                 consumptions = consumptions,
@@ -189,8 +187,8 @@ class FindAnvilContributesBinding {
     }
 
     @OptIn(InternalStatikApi::class)
-    private fun findConstructorInjections(ktClassOrObject: KtClassOrObject): List<AnvilInjection> {
-        val anvilInjections = mutableListOf<AnvilInjection>()
+    private fun findConstructorInjections(ktClassOrObject: KtClassOrObject): List<DiInjection> {
+        val anvilInjections = mutableListOf<DiInjection>()
         println("ktClassOrObject ${ktClassOrObject.fqName?.asString()}")
         ktClassOrObject.primaryConstructor?.let { primaryConstructor ->
             println("primaryConstructor: ${primaryConstructor.text}")
@@ -203,7 +201,7 @@ class FindAnvilContributesBinding {
                         val paramFqName = ktTypeReference!!.requireFqName().asString()
                         println(paramFqName)
                         anvilInjections.add(
-                            AnvilInjection(
+                            DiInjection(
                                 type = paramFqName,
                                 qualifierAnnotations = qualifierAnnotations,
                             )

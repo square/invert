@@ -72,6 +72,19 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
                             collectedStats[statKey] = it
                         }
                     }
+                    val diStatCollectors = this.statCollectors
+                        ?.filterIsInstance<ProvidesAndInjectsStatCollector>() ?: listOf()
+                    diStatCollectors.forEach { statCollector ->
+                        val statKey = statCollector.statInfo.name
+                        statInfoMap[statKey] = statCollector.statInfo
+                        statCollector.collect(
+                            srcFolder,
+                            projectPath,
+                            kotlinSourceFiles
+                        )?.let {
+                            collectedStats[statKey] = it
+                        }
+                    }
                     val genericStatCollectors = this.statCollectors
                         ?.filterIsInstance<GenericStatCollector>() ?: listOf()
                     genericStatCollectors.forEach { statCollector ->

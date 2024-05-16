@@ -166,6 +166,10 @@ fun StatDetailComposable(
                                     stat.stat
                                 }
 
+                                is Stat.ProvidesAndInjectsStat -> {
+                                    stat.value.toString().replace(",", "\n")
+                                }
+
                                 else -> ""
                             }
                         }

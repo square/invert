@@ -49,4 +49,15 @@ sealed interface StatCollector : Named {
             kotlinSourceFiles: List<File>
         ): Stat.StringStat?
     }
+
+    /**
+     * A [StatCollector] that collects [GenericStatCollector] data.
+     */
+    interface ProvidesAndInjectsStatCollector : StatCollector {
+        fun collect(
+            srcFolder: File,
+            projectPath: String,
+            kotlinSourceFiles: List<File>
+        ): Stat.ProvidesAndInjectsStat?
+    }
 }

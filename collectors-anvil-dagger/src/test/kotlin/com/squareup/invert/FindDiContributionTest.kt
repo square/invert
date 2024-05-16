@@ -7,7 +7,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import java.io.File
 import kotlin.test.Test
 
-class FindAnvilContributesBindingTest {
+class FindDiContributionTest {
 
     @Test
     fun `boundType specified and binding found`() {
