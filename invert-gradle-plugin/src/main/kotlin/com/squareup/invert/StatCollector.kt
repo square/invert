@@ -55,7 +55,7 @@ sealed interface StatCollector : Named {
      */
     interface ProvidesAndInjectsStatCollector : StatCollector {
         fun collect(
-            srcFolder: File,
+            rootProjectFolder: File,
             projectPath: String,
             kotlinSourceFiles: List<File>
         ): Stat.ProvidesAndInjectsStat?

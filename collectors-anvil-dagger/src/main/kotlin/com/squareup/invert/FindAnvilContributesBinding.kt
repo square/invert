@@ -105,11 +105,10 @@ class FindAnvilContributesBinding {
         return annotationInfos
     }
 
-    fun handleKotlinFile(file: File) {
+    fun handleKotlinFile(file: File, relativeFilePath: String) {
         val bindingsInFile = mutableListOf<DiContribution>()
         if (file.exists()) {
             val ktFile = file.toKtFile()
-            val fileName = file.name
 
             ktFile.accept(object : KtTreeVisitorVoid() {
                 override fun visitConstructorDelegationCall(call: KtConstructorDelegationCall) {
@@ -165,7 +164,7 @@ class FindAnvilContributesBinding {
                     if (bindingsInClassOrObject.isNotEmpty() || consumptions.isNotEmpty()) {
                         contributionAndConsumption.add(
                             ProvidesAndInjects(
-                                fileName = fileName,
+                                filePath = relativeFilePath,
                                 contributions = bindingsInClassOrObject,
                                 consumptions = consumptions,
                                 lineNumber = lineAndColumnRange.start.line,

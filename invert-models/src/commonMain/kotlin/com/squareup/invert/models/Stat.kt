@@ -70,7 +70,7 @@ sealed interface Stat {
             val classFqName: String,
             val contributions: List<DiContribution>,
             val consumptions: List<DiInjection>,
-            val fileName: String,
+            val filePath: String,
             val lineNumber: Int,
         )
     }

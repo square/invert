@@ -11,10 +11,17 @@ import java.io.File
  * by the [InvertGradlePlugin]
  */
 class DiProvidesAndInjectsStatCollector : StatCollector.ProvidesAndInjectsStatCollector {
-    override fun collect(srcFolder: File, projectPath: String, kotlinSourceFiles: List<File>): Stat.ProvidesAndInjectsStat? {
+    override fun collect(
+        rootSrcFolder: File,
+        projectPath: String,
+        kotlinSourceFiles: List<File>
+    ): Stat.ProvidesAndInjectsStat? {
         val findAnvil = FindAnvilContributesBinding()
         kotlinSourceFiles.forEach { kotlinFile ->
-            findAnvil.handleKotlinFile(kotlinFile)
+            findAnvil.handleKotlinFile(
+                file = kotlinFile,
+                relativeFilePath = kotlinFile.absolutePath.replace(rootSrcFolder.absolutePath, "").drop(1)
+            )
         }
 
         val contributionsAndConsumption = findAnvil.getCollectedContributionsAndConsumptions()

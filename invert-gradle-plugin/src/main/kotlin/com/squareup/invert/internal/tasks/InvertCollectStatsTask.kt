@@ -35,6 +35,9 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
     @get:Input
     abstract val projectPath: Property<String>
 
+    @get:Input
+    abstract val rootProjectPath: Property<String>
+
     @get:Internal
     abstract var statCollectors: List<StatCollector>?
 
@@ -78,9 +81,9 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
                         val statKey = statCollector.statInfo.name
                         statInfoMap[statKey] = statCollector.statInfo
                         statCollector.collect(
-                            srcFolder,
-                            projectPath,
-                            kotlinSourceFiles
+                            rootProjectFolder = File(rootProjectPath.get()),
+                            projectPath = projectPath,
+                            kotlinSourceFiles = kotlinSourceFiles
                         )?.let {
                             collectedStats[statKey] = it
                         }
@@ -133,6 +136,7 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
     ) {
         val projectPath = project.path
         this.projectPath.set(projectPath)
+        this.rootProjectPath.set(project.rootProject.layout.projectDirectory.asFile.absolutePath)
         this.projectMainSrcDirectory.set(
             File(project.layout.projectDirectory.asFile.path + "/src/main")
         )
