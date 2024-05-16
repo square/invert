@@ -143,12 +143,19 @@ fun StatDetailComposable(
                             val stat = statsDataForModule?.get(statKey)
                             when (stat) {
                                 is Stat.ClassDefinitionsStat -> {
-                                    val definitions = stat.definitions
-                                    if (definitions.isEmpty()) {
-                                        ""
-                                    } else {
-                                        definitions.size.toString() + " Type Definitions"
+                                    buildString {
+                                        val definitions = stat.definitions
+                                        if (definitions.isNotEmpty()) {
+                                            appendLine(definitions.size.toString() + " Type Definitions")
+                                        }
+
+                                        stat.definitions
+                                            .map { it.fqName }
+                                            .forEach {
+                                                appendLine(it)
+                                            }
                                     }
+
                                 }
 
                                 is Stat.HasImportStat -> {
@@ -163,30 +170,6 @@ fun StatDetailComposable(
                             }
                         }
                     )
-                    add(
-                        allModules.map { gradlePath ->
-                            val statsDataForModule: Map<StatKey, Stat>? = statsData?.statsByModule?.get(gradlePath)
-                            val stat = statsDataForModule?.get(statKey)
-                            when (stat) {
-                                is Stat.ClassDefinitionsStat -> {
-                                    buildString {
-                                        stat.definitions
-                                            .map { it.fqName }
-                                            .forEach {
-                                                appendLine(it)
-                                            }
-                                    }
-                                }
-
-                                is Stat.HasImportStat -> {
-                                    stat.details ?: ""
-                                }
-
-                                else -> ""
-                            }
-
-                        }
-                    )
                 }
             }
         }
@@ -195,7 +178,6 @@ fun StatDetailComposable(
             .apply {
                 statKeys.forEach {
                     add(it)
-                    add("$it Details")
                 }
             }
         val values: List<List<String>> = allModules.mapIndexed { idx, modulePath ->

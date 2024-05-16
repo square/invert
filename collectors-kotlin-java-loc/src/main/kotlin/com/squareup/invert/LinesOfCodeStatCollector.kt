@@ -29,7 +29,7 @@ class LinesOfCodeStatCollector : StatCollector.GenericStatCollector {
     override val statInfo: StatInfo = StatInfo(
         name = "KotlinLinesOfCode",
         description = "Kotlin Lines of Code",
-        statType = CollectedStatType.GENERIC
+        statType = CollectedStatType.STRING
     )
 
     override fun getName(): String {

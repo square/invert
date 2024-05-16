@@ -37,5 +37,6 @@ plugins {
 invert {
     ownershipCollector(com.squareup.invert.GitHubCodeOwnersInvertOwnershipCollector)
     addStatCollector(com.squareup.invert.RealAnvilContributesBindingStatCollector())
+    addStatCollector(com.squareup.invert.suppress.SupressionsStatCollector())
     addStatCollector(com.squareup.invert.LinesOfCodeStatCollector())
 }

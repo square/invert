@@ -4,14 +4,13 @@ import com.squareup.invert.models.CollectedStatType
 import com.squareup.invert.models.Stat.StringStat
 import com.squareup.invert.models.StatInfo
 import java.io.File
-import java.lang.RuntimeException
 
 /**
  * This collector invokes the [FindAnvilContributesBinding] class collect all instances
  * of the Anvil ContributesBinding annotation, and puts it into a Stat that can be used collected
  * by the [InvertGradlePlugin]
  */
-public class RealAnvilContributesBindingStatCollector : StatCollector.GenericStatCollector {
+class RealAnvilContributesBindingStatCollector : StatCollector.GenericStatCollector {
     override fun collect(srcFolder: File, projectPath: String, kotlinSourceFiles: List<File>): StringStat? {
         val findAnvil = FindAnvilContributesBinding()
         kotlinSourceFiles.forEach { kotlinFile ->
@@ -40,7 +39,7 @@ public class RealAnvilContributesBindingStatCollector : StatCollector.GenericSta
     override val statInfo: StatInfo = StatInfo(
         name = "AnvilContributesBinding",
         description = "Anvil ContributesBinding Annotation Information",
-        statType = CollectedStatType.GENERIC
+        statType = CollectedStatType.STRING
     )
 
     override fun getName(): String {

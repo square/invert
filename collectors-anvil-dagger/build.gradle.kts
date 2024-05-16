@@ -10,6 +10,8 @@ java {
 }
 
 dependencies {
+    compileOnly(gradleApi())
+
     api(libs.kotlinx.serialization.core)
     api(libs.kotlinx.serialization.json)
     implementation(libs.kotlin.compiler.embeddable)
