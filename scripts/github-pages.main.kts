@@ -10,7 +10,7 @@ val INVERT_VERSION = File(PROJECT_ROOT_DIR, "gradle.properties").readText()
     .lines()
     .first { it.startsWith("version=") }
     .substringAfter("version=")
-val INVERT_INIT_SCRIPT = File(PROJECT_ROOT_DIR, "invert.gradle.kts")
+val INVERT_INIT_SCRIPT = File(PROJECT_ROOT_DIR, "invert.init.script.gradle.kts")
 
 /**
  * Data bundle that includes standard output, error output, and exit code of a process.

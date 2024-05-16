@@ -8,7 +8,7 @@ buildscript {
         mavenCentral()
         google()
         gradlePluginPortal()
-//        maven { url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content") } // SNAPSHOT Versions for statik
+        maven { url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content") }
 //        maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") } // SNAPSHOT Versions
     }
     dependencies {
@@ -26,7 +26,7 @@ allprojects {
         mavenCentral()
         google()
         gradlePluginPortal()
-        maven { url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content") } // SNAPSHOT Versions for statik
+        maven { url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content") }
     }
 }
 
