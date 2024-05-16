@@ -77,6 +77,7 @@ class InvertReport(
             AnnotationProcessorsReportPage,
             ConfigurationDetailReportPage,
             ConfigurationsReportPage,
+            DependencyInjectionReportPage,
             DependencyDiffReportPage,
             ModuleDependencyGraphReportPage,
             HomeReportPage,

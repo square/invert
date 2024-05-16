@@ -19,6 +19,7 @@ class NavPage(
                 AllStatsReportPage.navPage,
                 AnnotationProcessorsReportPage.navPage,
                 ArtifactsReportPage.navPage,
+                DependencyInjectionReportPage.navPage,
                 OwnersReportPage.navPage,
                 PluginsNavRoute.navPage,
                 KotlinCompilerPluginsReportPage.navPage,
