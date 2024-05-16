@@ -62,7 +62,7 @@ fun HomeComposable(
         } else {
             Br {}
             P {
-                Text("Repo ")
+                Text("Git Repo ")
                 A(href = metadata.remoteRepoUrl) {
                     Text(metadata.remoteRepoUrl)
                 }
@@ -71,7 +71,14 @@ fun HomeComposable(
                 P({
                     classes("fs-6")
                 }) {
-                    Text("Last Commit from ${metadata.branchName} ")
+                    Text("Last Commit ")
+                    metadata.branchName?.let { branchName ->
+                        Text("from ")
+                        A(href = "${metadata.remoteRepoUrl}/tree/${branchName}/") {
+                            Text(branchName)
+                        }
+                        Text(" branch ")
+                    }
                     val commitUrl = metadata.remoteRepoUrl + "/commits/" + gitSha
                     A(href = commitUrl) {
                         Text(gitSha)
@@ -105,10 +112,16 @@ fun HomeComposable(
                 PluginsNavRoute.navPage
             ) { navRouteRepo.updateNavRoute(PluginsNavRoute) }
 
-            Pre {
-                Text(
-                    metadata.mavenRepoUrls.joinToString("\n")
-                )
+            Text("Remote Repositories")
+            Br()
+            Ul({ classes("fs-6") }) {
+                metadata.mavenRepoUrls.forEach { mavenRepoUrl ->
+                    Li {
+                        A(href = mavenRepoUrl) {
+                            Text(mavenRepoUrl)
+                        }
+                    }
+                }
             }
         }
     })

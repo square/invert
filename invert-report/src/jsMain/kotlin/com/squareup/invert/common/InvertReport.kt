@@ -55,6 +55,7 @@ class InvertReport(
             routeManager = routeManager,
             navRouteRepo = navRouteRepo,
             customNavItems = customNavItems,
+            reportDataRepo = reportDataRepo,
         )
     }
 

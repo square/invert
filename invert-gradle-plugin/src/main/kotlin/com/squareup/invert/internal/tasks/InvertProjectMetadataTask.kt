@@ -128,7 +128,8 @@ internal abstract class InvertProjectMetadataTask : DefaultTask() {
         )
 
         this.mavenRepoUrls.set(
-            rootProject.repositories
+            rootProject.buildscript.repositories
+//                .plus(rootProject.repositories)
                 .filterIsInstance<UrlArtifactRepository>()
                 .map { it.url.toURL().toString() }
                 .distinct()
