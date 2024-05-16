@@ -38,7 +38,7 @@ class RealAnvilContributesBindingStatCollector : StatCollector.GenericStatCollec
                         if (injections.consumptions.isNotEmpty()) {
                             appendLine("Injects:")
                             injections.consumptions.forEach {
-                                appendLine("* ${it.type}")
+                                appendLine("* ${it.qualifierAnnotations.joinToString(" ")} ${it.type}")
                             }
                         }
                         appendLine()

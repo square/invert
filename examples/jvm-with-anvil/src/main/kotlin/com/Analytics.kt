@@ -2,15 +2,18 @@
 
 package com
 
-import scopes.AppScope
 import com.squareup.anvil.annotations.ContributesBinding
+import kotlinx.coroutines.CoroutineScope
+import scopes.AppScope
 import javax.inject.Inject
 
 interface Analytics
 
 @Suppress("SomeRule")
 @ContributesBinding(AppScope::class)
-class RealAnalytics @Inject constructor() : Analytics {
+class RealAnalytics @Inject constructor(
+    @AppCoroutineScope coroutineScope: CoroutineScope,
+) : Analytics {
     init {
         for (i in 0..11) {
             while (i < 5) {
@@ -24,3 +27,5 @@ class RealAnalytics @Inject constructor() : Analytics {
         return "abcd".length.toString()
     }
 }
+
+data class SomeDataClass(val str: String)

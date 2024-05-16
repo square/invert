@@ -290,7 +290,7 @@ val ALL_REPOS = listOf(
     ),
 )
     .filter {
-        !(System.getenv().containsKey("GITHUB_ACTIONS") && it.runOnGitHubAction)
+        System.getenv().containsKey("GITHUB_ACTIONS") && it.runOnGitHubAction
     }
 
 val CLONES_DIR = File("build/clones").apply {

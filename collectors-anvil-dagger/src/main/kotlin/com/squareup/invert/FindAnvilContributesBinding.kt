@@ -1,15 +1,15 @@
 package com.squareup.invert
 
 import com.rickbusarow.statik.InternalStatikApi
-import com.rickbusarow.statik.element.kotlin.psi.utils.traversal.PsiTreePrinter
+import com.rickbusarow.statik.element.kotlin.psi.utils.traversal.PsiTreePrinter.Companion.printEverything
 import com.squareup.psi.classesAndInnerClasses
 import com.squareup.psi.requireFqName
 import com.squareup.psi.toKtFile
 import org.jetbrains.kotlin.diagnostics.DiagnosticUtils.getLineAndColumnRangeInPsiFile
 import org.jetbrains.kotlin.psi.*
-import org.jetbrains.kotlin.psi.psiUtil.findDescendantOfType
 import org.jetbrains.kotlin.psi.psiUtil.forEachDescendantOfType
 import org.jetbrains.kotlin.psi.psiUtil.getChildOfType
+import org.jetbrains.kotlin.psi.psiUtil.getChildrenOfType
 import java.io.File
 
 
@@ -88,7 +88,9 @@ class FindAnvilContributesBinding {
         ktClassOrObject.annotationEntries.forEach { ktAnnotationEntry: KtAnnotationEntry ->
             val annotationFqClassName = ktAnnotationEntry.requireFqName().asString()
             val annotationInfo = when (annotationFqClassName) {
-                ANVIL_CONTRIBUTES_BINDING_ANNOTATION_CLASS_NAME -> AnnotationInfo(
+                ANVIL_CONTRIBUTES_BINDING_ANNOTATION_CLASS_NAME,
+                // TODO Do we need to note when it is a multibinding?
+                ANVIL_CONTRIBUTES_MULTIBINDING_ANNOTATION_CLASS_NAME -> AnnotationInfo(
                     type = annotationFqClassName,
                     args = ktAnnotationEntry.extractContributesBindingAnnotationArgs()
                 )
@@ -179,20 +181,34 @@ class FindAnvilContributesBinding {
         allBindings.addAll(bindingsInFile)
     }
 
+    fun KtElement.getAnnotationsFromModifierList(): List<String> {
+        return getChildOfType<KtDeclarationModifierList>()?.getChildrenOfType<KtAnnotationEntry>()
+            ?.map { annotationEntry ->
+                annotationEntry.text
+            } ?: emptyList()
+    }
+
+    @OptIn(InternalStatikApi::class)
     private fun findConstructorInjections(ktClassOrObject: KtClassOrObject): List<AnvilInjection> {
         val anvilInjections = mutableListOf<AnvilInjection>()
-        println("ktClassOrObject $ktClassOrObject")
+        println("ktClassOrObject ${ktClassOrObject.fqName?.asString()}")
         ktClassOrObject.primaryConstructor?.let { primaryConstructor ->
-            val ktParameterList = primaryConstructor.findDescendantOfType<KtParameterList>()!!
-            ktParameterList.forEachDescendantOfType<KtParameter> { ktParameter ->
-                ktParameter.getChildOfType<KtTypeReference>().also { ktTypeReference ->
-                    val paramFqName = ktTypeReference!!.requireFqName().asString()
-                    println(paramFqName)
-                    anvilInjections.add(
-                        AnvilInjection(
-                            type = paramFqName
+            println("primaryConstructor: ${primaryConstructor.text}")
+            val hasInject = primaryConstructor.getAnnotationsFromModifierList().any { it.endsWith("Inject") }
+            if (hasInject) {
+                val ktParameterList = primaryConstructor.getChildOfType<KtParameterList>()!!
+                ktParameterList.forEachDescendantOfType<KtParameter> { ktParameter ->
+                    val qualifierAnnotations = ktParameter.getAnnotationsFromModifierList()
+                    ktParameter.getChildOfType<KtTypeReference>().also { ktTypeReference ->
+                        val paramFqName = ktTypeReference!!.requireFqName().asString()
+                        println(paramFqName)
+                        anvilInjections.add(
+                            AnvilInjection(
+                                type = paramFqName,
+                                qualifierAnnotations = qualifierAnnotations,
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
@@ -202,5 +218,8 @@ class FindAnvilContributesBinding {
     companion object {
         const val ANVIL_CONTRIBUTES_BINDING_ANNOTATION_CLASS_NAME =
             "com.squareup.anvil.annotations.ContributesBinding"
+        const val ANVIL_CONTRIBUTES_MULTIBINDING_ANNOTATION_CLASS_NAME =
+            "com.squareup.anvil.annotations.ContributesMultibinding"
+
     }
 }

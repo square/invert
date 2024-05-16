@@ -5,7 +5,14 @@ initscript {
     repositories {
         mavenLocal()
         mavenCentral()
-//        maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") } // SNAPSHOT Versions
+        // SNAPSHOT Versions
+        maven {
+            url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
+        }
+        // SNAPSHOT Versions for statik
+        maven {
+            url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content")
+        }
     }
     dependencies {
         val invertVersion = "+"
@@ -29,9 +36,14 @@ class InvertInitScriptPlugin : Plugin<Gradle> {
                         gradlePluginPortal()
                         google()
                         mavenLocal()
+                        // SNAPSHOT Versions
                         maven {
                             url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
-                        } // SNAPSHOT Versions
+                        }
+                        // SNAPSHOT Versions for statik
+                        maven {
+                            url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content")
+                        }
                     }
 
                     dependencies {

@@ -20,6 +20,7 @@ data class AnvilContributesBinding(
 @Serializable
 data class AnvilInjection(
     val type: String,
+    val qualifierAnnotations: List<String>
 )
 
 @Serializable
