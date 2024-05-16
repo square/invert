@@ -24,5 +24,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation("com.squareup.anvil:annotations:2.4.9")
     implementation("javax.inject:javax.inject:1")
-    detektPlugins(project(":custom-detekt-rules"))
+
+    val invertVersion = "0.0.1-dev-SNAPSHOT"
+    detektPlugins("com.squareup.invert:custom-detekt-rules:$invertVersion")
 }

@@ -5,7 +5,8 @@ initscript {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") } // SNAPSHOT Versions
+//        maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") } // SNAPSHOT Versions
+//        maven { url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content") } // SNAPSHOT Versions for statik
     }
     dependencies {
         val invertVersion = "+"

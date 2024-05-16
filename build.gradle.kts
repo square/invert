@@ -15,8 +15,8 @@ allprojects {
         mavenCentral()
         google()
         gradlePluginPortal()
+//        maven { url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content") } // SNAPSHOT Versions for statik
     }
-
 }
 
 plugins {
