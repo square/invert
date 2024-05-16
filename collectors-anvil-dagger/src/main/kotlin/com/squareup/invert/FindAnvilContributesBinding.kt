@@ -195,6 +195,7 @@ class FindAnvilContributesBinding {
             if (hasInject) {
                 val ktParameterList = primaryConstructor.getChildOfType<KtParameterList>()!!
                 ktParameterList.forEachDescendantOfType<KtParameter> { ktParameter ->
+
                     val qualifierAnnotations = ktParameter.getAnnotationsFromModifierList()
                     ktParameter.getChildOfType<KtTypeReference>().also { ktTypeReference ->
                         val paramFqName = ktTypeReference!!.requireFqName().asString()

@@ -1,7 +1,7 @@
 package com.squareup.invert.common.pages
 
 
-import PagingConstants
+import PagingConstants.MAX_RESULTS
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -12,44 +12,40 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.DependencyInjectionNavRoute.Companion.parser
-import com.squareup.invert.models.GradlePluginId
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatKey
-import org.jetbrains.compose.web.dom.H1
-import org.jetbrains.compose.web.dom.H3
-import org.jetbrains.compose.web.dom.Text
+import kotlinx.browser.window
+import kotlinx.html.ATarget
+import org.jetbrains.compose.web.dom.*
 import ui.*
 import kotlin.reflect.KClass
 
 data class DependencyInjectionNavRoute(
-    val pluginIds: List<GradlePluginId>,
-    val statKeys: List<String>,
-    val moduleQuery: String? = null
+    val typeQuery: String? = null,
+    val moduleQuery: String? = null,
 ) : BaseNavRoute(DependencyInjectionReportPage.navPage) {
 
     override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
         .also { params ->
-            params[PLUGIN_IDS_PARAM] = pluginIds.joinToString(separator = ",")
-            params[STATKEYS_PARAM] = statKeys.joinToString(separator = ",")
             moduleQuery?.let {
                 params[MODULE_QUERY_PARAM] = it
+            }
+            typeQuery?.let {
+                params[TYPE_QUERY_PARAM] = it
             }
         }
 
     companion object {
 
-        private const val PLUGIN_IDS_PARAM = "plugins"
-        private const val STATKEYS_PARAM = "statkeys"
         private const val MODULE_QUERY_PARAM = "modulequery"
+        private const val TYPE_QUERY_PARAM = "providedquery"
 
         fun parser(params: Map<String, String?>): DependencyInjectionNavRoute {
-            val pluginIds = params[PLUGIN_IDS_PARAM]?.split(",")?.filter { it.isNotBlank() } ?: listOf()
-            val statKeys = params[STATKEYS_PARAM]?.split(",")?.filter { it.isNotBlank() } ?: listOf()
             val moduleQuery = params[MODULE_QUERY_PARAM]
+            val typeQuery = params[TYPE_QUERY_PARAM]
             return DependencyInjectionNavRoute(
-                pluginIds = pluginIds,
-                statKeys = statKeys,
-                moduleQuery = moduleQuery
+                typeQuery = typeQuery,
+                moduleQuery = moduleQuery,
             )
         }
     }
@@ -69,17 +65,35 @@ object DependencyInjectionReportPage : InvertReportPage<DependencyInjectionNavRo
     }
 }
 
+sealed interface DiRowData {
+    data class Provides(
+        val module: String,
+        val filePath: String,
+        val lineNumber: Int,
+        val type: String,
+        val implementationType: String,
+        val scope: String? = null,
+        val qualifiers: List<String> = emptyList(),
+    ) : DiRowData
+
+    data class Injects(
+        val module: String,
+        val filePath: String,
+        val lineNumber: Int,
+        val type: String,
+        val qualifiers: List<String>,
+    ) : DiRowData
+}
+
 @Composable
 fun DependencyInjectionComposable(
-    statsNavRoute: DependencyInjectionNavRoute,
+    diNavRoute: DependencyInjectionNavRoute,
     reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
     navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
-    val allPluginIds by reportDataRepo.allPluginIds.collectAsState(null)
     val statsData by reportDataRepo.statsData.collectAsState(null)
     val allModulesOrig by reportDataRepo.allModules.collectAsState(null)
     val moduleToOwnerMapFlowValue by reportDataRepo.moduleToOwnerMap.collectAsState(null)
-
 
     H1 { Text("Dependency Injection") }
 
@@ -88,84 +102,167 @@ fun DependencyInjectionComposable(
         return
     }
 
-    val query = statsNavRoute.moduleQuery
-
-
+    val moduleQuery = diNavRoute.moduleQuery ?: ""
+    val typeQuery = diNavRoute.typeQuery ?: ""
 
     if (allModulesOrig == null) {
+        BootstrapLoadingMessageWithSpinner("Loading Modules")
         return
     }
-    val allModules1 = allModulesOrig!!
 
-    val allModules = if (query != null && query != ":" && query.isNotEmpty()) {
-        allModules1.filter { it.contains(query) }
+    val allModules = allModulesOrig!!
+
+    val modulesMatchingQuery = if (moduleQuery != null && moduleQuery != ":" && moduleQuery.isNotEmpty()) {
+        allModules.filter { it.contains(moduleQuery) }
     } else {
-        allModules1
+        allModules
     }
 
-    BootstrapSearchBox(
-        query = query ?: "",
-        placeholderText = "Module Query...",
-    ) {
-        navRouteRepo.updateNavRoute(statsNavRoute.copy(moduleQuery = it))
+    val ALL_MODULES_DATALIST_ID = "available_modules"
+    Datalist({ id(ALL_MODULES_DATALIST_ID) }) {
+        allModules.map { Option(it) }
     }
 
 
-    val STAT_KEY = "DiProvidesAndInjects"
-
-    val statsColumns = mutableListOf<List<String>>().apply {
-        val diData = statsData?.statInfos?.get(STAT_KEY)
-        add(
-            allModules.map { gradlePath ->
-                val statsDataForModule: Map<StatKey, Stat>? = statsData?.statsByModule?.get(gradlePath)
-                val stat = statsDataForModule?.get(STAT_KEY)
-                when (stat) {
-                    is Stat.ProvidesAndInjectsStat -> {
-                        stat.value.toString().replace(",", "\n")
-                    }
-
-                    else -> ""
-                }
-            }
-        )
-    }
-
-    val headers = mutableListOf("Module")
-        .apply {
-            add(STAT_KEY)
-        }
-    val values: List<List<String>> = allModules.mapIndexed { idx, modulePath ->
-        mutableListOf(
-            allModules[idx]
-        ).apply {
-            statsColumns.forEach {
-                add(it[idx])
+    BootstrapRow {
+        BootstrapColumn(4) {
+            BootstrapSearchBox(
+                query = moduleQuery,
+                placeholderText = "Module Query...",
+            ) {
+                navRouteRepo.updateNavRoute(diNavRoute.copy(moduleQuery = it))
             }
         }
-    }.filter {
-        var hasValue = false
-        it.forEachIndexed { idx, str ->
-            if (idx > 0 && str.isNotEmpty()) {
-                hasValue = true
+        BootstrapColumn(4) {
+            BootstrapSearchBox(
+                query = typeQuery,
+                placeholderText = "Type Query...",
+            ) {
+                navRouteRepo.updateNavRoute(diNavRoute.copy(typeQuery = it))
             }
         }
-        hasValue
     }
+    Br()
+
 
     if (statsData == null) {
         BootstrapLoadingMessageWithSpinner("Loading...")
+        return
+    }
+
+    val metadata by reportDataRepo.reportMetadata.collectAsState(null)
+    val base = metadata?.remoteRepoUrl + "/tree/" + metadata?.branchName
+    val gitRepoHttpsUrlForBranch = if (metadata?.remoteRepoUrl?.contains("square/invert") == true) {
+        // Hack for examples during development
+        "$base/examples"
     } else {
-        if (values.isNotEmpty()) {
-            BootstrapTable(
-                headers = headers,
-                rows = values,
-                types = headers.map { String::class },
-                maxResultsLimitConstant = PagingConstants.MAX_RESULTS
-            ) { cellValues ->
-                navRouteRepo.updateNavRoute(ModuleDetailNavRoute(cellValues[0]))
+        base
+    }
+
+    val gitRepoHttpsUrlForCommit = metadata?.remoteRepoUrl + "/blob/" + metadata?.currentBranchHash
+
+//    https://github.com/square/invert/blob/a5287e9583895e0fb645e9298f67551da8b72e9a/collectors-anvil-dagger/src/main/kotlin/com/squareup/invert/AnvilContributesBinding.kt
+
+    val STAT_KEY = "DiProvidesAndInjects"
+
+    val diRowDataRows = mutableListOf<DiRowData>()
+
+    modulesMatchingQuery.map { moduleGradlePath ->
+        val statsDataForModule: Map<StatKey, Stat>? = statsData?.statsByModule?.get(moduleGradlePath)
+        val stat = statsDataForModule?.get(STAT_KEY)
+        if (stat is Stat.ProvidesAndInjectsStat) {
+            stat.value.forEach { providesAndInjects ->
+                if (providesAndInjects.contributions.isNotEmpty()) {
+                    providesAndInjects.contributions.forEach { contribution ->
+                        diRowDataRows.add(
+                            DiRowData.Provides(
+                                module = moduleGradlePath,
+                                filePath = providesAndInjects.filePath,
+                                lineNumber = providesAndInjects.lineNumber,
+                                type = contribution.boundType,
+                                implementationType = contribution.boundImplementation,
+                                scope = null,
+                                qualifiers = listOf()
+                            )
+                        )
+                        contribution.boundImplementation.contains(typeQuery ?: "")
+                                || contribution.boundType.contains(typeQuery ?: "")
+                    }
+                }
+
+                if (providesAndInjects.consumptions.isNotEmpty()) {
+                    providesAndInjects.consumptions.forEach { consumption ->
+                        diRowDataRows.add(
+                            DiRowData.Injects(
+                                module = moduleGradlePath,
+                                filePath = providesAndInjects.filePath,
+                                lineNumber = providesAndInjects.lineNumber,
+                                type = consumption.type,
+                                qualifiers = consumption.qualifierAnnotations,
+                            )
+                        )
+                        consumption.type.contains(typeQuery)
+                    }
+                }
             }
-        } else {
-            H3 { Text("No Collected Stats of Type(s) ${statsNavRoute.statKeys}") }
         }
     }
+    val columnsHeaders = mutableListOf<String>(
+        "Module",
+        "Type",
+        "Qualifiers",
+        "File",
+    )
+    H4 { Text("Provides") }
+    BootstrapTable(
+        rows = diRowDataRows
+            .filterIsInstance<DiRowData.Provides>()
+            .filter { rowData ->
+                rowData.module.contains(moduleQuery)
+                        && (
+                        rowData.type.contains(typeQuery, true)
+                                || rowData.implementationType.contains(typeQuery, true)
+                        )
+            }
+            .map {
+                listOf(
+                    it.module,
+                    it.type + " -> " + it.implementationType,
+                    it.qualifiers.joinToString(" "),
+                    "${it.filePath}#L${it.lineNumber}",
+                )
+            },
+        types = columnsHeaders.map { String::class },
+        headers = columnsHeaders,
+        maxResultsLimitConstant = MAX_RESULTS,
+        onItemClick = {
+            val filePath = it[3]
+            window.open("${gitRepoHttpsUrlForBranch}/$filePath", ATarget.blank)
+        }
+    )
+    H4 { Text("Injects") }
+    BootstrapTable(
+        rows = diRowDataRows
+            .filterIsInstance<DiRowData.Injects>()
+            .filter { rowData ->
+
+                rowData.module.contains(moduleQuery, true)
+                        && rowData.type.contains(typeQuery, true)
+            }
+            .map {
+                listOf(
+                    it.module,
+                    it.type,
+                    it.qualifiers.joinToString(" "),
+                    "${it.filePath}#L${it.lineNumber}",
+                )
+            },
+        types = columnsHeaders.map { String::class },
+        headers = columnsHeaders,
+        maxResultsLimitConstant = MAX_RESULTS,
+        onItemClick = {
+            val filePath = it[3]
+            window.open("${gitRepoHttpsUrlForBranch}/$filePath", ATarget.blank)
+        }
+    )
 }

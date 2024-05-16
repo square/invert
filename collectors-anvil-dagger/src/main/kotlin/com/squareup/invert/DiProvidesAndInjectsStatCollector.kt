@@ -12,7 +12,7 @@ import java.io.File
  */
 class DiProvidesAndInjectsStatCollector : StatCollector.ProvidesAndInjectsStatCollector {
     override fun collect(
-        rootSrcFolder: File,
+        rootProjectFolder: File,
         projectPath: String,
         kotlinSourceFiles: List<File>
     ): Stat.ProvidesAndInjectsStat? {
@@ -20,7 +20,7 @@ class DiProvidesAndInjectsStatCollector : StatCollector.ProvidesAndInjectsStatCo
         kotlinSourceFiles.forEach { kotlinFile ->
             findAnvil.handleKotlinFile(
                 file = kotlinFile,
-                relativeFilePath = kotlinFile.absolutePath.replace(rootSrcFolder.absolutePath, "").drop(1)
+                relativeFilePath = kotlinFile.absolutePath.replace(rootProjectFolder.absolutePath, "").drop(1)
             )
         }
 

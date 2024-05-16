@@ -61,7 +61,7 @@ class InvertInitScriptPlugin : Plugin<Gradle> {
                     plugins.apply(com.squareup.invert.InvertGradlePlugin::class.java)
                     this.extensions.getByType(com.squareup.invert.InvertExtension::class.java).apply {
                         ownershipCollector(com.squareup.invert.GitHubCodeOwnersInvertOwnershipCollector)
-                        addStatCollector(com.squareup.invert.RealAnvilContributesBindingStatCollector())
+                        addStatCollector(com.squareup.invert.DiProvidesAndInjectsStatCollector())
                         addStatCollector(com.squareup.invert.suppress.SupressionsStatCollector())
                         addStatCollector(com.squareup.invert.LinesOfCodeStatCollector())
                     }
