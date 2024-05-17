@@ -60,6 +60,7 @@ class NavPage(
                 NavPageGroup(
                     "Stats", setOf(
                         AllStatsReportPage.navPage,
+                        SuppressAnnotationGraphReportPage.navPage,
                     ).toNavItems().plus(
                         NavItem(
                             itemTitle = "@Suppress Usages",

@@ -76,6 +76,18 @@ window.render3dGraph = function (domElementId, graphDataJson, width, height) {
         });
     }
 }
+
+// https://www.chartjs.org/docs/latest/getting-started/
+window.renderChartJs = function (domElementId, graphDataJson) {
+    if (window.ForceGraph == undefined) {
+        loadJsFileAsync("https://cdn.jsdelivr.net/npm/chart.js", function (obj) {
+            const chartJsData = JSON.parse(graphDataJson)
+            const ctx = document.getElementById(domElementId);
+            new Chart(ctx, chartJsData);
+        });
+    }
+}
+
 window.markdownToHtml = function (markdownStr) {
     return marked.parse(markdownStr)
 }

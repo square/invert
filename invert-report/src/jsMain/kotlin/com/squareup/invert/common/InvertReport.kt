@@ -91,6 +91,7 @@ class InvertReport(
             PluginsReportPage,
             StatDetailReportPage,
             UnusedModulesReportPage,
+            SuppressAnnotationGraphReportPage,
         )
     }
 }

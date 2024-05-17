@@ -15,3 +15,5 @@ external fun keysForObject(any: Any): Array<String>
  * @param graphDataJson Graph Data serialized to JSON
  */
 external fun render3dGraph(domElementId: String, graphDataJson: String, width: Int, height: Int)
+
+external fun renderChartJs(domElementId: String, graphDataJson: String)
