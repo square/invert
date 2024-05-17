@@ -190,9 +190,7 @@ class FindAnvilContributesBinding {
     @OptIn(InternalStatikApi::class)
     private fun findConstructorInjections(ktFile: KtFile, ktClassOrObject: KtClassOrObject): List<DiInjection> {
         val anvilInjections = mutableListOf<DiInjection>()
-        println("ktClassOrObject ${ktClassOrObject.fqName?.asString()}")
         ktClassOrObject.primaryConstructor?.let { primaryConstructor ->
-            println("primaryConstructor: ${primaryConstructor.text}")
             val hasInject = primaryConstructor.getAnnotationsFromModifierList().any { it.endsWith("Inject") }
             if (hasInject) {
                 val lineAndColumnRange = getLineAndColumnRangeInPsiFile(ktFile, primaryConstructor.textRange)
@@ -202,7 +200,6 @@ class FindAnvilContributesBinding {
                     val qualifierAnnotations = ktParameter.getAnnotationsFromModifierList()
                     ktParameter.getChildOfType<KtTypeReference>().also { ktTypeReference ->
                         val paramFqName = ktTypeReference!!.requireFqName().asString()
-                        println(paramFqName)
                         anvilInjections.add(
                             DiInjection(
                                 type = paramFqName,
