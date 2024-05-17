@@ -126,7 +126,10 @@ class FindAnvilContributesBinding {
                         ?.map { it.requireFqName().asString() }
                     val annotationInfos = ktClassOrObject.extractAnnotationInfos()
                     val contributeBindingAnnotationInfo: AnnotationInfo? = annotationInfos
-                        .firstOrNull { it.type == ANVIL_CONTRIBUTES_BINDING_ANNOTATION_CLASS_NAME }
+                        .firstOrNull {
+                            it.type == ANVIL_CONTRIBUTES_BINDING_ANNOTATION_CLASS_NAME
+                                    || it.type == ANVIL_CONTRIBUTES_MULTIBINDING_ANNOTATION_CLASS_NAME
+                        }
 
                     contributeBindingAnnotationInfo?.let {
                         val scope = contributeBindingAnnotationInfo.args?.firstOrNull { it.name == "scope" }
@@ -156,9 +159,7 @@ class FindAnvilContributesBinding {
                     }
 
                     //Inject Constructor
-
-                    val consumptions = findConstructorInjections(ktClassOrObject)
-
+                    val consumptions = findConstructorInjections(ktFile, ktClassOrObject)
 
                     val lineAndColumnRange = getLineAndColumnRangeInPsiFile(ktFile, ktClassOrObject.textRange)
                     if (bindingsInClassOrObject.isNotEmpty() || consumptions.isNotEmpty()) {
@@ -167,7 +168,8 @@ class FindAnvilContributesBinding {
                                 filePath = relativeFilePath,
                                 contributions = bindingsInClassOrObject,
                                 consumptions = consumptions,
-                                lineNumber = lineAndColumnRange.start.line,
+                                startLine = lineAndColumnRange.start.line,
+                                endLine = lineAndColumnRange.end.line,
                                 classFqName = classOrObjectFqName,
                             )
                         )
@@ -186,13 +188,14 @@ class FindAnvilContributesBinding {
     }
 
     @OptIn(InternalStatikApi::class)
-    private fun findConstructorInjections(ktClassOrObject: KtClassOrObject): List<DiInjection> {
+    private fun findConstructorInjections(ktFile: KtFile, ktClassOrObject: KtClassOrObject): List<DiInjection> {
         val anvilInjections = mutableListOf<DiInjection>()
         println("ktClassOrObject ${ktClassOrObject.fqName?.asString()}")
         ktClassOrObject.primaryConstructor?.let { primaryConstructor ->
             println("primaryConstructor: ${primaryConstructor.text}")
             val hasInject = primaryConstructor.getAnnotationsFromModifierList().any { it.endsWith("Inject") }
             if (hasInject) {
+                val lineAndColumnRange = getLineAndColumnRangeInPsiFile(ktFile, primaryConstructor.textRange)
                 val ktParameterList = primaryConstructor.getChildOfType<KtParameterList>()!!
                 ktParameterList.forEachDescendantOfType<KtParameter> { ktParameter ->
 
@@ -204,6 +207,8 @@ class FindAnvilContributesBinding {
                             DiInjection(
                                 type = paramFqName,
                                 qualifierAnnotations = qualifierAnnotations,
+                                startLine = lineAndColumnRange.start.line,
+                                endLine = lineAndColumnRange.end.line,
                             )
                         )
                     }

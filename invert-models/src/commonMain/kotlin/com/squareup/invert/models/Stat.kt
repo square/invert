@@ -62,7 +62,9 @@ sealed interface Stat {
         @Serializable
         data class DiInjection(
             val type: String,
-            val qualifierAnnotations: List<String>
+            val qualifierAnnotations: List<String>,
+            val startLine: Int,
+            val endLine: Int,
         )
 
         @Serializable
@@ -71,7 +73,8 @@ sealed interface Stat {
             val contributions: List<DiContribution>,
             val consumptions: List<DiInjection>,
             val filePath: String,
-            val lineNumber: Int,
+            val startLine: Int,
+            val endLine: Int,
         )
     }
 }

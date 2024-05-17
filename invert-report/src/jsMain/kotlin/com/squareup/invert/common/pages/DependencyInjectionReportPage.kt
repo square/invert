@@ -69,7 +69,8 @@ sealed interface DiRowData {
     data class Provides(
         val module: String,
         val filePath: String,
-        val lineNumber: Int,
+        val startLine: Int,
+        val endLine: Int,
         val type: String,
         val implementationType: String,
         val scope: String? = null,
@@ -79,7 +80,8 @@ sealed interface DiRowData {
     data class Injects(
         val module: String,
         val filePath: String,
-        val lineNumber: Int,
+        val startLine: Int,
+        val endLine: Int,
         val type: String,
         val qualifiers: List<String>,
     ) : DiRowData
@@ -123,20 +125,11 @@ fun DependencyInjectionComposable(
         allModules.map { Option(it) }
     }
 
-
     BootstrapRow {
-        BootstrapColumn(4) {
-            BootstrapSearchBox(
-                query = moduleQuery,
-                placeholderText = "Module Query...",
-            ) {
-                navRouteRepo.updateNavRoute(diNavRoute.copy(moduleQuery = it))
-            }
-        }
-        BootstrapColumn(4) {
+        BootstrapColumn(12) {
             BootstrapSearchBox(
                 query = typeQuery,
-                placeholderText = "Type Query...",
+                placeholderText = "Class/Interface Type Search...",
             ) {
                 navRouteRepo.updateNavRoute(diNavRoute.copy(typeQuery = it))
             }
@@ -178,7 +171,8 @@ fun DependencyInjectionComposable(
                             DiRowData.Provides(
                                 module = moduleGradlePath,
                                 filePath = providesAndInjects.filePath,
-                                lineNumber = providesAndInjects.lineNumber,
+                                startLine = providesAndInjects.startLine,
+                                endLine = providesAndInjects.endLine,
                                 type = contribution.boundType,
                                 implementationType = contribution.boundImplementation,
                                 scope = null,
@@ -196,7 +190,8 @@ fun DependencyInjectionComposable(
                             DiRowData.Injects(
                                 module = moduleGradlePath,
                                 filePath = providesAndInjects.filePath,
-                                lineNumber = providesAndInjects.lineNumber,
+                                startLine = consumption.startLine,
+                                endLine = consumption.endLine,
                                 type = consumption.type,
                                 qualifiers = consumption.qualifierAnnotations,
                             )
@@ -229,7 +224,7 @@ fun DependencyInjectionComposable(
                     it.module,
                     it.type + " -> " + it.implementationType,
                     it.qualifiers.joinToString(" "),
-                    "${it.filePath}#L${it.lineNumber}",
+                    "${it.filePath}#L${it.startLine}-L${it.endLine}",
                 )
             },
         types = columnsHeaders.map { String::class },
@@ -254,7 +249,7 @@ fun DependencyInjectionComposable(
                     it.module,
                     it.type,
                     it.qualifiers.joinToString(" "),
-                    "${it.filePath}#L${it.lineNumber}",
+                    "${it.filePath}#L${it.startLine}-L${it.endLine}",
                 )
             },
         types = columnsHeaders.map { String::class },

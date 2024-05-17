@@ -195,11 +195,6 @@ val ALL_REPOS = listOf(
         runOnGitHubAction = false,
     ),
     TargetRepo(
-        org = "android",
-        project = "nowinandroid",
-        runOnGitHubAction = false,
-    ),
-    TargetRepo(
         org = "square",
         project = "anvil",
         buildDirPath = "build/root-build",
@@ -238,7 +233,6 @@ val ALL_REPOS = listOf(
             // ignoreBuildJavaVersionCheck=true is needed for https://github.com/gradle/gradle for the Java 11/Java 17 mix
             "$DEFAULT_INIT_SCRIPT_LINE -Dorg.gradle.ignoreBuildJavaVersionCheck=true"
         },
-        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "spring-projects",
@@ -287,6 +281,10 @@ val ALL_REPOS = listOf(
     TargetRepo(
         org = "duckduckgo",
         project = "Android",
+    ),
+    TargetRepo(
+        org = "android",
+        project = "nowinandroid",
     ),
 )
     .filter {

@@ -24,3 +24,8 @@
     padding-top: .75rem;
     padding-bottom: .75rem;
 }
+
+.nav-pills {
+    /*--bs-nav-pills-link-active-bg: #0d6efd;*/
+    --bs-nav-pills-link-active-bg: rgb(13, 110, 253, 0.2) !important;
+}
