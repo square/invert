@@ -50,8 +50,8 @@ class SupressionsStatCollector : StatCollector.GenericStatCollector {
     }
 
     override val statInfo: StatInfo = StatInfo(
-        name = "@Suppress Annotation",
-        description = "@Suppress Annotation Used",
+        name = "SuppressAnnotationUsages",
+        description = "@Suppress Annotation Usages",
         statType = CollectedStatType.STRING
     )
 

@@ -8,7 +8,7 @@ import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import com.squareup.invert.common.pages.ModuleConsumptionNavRoute.Companion.parser
+import com.squareup.invert.common.pages.InvertedDependenciesNavRoute.Companion.parser
 import com.squareup.invert.common.utils.DependencyComputations
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.GradlePath
@@ -19,11 +19,11 @@ import ui.*
 import kotlin.reflect.KClass
 
 
-data class ModuleConsumptionNavRoute(
+data class InvertedDependenciesNavRoute(
     val pluginGroupByFilter: List<GradlePluginId> = listOf(),
     val configurations: List<ConfigurationName> = listOf(),
     val moduleQuery: String? = null,
-) : BaseNavRoute(ModuleConsumptionReportPage.navPage) {
+) : BaseNavRoute(InvertedDependenciesReportPage.navPage) {
     override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
         .apply {
             if (pluginGroupByFilter.isNotEmpty()) {
@@ -43,7 +43,7 @@ data class ModuleConsumptionNavRoute(
         private const val MODULE_QUERY_PARAM_NAME = "module"
         private const val PLUGIN_GROUP_BY_FILTER_QUERY_PARAM_NAME = "plugin_id"
         private const val CONFIGURATIONS_QUERY_PARAM_NAME = "configurations"
-        fun parser(params: Map<String, String?>): ModuleConsumptionNavRoute = ModuleConsumptionNavRoute(
+        fun parser(params: Map<String, String?>): InvertedDependenciesNavRoute = InvertedDependenciesNavRoute(
             pluginGroupByFilter = params[PLUGIN_GROUP_BY_FILTER_QUERY_PARAM_NAME]?.split(",")
                 ?.filter { it.isNotBlank() } ?: listOf(),
             configurations = params[CONFIGURATIONS_QUERY_PARAM_NAME]?.split(",")
@@ -55,25 +55,25 @@ data class ModuleConsumptionNavRoute(
 }
 
 
-object ModuleConsumptionReportPage : InvertReportPage<ModuleConsumptionNavRoute> {
+object InvertedDependenciesReportPage : InvertReportPage<InvertedDependenciesNavRoute> {
     override val navPage: NavPage = NavPage(
-        pageId = "consumption",
-        displayName = "Module Consumption",
+        pageId = "inverted",
+        displayName = "Inverted Dependencies",
         navIconSlug = "bar-chart",
         navRouteParser = { parser(it) }
     )
 
-    override val navRouteKClass: KClass<ModuleConsumptionNavRoute> = ModuleConsumptionNavRoute::class
+    override val navRouteKClass: KClass<InvertedDependenciesNavRoute> = InvertedDependenciesNavRoute::class
 
-    override val composableContent: @Composable (ModuleConsumptionNavRoute) -> Unit = { navRoute ->
-        ModuleConsumptionComposable(navRoute)
+    override val composableContent: @Composable (InvertedDependenciesNavRoute) -> Unit = { navRoute ->
+        InverteDependenciesComposable(navRoute)
     }
 }
 
 
 @Composable
-fun ModuleConsumptionComposable(
-    navRoute: ModuleConsumptionNavRoute,
+fun InverteDependenciesComposable(
+    navRoute: InvertedDependenciesNavRoute,
     reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
     navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
@@ -142,8 +142,8 @@ fun SettingsComposable(reportDataRepo: ReportDataRepo, navRouteRepo: NavRouteRep
     if (navRoute == null) {
         return
     } else {
-        val moduleConsumptionNavRoute = navRoute!! as ModuleConsumptionNavRoute
-        val groupByFilterItems = moduleConsumptionNavRoute.pluginGroupByFilter
+        val invertedDependenciesNavRoute = navRoute!! as InvertedDependenciesNavRoute
+        val groupByFilterItems = invertedDependenciesNavRoute.pluginGroupByFilter
         H1 {
             Text("Module Consumption Settings")
         }
@@ -154,22 +154,22 @@ fun SettingsComposable(reportDataRepo: ReportDataRepo, navRouteRepo: NavRouteRep
                 val allConfigurationNames by reportDataRepo.allAnalyzedConfigurationNames.collectAsState(listOf())
                 BootstrapButton("Select All") {
                     navRouteRepo.updateNavRoute(
-                        moduleConsumptionNavRoute.copy(configurations = allConfigurationNames?.toList() ?: listOf())
+                        invertedDependenciesNavRoute.copy(configurations = allConfigurationNames?.toList() ?: listOf())
                     )
                 }
                 BootstrapButton("Unselect All") {
                     navRouteRepo.updateNavRoute(
-                        moduleConsumptionNavRoute.copy(configurations = listOf())
+                        invertedDependenciesNavRoute.copy(configurations = listOf())
                     )
                 }
                 allConfigurationNames?.sorted()?.forEach { configurationName ->
                     BootstrapSettingsCheckbox(
                         labelText = configurationName,
-                        initialIsChecked = moduleConsumptionNavRoute.configurations.contains(configurationName)
+                        initialIsChecked = invertedDependenciesNavRoute.configurations.contains(configurationName)
                     ) { shouldAdd ->
                         navRouteRepo.updateNavRoute(
-                            moduleConsumptionNavRoute.copy(
-                                configurations = moduleConsumptionNavRoute.configurations
+                            invertedDependenciesNavRoute.copy(
+                                configurations = invertedDependenciesNavRoute.configurations
                                     .toMutableList()
                                     .apply {
                                         remove(configurationName)
@@ -187,14 +187,14 @@ fun SettingsComposable(reportDataRepo: ReportDataRepo, navRouteRepo: NavRouteRep
                 val allPluginIds by reportDataRepo.allPluginIds.collectAsState(listOf())
                 BootstrapButton("Select All") {
                     navRouteRepo.updateNavRoute(
-                        moduleConsumptionNavRoute.copy(
+                        invertedDependenciesNavRoute.copy(
                             pluginGroupByFilter = allPluginIds ?: listOf()
                         )
                     )
                 }
                 BootstrapButton("Unselect All") {
                     navRouteRepo.updateNavRoute(
-                        moduleConsumptionNavRoute.copy(
+                        invertedDependenciesNavRoute.copy(
                             pluginGroupByFilter = listOf()
                         )
                     )
@@ -205,8 +205,8 @@ fun SettingsComposable(reportDataRepo: ReportDataRepo, navRouteRepo: NavRouteRep
                         initialIsChecked = groupByFilterItems.contains(gradlePluginId)
                     ) { shouldAdd ->
                         navRouteRepo.updateNavRoute(
-                            moduleConsumptionNavRoute.copy(
-                                pluginGroupByFilter = moduleConsumptionNavRoute.pluginGroupByFilter.toMutableList()
+                            invertedDependenciesNavRoute.copy(
+                                pluginGroupByFilter = invertedDependenciesNavRoute.pluginGroupByFilter.toMutableList()
                                     .apply {
                                         remove(gradlePluginId)
                                         if (shouldAdd) {
@@ -226,7 +226,7 @@ fun SettingsComposable(reportDataRepo: ReportDataRepo, navRouteRepo: NavRouteRep
 @Composable
 fun RightColumn(
     reportDataRepo: ReportDataRepo,
-    moduleConsumptionNavRoute: ModuleConsumptionNavRoute
+    invertedDependenciesNavRoute: InvertedDependenciesNavRoute
 ) {
     val pluginIdToAllAppsMap: Map<GradlePluginId, List<GradlePath>>? by reportDataRepo.pluginIdToAllModulesMap.collectAsState(
         null
@@ -236,8 +236,8 @@ fun RightColumn(
     val collectedPlugins by reportDataRepo.collectedPluginInfoReport.collectAsState(null)
     val pluginIdToGradlePathsMatchingQuery = DependencyComputations.computePluginIdToGradlePathsMatchingQuery(
         matchingQueryModulesList = allModulesMatchingQuery?.filter { it.startsWith(":") } ?: listOf(),
-        pluginGroupByFilter = moduleConsumptionNavRoute.pluginGroupByFilter,
-        configurations = moduleConsumptionNavRoute.configurations,
+        pluginGroupByFilter = invertedDependenciesNavRoute.pluginGroupByFilter,
+        configurations = invertedDependenciesNavRoute.configurations,
         invertedDeps = invertedDeps,
         collectedPlugins = collectedPlugins,
     )

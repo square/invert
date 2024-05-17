@@ -84,7 +84,7 @@ class InvertReport(
             KotlinCompilerPluginsReportPage,
             LeafModulesReportPage,
             ModuleDetailReportPage,
-            ModuleConsumptionReportPage,
+            InvertedDependenciesReportPage,
             OwnerDetailReportPage,
             OwnersReportPage,
             PluginDetailReportPage,

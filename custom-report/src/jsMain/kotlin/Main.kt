@@ -1,6 +1,6 @@
 import com.squareup.invert.common.InvertReport
 import com.squareup.invert.common.pages.DependencyDiffNavRoute
-import com.squareup.invert.common.pages.ModuleConsumptionNavRoute
+import com.squareup.invert.common.pages.InvertedDependenciesNavRoute
 import navigation.CustomNavItem
 
 fun main() {
@@ -8,7 +8,7 @@ fun main() {
         CustomNavItem(
             text = "What Demo Apps?",
             iconSlug = "question-circle",
-            navRoute = ModuleConsumptionNavRoute(
+            navRoute = InvertedDependenciesNavRoute(
                 pluginGroupByFilter = listOf(
                     "com.squareup.gradle.DemoAppPlugin"
                 ),

@@ -45,9 +45,8 @@ fun LeftNavigationComposable(initialRoute: NavRoute, navRouteRepo: NavRouteRepo,
                         id(collapseId)
                     }) {
                         Ul({ classes("btn-toggle-nav list-unstyled fw-normal pb-1 small".split(" ")) }) {
-                            navPageGroup.navItems.forEach { rootNavItem ->
-                                val newNavRoute = rootNavItem.navRouteParser(mapOf())
-                                val activeTab = currentNavRoute::class == newNavRoute::class
+                            navPageGroup.navItems.forEach { rootNavItem: NavPage.NavItem ->
+                                val activeTab = rootNavItem.matchesCurrentNavRoute(currentNavRoute)
                                 Li {
                                     A(
                                         href = "#",
@@ -61,14 +60,14 @@ fun LeftNavigationComposable(initialRoute: NavRoute, navRouteRepo: NavRouteRepo,
                                                             it.add("active")
                                                         }
                                                     })
-                                            onClick { navRouteRepo.updateNavRoute(newNavRoute) }
+                                            onClick { navRouteRepo.updateNavRoute(rootNavItem.destinationNavRoute) }
                                         }) {
 
                                         BootstrapIcon(rootNavItem.navIconSlug) {}
                                         Span({
                                             classes("ps-2")
                                         }) {
-                                            Text(rootNavItem.displayName)
+                                            Text(rootNavItem.itemTitle)
                                         }
                                     }
                                 }
@@ -80,37 +79,37 @@ fun LeftNavigationComposable(initialRoute: NavRoute, navRouteRepo: NavRouteRepo,
     }
     return
 }
-
-@Composable
-fun OldNav(currentNavRoute: NavRoute, navRouteRepo: NavRouteRepo, customReports: List<CustomNavItem>) {
-    Hr { }
-
-    /** Entry Point */
-    NavPage
-        .ROOT_NAV_ITEMS.map { it.navItems }.flatten()
-        .forEach { rootNavItem: NavPage ->
-            val displayName = rootNavItem.displayName
-            val navIconSlug = rootNavItem.navIconSlug
-            val newNavRoute = rootNavItem.navRouteParser(mapOf())
-            BootstrapNavItem(
-                text = displayName,
-                iconSlug = navIconSlug,
-                activeTab = currentNavRoute::class == newNavRoute::class,
-                onClick = {
-                    navRouteRepo.updateNavRoute(newNavRoute)
-                }
-            )
-        }
-
-    if (customReports.isNotEmpty()) {
-        BootstrapNavSectionHeader("Custom Reports", "fire")
-
-        customReports.forEach {
-            BootstrapNavItem(
-                text = it.text,
-                iconSlug = it.iconSlug,
-                onClick = { navRouteRepo.updateNavRoute(it.navRoute) }
-            )
-        }
-    }
-}
+//
+//@Composable
+//fun OldNav(currentNavRoute: NavRoute, navRouteRepo: NavRouteRepo, customReports: List<CustomNavItem>) {
+//    Hr { }
+//
+//    /** Entry Point */
+//    NavPage
+//        .ROOT_NAV_ITEMS.map { it.navItems }.flatten()
+//        .forEach { rootNavItem: NavPage.NavItem ->
+//            val displayName = rootNavItem.navPage.displayName
+//            val navIconSlug = rootNavItem.navPage.navIconSlug
+//            val newNavRoute = rootNavItem.destinationNavRoute
+//            BootstrapNavItem(
+//                text = displayName,
+//                iconSlug = navIconSlug,
+//                activeTab = currentNavRoute::class == newNavRoute::class,
+//                onClick = {
+//                    navRouteRepo.updateNavRoute(newNavRoute)
+//                }
+//            )
+//        }
+//
+//    if (customReports.isNotEmpty()) {
+//        BootstrapNavSectionHeader("Custom Reports", "fire")
+//
+//        customReports.forEach {
+//            BootstrapNavItem(
+//                text = it.text,
+//                iconSlug = it.iconSlug,
+//                onClick = { navRouteRepo.updateNavRoute(it.navRoute) }
+//            )
+//        }
+//    }
+//}
