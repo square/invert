@@ -286,9 +286,18 @@ val ALL_REPOS = listOf(
         org = "android",
         project = "nowinandroid",
     ),
+    TargetRepo(
+        org = "handstandsam",
+        project = "ShoppingApp",
+    ),
 )
     .filter {
-        System.getenv().containsKey("GITHUB_ACTIONS") && it.runOnGitHubAction
+        val isCi = System.getenv().containsKey("GITHUB_ACTIONS")
+        if (isCi) {
+            it.runOnGitHubAction
+        } else {
+            true
+        }
     }
 
 val CLONES_DIR = File("build/clones").apply {
