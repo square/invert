@@ -10,7 +10,7 @@ import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.GradlePath
 import com.squareup.invert.models.GradlePluginId
 import com.squareup.invert.models.Stat
-import com.squareup.invert.models.StatInfo
+import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.js.ConfigurationsJsReportModel
 import com.squareup.invert.models.js.DependenciesJsReportModel
@@ -44,13 +44,13 @@ object InvertJsReportUtils {
    * Takes all [CollectedStatsForProject] collected by Invert, and creates the JS Report Model.
    */
   fun buildModuleToStatsMap(collectedStats: List<CollectedStatsForProject>): StatsJsReportModel {
-    val statInfos: Map<StatKey, StatInfo> = mutableSetOf<StatInfo>()
+    val statInfos: Map<StatKey, StatMetadata> = mutableSetOf<StatMetadata>()
       .also { statInfos ->
         collectedStats.forEach { collectedStatsForProject ->
           statInfos.addAll(collectedStatsForProject.statInfos.values)
         }
       }
-      .associateBy { it.name }
+      .associateBy { it.key }
 
     val statData = mutableMapOf<GradlePath, Map<StatKey, Stat>>()
     collectedStats.forEach { collectedStatForProject: CollectedStatsForProject ->

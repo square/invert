@@ -12,6 +12,8 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.SuppressAnnotationGraphNavRoute.Companion.parser
 import com.squareup.invert.models.InvertSerialization
+import com.squareup.invert.models.Stat
+import com.squareup.invert.models.StatKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -106,6 +108,7 @@ data class ChartJsParam(
     val options: ChartJsOptions,
 )
 
+
 @Composable
 fun SuppressAnnotationGraphComposable(
     dependencyGraphNavRoute: SuppressAnnotationGraphNavRoute,
@@ -114,6 +117,10 @@ fun SuppressAnnotationGraphComposable(
 ) {
     val rootModulePath = dependencyGraphNavRoute.module ?: ":api:sales-report:impl"
     val allModules by reportDataRepo.allModules.collectAsState(null)
+    val statsData by reportDataRepo.statsData.collectAsState(null)
+
+
+    val statsByModule = statsData?.statsByModule
 
     if (allModules == null) {
         BootstrapLoadingMessageWithSpinner()
@@ -121,14 +128,45 @@ fun SuppressAnnotationGraphComposable(
     }
 
 
+//    val labels = listOf("Red", "Blue", "Yellow", "Green")
+    val labels = mutableListOf<String>()
+    val chartData = statsByModule?.keys?.map { modulePath ->
+        labels.add(modulePath)
+        var count = 0
+        val onlySuppressStatsForModule: List<Stat.NumericStat>? =
+            statsByModule[modulePath]?.filter { (statKey, stat) ->
+                ((stat is Stat.NumericStat) && statKey.startsWith("Suppress"))
+            }?.map { it.value as Stat.NumericStat }
+
+        println("onlySuppressStatsForModule")
+        println(onlySuppressStatsForModule)
+
+        onlySuppressStatsForModule?.forEach {
+            count += it.value
+        }
+
+//        count += onlySuppressStatsForModule
+        statsByModule[modulePath]?.forEach { entry ->
+            val statKey = entry.key
+            val stat = entry.value
+            if ((stat is Stat.NumericStat) && statKey.startsWith("Suppress")) {
+                count += stat.value
+            }
+        }
+        count
+    } ?: emptyList()
+
+    println(labels)
+    println(chartData)
+
     val pieChartData = ChartJsParam(
         type = "doughnut",
         data = ChartJsData(
-            labels = listOf("Red", "Blue", "Yellow", "Green"),
+            labels = labels.subList(0, minOf(labels.size, 5)),
             datasets = listOf(
                 ChartJsDataset(
-                    label = "Number of Votes",
-                    data = listOf(12, 19, 3, 5),
+                    label = "Number of Suppressions",
+                    data = chartData.subList(0, minOf(labels.size, 5)),
                     borderWidth = 1
                 )
             ),

@@ -163,7 +163,7 @@ fun DependencyInjectionComposable(
     modulesMatchingQuery.map { moduleGradlePath ->
         val statsDataForModule: Map<StatKey, Stat>? = statsData?.statsByModule?.get(moduleGradlePath)
         val stat = statsDataForModule?.get(STAT_KEY)
-        if (stat is Stat.ProvidesAndInjectsStat) {
+        if (stat is Stat.DiProvidesAndInjectsStat) {
             stat.value.forEach { providesAndInjects ->
                 if (providesAndInjects.contributions.isNotEmpty()) {
                     providesAndInjects.contributions.forEach { contribution ->

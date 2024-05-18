@@ -1,7 +1,7 @@
 package com.squareup.invert
 
 import com.rickbusarow.statik.InternalStatikApi
-import com.squareup.invert.models.Stat.ProvidesAndInjectsStat.*
+import com.squareup.invert.models.Stat.DiProvidesAndInjectsStat.*
 import com.squareup.psi.classesAndInnerClasses
 import com.squareup.psi.requireFqName
 import com.squareup.psi.toKtFile

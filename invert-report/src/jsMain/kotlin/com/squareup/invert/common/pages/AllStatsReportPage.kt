@@ -83,10 +83,12 @@ fun AllStatsComposable(
 
     val statInfos = statsData.statInfos.values
 
-    val rows = statInfos.map { statInfo -> listOf(statInfo.name, statInfo.statType.name, statInfo.description) }
+    val rows = statInfos
+        .filter { listOfNotNull(CollectedStatType.NUMERIC, CollectedStatType.BOOLEAN, CollectedStatType.STRING).contains(it.statType) }
+        .map { statInfo -> listOf(statInfo.description, statInfo.statType.name, statInfo.key) }
 
     BootstrapTable(
-        headers = listOf("Name", "Type", "Description"),
+        headers = listOf("Description", "Type", "Key"),
         rows = rows,
         types = statInfos.map { String::class },
         maxResultsLimitConstant = MAX_RESULTS
@@ -94,7 +96,7 @@ fun AllStatsComposable(
         navRouteRepo.updateNavRoute(
             StatDetailNavRoute(
                 pluginIds = listOf(),
-                statKeys = listOf(cellValues[0])
+                statKeys = listOf(cellValues[2])
             )
         )
     }
@@ -105,9 +107,10 @@ fun AllStatsComposable(
             navRouteRepo.updateNavRoute(
                 StatDetailNavRoute(
                     pluginIds = listOf(),
-                    statKeys = statInfos.map { it.name }
+                    statKeys = statInfos.map { it.key }
                 )
             )
-        })
+        }
+    )
 
 }

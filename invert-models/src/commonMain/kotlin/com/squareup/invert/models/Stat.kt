@@ -10,37 +10,32 @@ import kotlinx.serialization.Serializable
  */
 sealed interface Stat {
 
+
     @Serializable
-    @SerialName("class_definitions_stat")
-    data class ClassDefinitionsStat(
-        val definitions: List<ClassDefinition>
-    ) : Stat {
-        @Serializable
-        data class ClassDefinition(
-            val name: String,
-            val fqName: String,
-            val file: String,
-            val supertypes: List<String>,
-        )
-    }
+    @SerialName("numeric_stat")
+    data class NumericStat(
+        val value: Int,
+        val details: String? = null,
+    ) : Stat
 
     @Serializable
     @SerialName("string_stat")
     data class StringStat(
-        val stat: String,
+        val value: String,
+        val details: String? = null,
     ) : Stat
 
     @Serializable
-    @SerialName("has_import_stat")
-    data class HasImportStat(
+    @SerialName("boolean_stat")
+    data class BooleanStat(
         val value: Boolean,
         val details: String? = null,
     ) : Stat
 
 
     @Serializable
-    @SerialName("provides_and_injects")
-    data class ProvidesAndInjectsStat(
+    @SerialName("di_provides_and_injects")
+    data class DiProvidesAndInjectsStat(
         val value: List<ProvidesAndInjects>,
         val details: String? = null,
     ) : Stat {

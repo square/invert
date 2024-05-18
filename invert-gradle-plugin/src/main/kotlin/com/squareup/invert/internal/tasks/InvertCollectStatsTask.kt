@@ -2,25 +2,20 @@ package com.squareup.invert.internal.tasks
 
 import com.squareup.invert.InvertExtension
 import com.squareup.invert.StatCollector
-import com.squareup.invert.StatCollector.*
 import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.InvertFileUtils.addSlashAnd
 import com.squareup.invert.internal.models.CollectedStatsForProject
 import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
 import com.squareup.invert.models.Stat
-import com.squareup.invert.models.StatInfo
 import com.squareup.invert.models.StatKey
+import com.squareup.invert.models.StatMetadata
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 import java.io.File
 
 /**
@@ -60,60 +55,87 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
                 .filter { it.extension == "kt" }
                 .toList()
 
-            val statInfoMap = mutableMapOf<StatKey, StatInfo>()
+            val statMetadataMap = mutableMapOf<StatKey, StatMetadata>()
 
             val collectedStats: Map<StatKey, Stat> =
                 mutableMapOf<StatKey, Stat>().also { collectedStats ->
-                    val hasImportStatCollectors = this.statCollectors
-                        ?.filterIsInstance<HasImportStatCollector>() ?: listOf()
-                    hasImportStatCollectors.forEach { statCollector ->
-                        val statKey = statCollector.statInfo.name
-                        statInfoMap[statKey] = statCollector.statInfo
-                        statCollector.collect(
-                            kotlinSourceFiles
-                        )?.let {
-                            collectedStats[statKey] = it
-                        }
-                    }
-                    val diStatCollectors = this.statCollectors
-                        ?.filterIsInstance<ProvidesAndInjectsStatCollector>() ?: listOf()
-                    diStatCollectors.forEach { statCollector ->
-                        val statKey = statCollector.statInfo.name
-                        statInfoMap[statKey] = statCollector.statInfo
+                    this.statCollectors?.forEach { statCollector ->
                         statCollector.collect(
                             rootProjectFolder = File(rootProjectPath.get()),
                             projectPath = projectPath,
                             kotlinSourceFiles = kotlinSourceFiles
-                        )?.let {
-                            collectedStats[statKey] = it
+                        )?.forEach { collectedStat ->
+                            val statKey = collectedStat.metadata.key
+                            collectedStat.stat?.let { stat ->
+                                statMetadataMap[statKey] = collectedStat.metadata
+                                collectedStats[statKey] = stat
+                            }
                         }
                     }
-                    val genericStatCollectors = this.statCollectors
-                        ?.filterIsInstance<GenericStatCollector>() ?: listOf()
-                    genericStatCollectors.forEach { statCollector ->
-                        val statKey = statCollector.statInfo.name
-                        statInfoMap[statKey] = statCollector.statInfo
-                        statCollector.collect(
-                            srcFolder,
-                            projectPath,
-                            kotlinSourceFiles
-                        )?.let {
-                            collectedStats[statKey] = it
-                        }
-                    }
-                    val classDefinitionCollectors = this.statCollectors
-                        ?.filterIsInstance<DefinitionsCollector>() ?: listOf()
-                    classDefinitionCollectors.forEach { statCollector ->
-                        val statKey = statCollector.statInfo.name
-                        statInfoMap[statKey] = statCollector.statInfo
-                        statCollector.collect(
-                            srcFolder,
-                            projectPath,
-                            kotlinSourceFiles
-                        )?.let {
-                            collectedStats[statKey] = it
-                        }
-                    }
+
+//                    val hasImportStatCollectors = this.statCollectors
+//                        ?.filterIsInstance<BooleanStatCollector>() ?: listOf()
+//                    hasImportStatCollectors.forEach { statCollector ->
+//                        val statKey = statCollector.statMetadata.key
+//                        statMetadataMap[statKey] = statCollector.statMetadata
+//                        statCollector.collect(
+//                            kotlinSourceFiles
+//                        )?.let {
+//                            collectedStats[statKey] = it
+//                        }
+//                    }
+//
+//
+//                    val hasImportStatCollectors = this.statCollectors
+//                        ?.filterIsInstance<BooleanStatCollector>() ?: listOf()
+//                    hasImportStatCollectors.forEach { statCollector ->
+//                        val statKey = statCollector.statMetadata.key
+//                        statMetadataMap[statKey] = statCollector.statMetadata
+//                        statCollector.collect(
+//                            kotlinSourceFiles
+//                        )?.let {
+//                            collectedStats[statKey] = it
+//                        }
+//                    }
+//                    val diStatCollectors = this.statCollectors
+//                        ?.filterIsInstance<ProvidesAndInjectsStatCollector>() ?: listOf()
+//                    diStatCollectors.forEach { statCollector ->
+//                        val statKey = statCollector.statMetadata.key
+//                        statMetadataMap[statKey] = statCollector.statMetadata
+//                        statCollector.collect(
+//                            rootProjectFolder = File(rootProjectPath.get()),
+//                            projectPath = projectPath,
+//                            kotlinSourceFiles = kotlinSourceFiles
+//                        )?.let {
+//                            collectedStats[statKey] = it
+//                        }
+//                    }
+//                    val genericStatCollectors = this.statCollectors
+//                        ?.filterIsInstance<GenericStatCollector>() ?: listOf()
+//                    genericStatCollectors.forEach { statCollector ->
+//                        val statKey = statCollector.statMetadata.key
+//                        statMetadataMap[statKey] = statCollector.statMetadata
+//                        statCollector.collect(
+//                            srcFolder,
+//                            projectPath,
+//                            kotlinSourceFiles
+//                        )?.let {
+//                            collectedStats[statKey] = it
+//                        }
+//                    }
+//                    val classDefinitionCollectors = this.statCollectors
+//                        ?.filterIsInstance<DefinitionsCollector>() ?: listOf()
+//                    classDefinitionCollectors.forEach { statCollector ->
+//                        val statKey = statCollector.statInfo.name
+//                        statMetadataMap[statKey] = statCollector.statInfo
+//                        statCollector.collect(
+//                            srcFolder,
+//                            projectPath,
+//                            kotlinSourceFiles
+//                        )?.let {
+//                            collectedStats[statKey] = it
+//                        }
+//                    }
                 }
 
             InvertJsonReportWriter.writeJsonFile(
@@ -123,7 +145,7 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
                 CollectedStatsForProject.serializer(),
                 CollectedStatsForProject(
                     path = projectPath,
-                    statInfos = statInfoMap,
+                    statInfos = statMetadataMap,
                     stats = collectedStats,
                 )
             )

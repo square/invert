@@ -2,7 +2,7 @@ package com.squareup.invert.models.js
 
 import com.squareup.invert.models.GradlePath
 import com.squareup.invert.models.Stat
-import com.squareup.invert.models.StatInfo
+import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.StatKey
 import kotlinx.serialization.Serializable
 
@@ -11,6 +11,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class StatsJsReportModel(
-  val statInfos: Map<StatKey, StatInfo>,
-  val statsByModule: Map<GradlePath, Map<StatKey, Stat>>,
+    val statInfos: Map<StatKey, StatMetadata>,
+    val statsByModule: Map<GradlePath, Map<StatKey, Stat>>,
 )

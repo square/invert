@@ -28,4 +28,5 @@ class RealAnalytics @Inject constructor(
     }
 }
 
+@Suppress("SomeRule")
 data class SomeDataClass(val str: String)

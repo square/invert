@@ -12,10 +12,7 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.StatDetailNavRoute.Companion.parser
-import com.squareup.invert.models.GradlePluginId
-import com.squareup.invert.models.Stat
-import com.squareup.invert.models.StatInfo
-import com.squareup.invert.models.StatKey
+import com.squareup.invert.models.*
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.Text
@@ -136,44 +133,33 @@ fun StatDetailComposable(
         val statsColumns = mutableListOf<List<String>>().apply {
             statKeys.forEach { statKey ->
                 val statInfo = statsData?.statInfos?.get(statKey)
-                statInfo?.let { statInfo: StatInfo ->
-                    add(
-                        allModules.map { gradlePath ->
-                            val statsDataForModule: Map<StatKey, Stat>? = statsData?.statsByModule?.get(gradlePath)
-                            val stat = statsDataForModule?.get(statKey)
-                            when (stat) {
-                                is Stat.ClassDefinitionsStat -> {
-                                    buildString {
-                                        val definitions = stat.definitions
-                                        if (definitions.isNotEmpty()) {
-                                            appendLine(definitions.size.toString() + " Type Definitions")
-                                        }
-
-                                        stat.definitions
-                                            .map { it.fqName }
-                                            .forEach {
-                                                appendLine(it)
-                                            }
+                statInfo?.let { statMetadata: StatMetadata ->
+                    if (listOf(CollectedStatType.STRING, CollectedStatType.BOOLEAN, CollectedStatType.NUMERIC).contains(
+                            statMetadata.statType
+                        )
+                    ) {
+                        add(
+                            allModules.map { gradlePath ->
+                                val statsDataForModule: Map<StatKey, Stat>? = statsData?.statsByModule?.get(gradlePath)
+                                val stat = statsDataForModule?.get(statKey)
+                                when (stat) {
+                                    is Stat.BooleanStat -> {
+                                        stat.value.toString()
                                     }
 
-                                }
+                                    is Stat.StringStat -> {
+                                        stat.value
+                                    }
 
-                                is Stat.HasImportStat -> {
-                                    stat.value.toString()
-                                }
+                                    is Stat.NumericStat -> {
+                                        stat.value.toString()
+                                    }
 
-                                is Stat.StringStat -> {
-                                    stat.stat
+                                    else -> ""
                                 }
-
-                                is Stat.ProvidesAndInjectsStat -> {
-                                    stat.value.toString().replace(",", "\n")
-                                }
-
-                                else -> ""
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -181,7 +167,13 @@ fun StatDetailComposable(
         val headers = mutableListOf("Module")
             .apply {
                 statKeys.forEach {
-                    add(it)
+                    val thisStatType = statsData?.statInfos?.get(it)
+                    if (listOf(CollectedStatType.STRING, CollectedStatType.BOOLEAN, CollectedStatType.NUMERIC).contains(
+                            thisStatType?.statType
+                        )
+                    ) {
+                        add(statsData?.statInfos?.get(it)?.description ?: it)
+                    }
                 }
             }
         val values: List<List<String>> = allModules.mapIndexed { idx, modulePath ->

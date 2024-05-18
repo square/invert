@@ -14,13 +14,8 @@ object InvertSerialization {
     serializersModule = SerializersModule {
       polymorphic(
         baseClass = Stat::class,
-        actualClass = Stat.HasImportStat::class,
-        actualSerializer = Stat.HasImportStat.serializer()
-      )
-      polymorphic(
-        baseClass = Stat::class,
-        actualClass = Stat.ClassDefinitionsStat::class,
-        actualSerializer = Stat.ClassDefinitionsStat.serializer()
+        actualClass = Stat.BooleanStat::class,
+        actualSerializer = Stat.BooleanStat.serializer()
       )
       polymorphic(
         baseClass = Stat::class,
@@ -29,8 +24,13 @@ object InvertSerialization {
       )
       polymorphic(
         baseClass = Stat::class,
-        actualClass = Stat.ProvidesAndInjectsStat::class,
-        actualSerializer = Stat.ProvidesAndInjectsStat.serializer()
+        actualClass = Stat.NumericStat::class,
+        actualSerializer = Stat.NumericStat.serializer()
+      )
+      polymorphic(
+        baseClass = Stat::class,
+        actualClass = Stat.DiProvidesAndInjectsStat::class,
+        actualSerializer = Stat.DiProvidesAndInjectsStat.serializer()
       )
     }
   }

@@ -1,9 +1,10 @@
 package com.squareup.invert.suppress
 
+import com.squareup.invert.CollectedStat
 import com.squareup.invert.StatCollector
 import com.squareup.invert.models.CollectedStatType
-import com.squareup.invert.models.Stat.StringStat
-import com.squareup.invert.models.StatInfo
+import com.squareup.invert.models.Stat
+import com.squareup.invert.models.StatMetadata
 import com.squareup.psi.toKtFile
 import org.jetbrains.kotlin.com.intellij.psi.util.PsiTreeUtil
 import org.jetbrains.kotlin.psi.KtAnnotationEntry
@@ -14,13 +15,17 @@ import java.io.File
  * of the Anvil ContributesBinding annotation, and puts it into a Stat that can be used collected
  * by the [InvertGradlePlugin]
  */
-class SupressionsStatCollector : StatCollector.GenericStatCollector {
-    override fun collect(srcFolder: File, projectPath: String, kotlinSourceFiles: List<File>): StringStat? {
+class SupressionsStatCollector : StatCollector {
+    override fun collect(
+        rootProjectFolder: File,
+        projectPath: String,
+        kotlinSourceFiles: List<File>
+    ): List<CollectedStat>? {
         val allSuppressions = mutableListOf<Suppression>()
         kotlinSourceFiles.forEach { file ->
             if (file.exists()) {
                 val ktFile = file.toKtFile()
-                val relativePath = file.absolutePath.replace(srcFolder.absolutePath, "")
+                val relativePath = file.absolutePath.replace(rootProjectFolder.absolutePath, "")
 
                 val suppressionsVisitor = SuppressionsVisitor()
                 PsiTreeUtil.findChildrenOfType(ktFile, KtAnnotationEntry::class.java).forEach {
@@ -30,30 +35,45 @@ class SupressionsStatCollector : StatCollector.GenericStatCollector {
             }
         }
 
-        return if (allSuppressions.isNotEmpty()) {
-            StringStat(
-                buildString {
-                    val suppressionsByType = allSuppressions
-                        .groupBy { it.type }
-                    suppressionsByType.keys.sorted().forEach { type ->
-                        appendLine("@Suppress(\"$type\")")
-                        val bindings = suppressionsByType[type]
-                        bindings?.map { "${it.filePath}:${it.startLine}:${it.startColumn}" }?.sorted()
-                            ?.forEach { appendLine("* $it") }
-                        appendLine()
+        val collectedStats = mutableListOf<CollectedStat>()
+
+        if (allSuppressions.isNotEmpty()) {
+            val suppressionsByTypeMap = allSuppressions
+                .groupBy { it.type }
+
+            suppressionsByTypeMap.keys.sorted().map { type ->
+                suppressionsByTypeMap[type]?.let { suppressionsByTypeList ->
+                    val numericStat = suppressionsByTypeList.let {
+                        Stat.NumericStat(
+                            value = suppressionsByTypeList.size,
+                            details = buildString {
+                                suppressionsByTypeList
+                                    .map { "${it.filePath}:${it.startLine}:${it.startColumn}" }
+                                    .sorted()
+                                    .forEach { appendLine("* $it") }
+                            }
+                        )
                     }
+                    collectedStats.add(
+                        CollectedStat(
+                            metadata = StatMetadata(
+                                key = "Suppress_$type",
+                                description = "@Suppress(\"$type\")",
+                                statType = CollectedStatType.NUMERIC,
+                            ),
+                            stat = numericStat
+                        )
+                    )
                 }
-            )
+
+            }
+        }
+        return if (collectedStats.isNotEmpty()) {
+            collectedStats
         } else {
             null
         }
     }
-
-    override val statInfo: StatInfo = StatInfo(
-        name = "SuppressAnnotationUsages",
-        description = "@Suppress Annotation Usages",
-        statType = CollectedStatType.STRING
-    )
 
     override fun getName(): String {
         return this::class.java.name

@@ -1,7 +1,7 @@
 package com.squareup.invert
 
 
-import com.squareup.invert.models.Stat.ProvidesAndInjectsStat.DiContribution
+import com.squareup.invert.models.Stat.DiProvidesAndInjectsStat.DiContribution
 import com.squareup.invert.testutils.InvertTestUtils.assertEqualsAndPrintDiff
 import kotlinx.serialization.builtins.ListSerializer
 import java.io.File
@@ -24,7 +24,7 @@ class FindDiContributionTest {
             )
         }
         val findAnvil = FindAnvilContributesBinding().apply {
-            handleKotlinFile(ktFile)
+            handleKotlinFile(ktFile, ktFile.parentFile.absolutePath)
         }
 
         assertEqualsAndPrintDiff(
@@ -56,7 +56,7 @@ class FindDiContributionTest {
             )
         }
         val findAnvil = FindAnvilContributesBinding().apply {
-            handleKotlinFile(ktFile)
+            handleKotlinFile(ktFile, ktFile.parentFile.absolutePath)
         }
 
         assertEqualsAndPrintDiff(
@@ -94,7 +94,7 @@ class FindDiContributionTest {
             )
         }
         val findAnvil = FindAnvilContributesBinding().apply {
-            handleKotlinFile(ktFile)
+            handleKotlinFile(ktFile, ktFile.parentFile.absolutePath)
         }
 
         assertEqualsAndPrintDiff(
@@ -135,7 +135,7 @@ class FindDiContributionTest {
             )
         }
         val findAnvil = FindAnvilContributesBinding().apply {
-            handleKotlinFile(ktFile)
+            handleKotlinFile(ktFile, ktFile.parentFile.absolutePath)
         }
 
         assertEqualsAndPrintDiff(
@@ -172,7 +172,7 @@ class FindDiContributionTest {
             )
         }
         val findAnvil = FindAnvilContributesBinding().apply {
-            handleKotlinFile(ktFile)
+            handleKotlinFile(ktFile, ktFile.parentFile.absolutePath)
         }
 
         assertEqualsAndPrintDiff(
@@ -206,7 +206,7 @@ class FindDiContributionTest {
             )
         }
         val findAnvil = FindAnvilContributesBinding().apply {
-            handleKotlinFile(ktFile)
+            handleKotlinFile(ktFile, ktFile.parentFile.absolutePath)
         }
 
         assertEqualsAndPrintDiff(
