@@ -1,30 +1,28 @@
 package com.squareup.invert.common.pages
 
 
+import PagingConstants
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.squareup.invert.common.DependencyGraph
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ReportDataRepo
+import com.squareup.invert.common.charts.ChartJsChartComposable
+import com.squareup.invert.common.charts.ChartsJs
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.SuppressAnnotationGraphNavRoute.Companion.parser
-import com.squareup.invert.models.InvertSerialization
+import com.squareup.invert.models.GradlePath
 import com.squareup.invert.models.Stat
-import com.squareup.invert.models.StatKey
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Canvas
-import renderChartJs
+import kotlinx.browser.window
+import org.jetbrains.compose.web.dom.H3
+import org.jetbrains.compose.web.dom.Text
 import ui.BootstrapColumn
 import ui.BootstrapLoadingMessageWithSpinner
 import ui.BootstrapRow
+import ui.BootstrapTable
 import kotlin.reflect.KClass
 
 data class SuppressAnnotationGraphNavRoute(
@@ -72,42 +70,11 @@ object SuppressAnnotationGraphReportPage : InvertReportPage<SuppressAnnotationGr
     }
 }
 
-
-@Serializable
-data class ScaleInfo(
-    val beginAtZero: Boolean = true,
+data class SuppressTypeByModule(
+    val gradlePath: GradlePath,
+    val suppressType: String,
+    val count: Int,
 )
-
-@Serializable
-data class ChartJsScales(
-    val y: ScaleInfo = ScaleInfo(),
-)
-
-@Serializable
-data class ChartJsOptions(
-    val scales: ChartJsScales,
-)
-
-@Serializable
-data class ChartJsDataset(
-    val label: String,
-    val data: List<Int>,
-    val borderWidth: Int = 1,
-)
-
-@Serializable
-data class ChartJsData(
-    val labels: List<String>,
-    val datasets: List<ChartJsDataset>,
-)
-
-@Serializable
-data class ChartJsParam(
-    val type: String,
-    val data: ChartJsData,
-    val options: ChartJsOptions,
-)
-
 
 @Composable
 fun SuppressAnnotationGraphComposable(
@@ -127,15 +94,45 @@ fun SuppressAnnotationGraphComposable(
         return
     }
 
+    val listOfSuppressTypeByModule = mutableListOf<SuppressTypeByModule>().apply {
+        statsByModule?.keys?.map { modulePath ->
+            statsByModule[modulePath]?.forEach { (statKey, stat) ->
+                val statMetadataForStatKey = statsData?.statInfos?.get(statKey)
+                if ((stat is Stat.NumericStat) && statMetadataForStatKey?.category == "suppress_annotation") {
+                    this.add(
+                        SuppressTypeByModule(
+                            gradlePath = modulePath,
+                            suppressType = statMetadataForStatKey.description,
+                            count = stat.value
+                        )
+                    )
+                }
+            }
+        }
+    }
 
-//    val labels = listOf("Red", "Blue", "Yellow", "Green")
+    val distinctSuppressTypes: List<SuppressTypeByModule> = listOfSuppressTypeByModule.distinctBy { it.suppressType }
+    val suppressTypeToTotalCount = distinctSuppressTypes
+        .map { suppressTypeByModule: SuppressTypeByModule ->
+            suppressTypeByModule to listOfSuppressTypeByModule
+                .filter { it.suppressType == suppressTypeByModule.suppressType }
+                .sumOf { it.count }
+        }
+        .sortedByDescending { it.second }
+
+    val gradlePathToTotalCount: Map<GradlePath, Int> = listOfSuppressTypeByModule
+        .groupBy { it.gradlePath }
+        .map { (gradlePath, suppressTypeByModule) -> gradlePath to suppressTypeByModule.sumOf { it.count } }
+        .toMap()
+
+
     val labels = mutableListOf<String>()
     val chartData = statsByModule?.keys?.map { modulePath ->
         labels.add(modulePath)
         var count = 0
         val onlySuppressStatsForModule: List<Stat.NumericStat>? =
             statsByModule[modulePath]?.filter { (statKey, stat) ->
-                ((stat is Stat.NumericStat) && statKey.startsWith("Suppress"))
+                ((stat is Stat.NumericStat) && statKey.startsWith("suppress_annotation_"))
             }?.map { it.value as Stat.NumericStat }
 
         println("onlySuppressStatsForModule")
@@ -149,7 +146,7 @@ fun SuppressAnnotationGraphComposable(
         statsByModule[modulePath]?.forEach { entry ->
             val statKey = entry.key
             val stat = entry.value
-            if ((stat is Stat.NumericStat) && statKey.startsWith("Suppress")) {
+            if ((stat is Stat.NumericStat) && statKey.startsWith("suppress_annotation_")) {
                 count += stat.value
             }
         }
@@ -159,62 +156,103 @@ fun SuppressAnnotationGraphComposable(
     println(labels)
     println(chartData)
 
-    val pieChartData = ChartJsParam(
-        type = "doughnut",
-        data = ChartJsData(
-            labels = labels.subList(0, minOf(labels.size, 5)),
-            datasets = listOf(
-                ChartJsDataset(
-                    label = "Number of Suppressions",
-                    data = chartData.subList(0, minOf(labels.size, 5)),
-                    borderWidth = 1
-                )
-            ),
-        ),
-        options = ChartJsOptions(
-            scales = ChartJsScales(
-                y = ScaleInfo(
-                    beginAtZero = true
-                )
-            )
-        )
-    )
 
     BootstrapRow {
-        BootstrapColumn(6) {
-            ChartJsComposable("chart-js-pie-graph", pieChartData)
-        }
-        BootstrapColumn(6) {
-            ChartJsComposable("chart-js-bar-graph", pieChartData.copy(type = "bar"))
-        }
-    }
-
-
-}
-
-@Composable
-fun ChartJsComposable(graphDomId: String, pieChartData: ChartJsParam) {
-    // Good to go
-    Canvas({
-        id(graphDomId)
-        style {
-            border {
-                width(2.px)
-                style(LineStyle.Solid)
-                color = Color.black
+        BootstrapColumn(12) {
+            H3 {
+                Text("Top Suppressions by Total Count")
             }
-            width(100.percent)
-            height(400.px)
-        }
-    })
-    CoroutineScope(Dispatchers.Main).launch {
-        delay(500)
-        renderChartJs(
-            graphDomId,
-            InvertSerialization.InvertJson.encodeToString(
-                ChartJsParam.serializer(), pieChartData
-            ),
-        )
-    }
-}
+            BootstrapRow {
+                BootstrapColumn(6) {
+                    BootstrapTable(
+                        headers = listOf("@Suppress Type", "Count"),
+                        rows = suppressTypeToTotalCount.map {
+                            listOf(it.first.suppressType, it.second.toString())
+                        },
+                        types = listOf(String::class, Int::class),
+                        maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
+                        onItemClick = { row ->
+                            window.alert("$row")
+                        },
+                        sortByColumn = 1,
+                        sortAscending = false,
+                    )
+                }
+                BootstrapColumn(6) {
+                    ChartJsChartComposable(
+                        domId = "chart-js-pie-graph1",
+                        type = "pie",
+                        data = ChartsJs.ChartJsData(
+                            labels = suppressTypeToTotalCount.map { it.first.suppressType },
+                            datasets = listOf(
+                                ChartsJs.ChartJsDataset(
+                                    label = "Number of Suppressions",
+                                    data = suppressTypeToTotalCount.map { it.second },
+                                    borderWidth = 1
+                                )
+                            ),
+                        ),
+                        onClick = { label: String, value: Int ->
+                            navRouteRepo.updateNavRoute(
+                                StatDetailNavRoute(
+                                    statKeys = listOf("suppress_annotation_$label"),
+                                )
+                            )
+                        }
+                    )
+                }
+            }
 
+            H3 {
+                Text("Modules with Most Suppressions")
+            }
+            BootstrapRow {
+                BootstrapColumn(6) {
+                    BootstrapTable(
+                        headers = listOf("Module", "Total @Suppress Count"),
+                        rows = gradlePathToTotalCount.map {
+                            listOf(it.key, it.value.toString())
+                        },
+                        types = listOf(String::class, Int::class),
+                        maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
+                        onItemClick = { row ->
+                            navRouteRepo.updateNavRoute(
+                                ModuleDetailNavRoute(
+                                    path = row[0]
+                                )
+                            )
+                        },
+                        sortByColumn = 1,
+                        sortAscending = false,
+                    )
+                }
+                BootstrapColumn(6) {
+                    ChartJsChartComposable(
+                        domId = "chart-js-pie-graph",
+                        type = "pie",
+                        data = ChartsJs.ChartJsData(
+                            labels = labels.subList(0, minOf(labels.size, 5)),
+                            datasets = listOf(
+                                ChartsJs.ChartJsDataset(
+                                    label = "Number of Suppressions",
+                                    data = chartData.subList(0, minOf(labels.size, 5)),
+                                    borderWidth = 1
+                                )
+                            ),
+                        ),
+                        onClick = { label: String, value: Int ->
+                            navRouteRepo.updateNavRoute(
+                                ModuleDetailNavRoute(
+                                    path = label
+                                )
+                            )
+                        }
+                    )
+                }
+            }
+
+        }
+    }
+
+
+}

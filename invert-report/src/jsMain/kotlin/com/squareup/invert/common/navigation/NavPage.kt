@@ -60,28 +60,30 @@ class NavPage(
                 NavPageGroup(
                     "Stats", setOf(
                         AllStatsReportPage.navPage,
-                        SuppressAnnotationGraphReportPage.navPage,
-                    ).toNavItems().plus(
-                        NavItem(
-                            itemTitle = "@Suppress Usages",
-                            destinationNavRoute = StatDetailNavRoute(
-                                statKeys = listOf("SuppressAnnotationUsages"),
-                                pluginIds = emptyList(),
-                            ),
-                            matchesCurrentNavRoute = { currentNavRoute ->
-                                if (currentNavRoute is StatDetailNavRoute) {
-                                    currentNavRoute.statKeys == listOf("SuppressAnnotationUsages")
-                                } else {
-                                    false
-                                }
-                            }
-                        )
-                    )
+                    ).toNavItems()
+//                        .plus(
+//                            NavItem(
+//                                itemTitle = "@Suppress Stat",
+//                                destinationNavRoute = StatDetailNavRoute(
+//                                    statKeys = listOf("SuppressAnnotationUsages"),
+//                                    pluginIds = emptyList(),
+//                                ),
+//                                matchesCurrentNavRoute = { currentNavRoute ->
+//                                    if (currentNavRoute is StatDetailNavRoute) {
+//                                        currentNavRoute.statKeys.firstOrNull()?.startsWith("suppress_annotation_")
+//                                            ?: false
+//                                    } else {
+//                                        false
+//                                    }
+//                                }
+//                            )
+//                        )
                 ),
                 NavPageGroup(
                     "Insights", setOf(
                         LeafModulesNavRoute.navPage,
                         UnusedModulesReportPage.navPage,
+                        SuppressAnnotationGraphReportPage.navPage,
                     ).toNavItems()
                 ),
                 NavPageGroup(

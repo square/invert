@@ -5,7 +5,7 @@ external fun externalLoadJavaScriptFile(key: String, callback: (json: String) ->
 
 external fun loadJsFileAsync(url: String, callback: () -> Unit)
 
-external fun markdownToHtml(markdown: String) : String
+external fun markdownToHtml(markdown: String): String
 
 external fun keysForObject(any: Any): Array<String>
 
@@ -16,4 +16,4 @@ external fun keysForObject(any: Any): Array<String>
  */
 external fun render3dGraph(domElementId: String, graphDataJson: String, width: Int, height: Int)
 
-external fun renderChartJs(domElementId: String, graphDataJson: String)
+external fun renderChartJs(domElementId: String, graphDataJson: String, onClick: (label: String, value: Int) -> Unit)

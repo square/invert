@@ -7,7 +7,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class StatMetadata(
-  val key: String,
-  val description: String,
-  val statType: CollectedStatType,
+    val key: String,
+    val description: String,
+    val statType: CollectedStatType,
+    val category: String? = null,
 )

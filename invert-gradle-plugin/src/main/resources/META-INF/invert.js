@@ -78,12 +78,31 @@ window.render3dGraph = function (domElementId, graphDataJson, width, height) {
 }
 
 // https://www.chartjs.org/docs/latest/getting-started/
-window.renderChartJs = function (domElementId, graphDataJson) {
+window.renderChartJs = function (domElementId, graphDataJson, onClick) {
     if (window.ForceGraph == undefined) {
         loadJsFileAsync("https://cdn.jsdelivr.net/npm/chart.js", function (obj) {
             const chartJsData = JSON.parse(graphDataJson)
             const ctx = document.getElementById(domElementId);
-            new Chart(ctx, chartJsData);
+            chartJsData['options']['onClick'] = function (event, elements) {
+                if (elements.length > 0) {
+                    var elementIndex = elements[0].index;
+                    var label = this.data.labels[elementIndex];
+                    var value = this.data.datasets[0].data[elementIndex];
+                    onClick(label, value)
+                }
+                // let chart = this
+                // console.log("Chart " + Object.keys(this))
+                // const canvasPosition = Chart.helpers.getRelativePosition(e, chart);
+                // console.log("canvasPosition " + canvasPosition +  Object.keys(canvasPosition))
+                // console.log("canvasPositionX " + canvasPosition.x)
+                // console.log("canvasPositionY " + canvasPosition.y)
+                //
+                // // Substitute the appropriate scale IDs
+                // const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
+                // const dataY = chart.scales.y.getValueForPixel(canvasPosition.y);
+                // onClick({x: dataX, y: dataY})
+            }
+            let chart = new Chart(ctx, chartJsData);
         });
     }
 }

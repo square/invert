@@ -57,20 +57,18 @@ class SupressionsStatCollector : StatCollector {
                     collectedStats.add(
                         CollectedStat(
                             metadata = StatMetadata(
-                                key = "Suppress_$type",
+                                key = "suppress_annotation_$type",
                                 description = "@Suppress(\"$type\")",
                                 statType = CollectedStatType.NUMERIC,
+                                category = "suppress_annotation"
                             ),
                             stat = numericStat
                         )
                     )
                 }
-
             }
         }
-        return if (collectedStats.isNotEmpty()) {
-            collectedStats
-        } else {
+        return collectedStats.ifEmpty {
             null
         }
     }

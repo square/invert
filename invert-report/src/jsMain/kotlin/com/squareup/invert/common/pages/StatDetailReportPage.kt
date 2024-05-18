@@ -20,7 +20,7 @@ import ui.*
 import kotlin.reflect.KClass
 
 data class StatDetailNavRoute(
-    val pluginIds: List<GradlePluginId>,
+    val pluginIds: List<GradlePluginId> = emptyList(),
     val statKeys: List<String>,
     val moduleQuery: String? = null
 ) : BaseNavRoute(StatDetailReportPage.navPage) {
@@ -77,7 +77,6 @@ fun StatDetailComposable(
     val allModulesOrig by reportDataRepo.allModules.collectAsState(null)
     val moduleToOwnerMapFlowValue by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
-
     val statKeys = statsNavRoute.statKeys.ifEmpty {
         statsData?.statInfos?.map { it.key } ?: listOf()
     }
@@ -129,15 +128,13 @@ fun StatDetailComposable(
         navRouteRepo.updateNavRoute(statsNavRoute.copy(moduleQuery = it))
     }
 
+    val SUPPORTED_TYPES = listOf(CollectedStatType.STRING, CollectedStatType.BOOLEAN, CollectedStatType.NUMERIC)
     val resultsTab = BootstrapTabData("Results") {
         val statsColumns = mutableListOf<List<String>>().apply {
             statKeys.forEach { statKey ->
                 val statInfo = statsData?.statInfos?.get(statKey)
                 statInfo?.let { statMetadata: StatMetadata ->
-                    if (listOf(CollectedStatType.STRING, CollectedStatType.BOOLEAN, CollectedStatType.NUMERIC).contains(
-                            statMetadata.statType
-                        )
-                    ) {
+                    if (SUPPORTED_TYPES.contains(statMetadata.statType)) {
                         add(
                             allModules.map { gradlePath ->
                                 val statsDataForModule: Map<StatKey, Stat>? = statsData?.statsByModule?.get(gradlePath)
@@ -159,6 +156,27 @@ fun StatDetailComposable(
                                 }
                             }
                         )
+                        add(
+                            allModules.map { gradlePath ->
+                                val statsDataForModule: Map<StatKey, Stat>? = statsData?.statsByModule?.get(gradlePath)
+                                val stat = statsDataForModule?.get(statKey)
+                                when (stat) {
+                                    is Stat.BooleanStat -> {
+                                        stat.details
+                                    }
+
+                                    is Stat.StringStat -> {
+                                        stat.details
+                                    }
+
+                                    is Stat.NumericStat -> {
+                                        stat.details
+                                    }
+
+                                    else -> ""
+                                } ?: ""
+                            }
+                        )
                     }
                 }
             }
@@ -168,11 +186,10 @@ fun StatDetailComposable(
             .apply {
                 statKeys.forEach {
                     val thisStatType = statsData?.statInfos?.get(it)
-                    if (listOf(CollectedStatType.STRING, CollectedStatType.BOOLEAN, CollectedStatType.NUMERIC).contains(
-                            thisStatType?.statType
-                        )
-                    ) {
-                        add(statsData?.statInfos?.get(it)?.description ?: it)
+                    if (SUPPORTED_TYPES.contains(thisStatType?.statType)) {
+                        val description = statsData?.statInfos?.get(it)?.description ?: it
+                        add(description)
+                        add("$description Details")
                     }
                 }
             }

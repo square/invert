@@ -2,7 +2,6 @@ package ui
 
 import PagingConstants.MAX_RESULTS
 import androidx.compose.runtime.*
-import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.utils.CsvFileDownloadUtil
 import kotlinx.browser.window
 import org.jetbrains.compose.web.attributes.list
@@ -186,6 +185,8 @@ fun BootstrapTable(
     /** If null, no sorting. */
     types: List<KClass<*>>?,
     maxResultsLimitConstant: Int,
+    sortByColumn: Int = 0,
+    sortAscending: Boolean = true,
     onItemClick: ((List<String>) -> Unit)?,
 ) {
     val enableSorting = types != null
@@ -196,8 +197,8 @@ fun BootstrapTable(
     Table({
         classes("table table-bordered table-striped table-hover table-sm".split(" "))
     }) {
-        var sortIdx by remember { mutableStateOf(0) }
-        var ascending by remember { mutableStateOf(true) }
+        var sortIdx by remember { mutableStateOf(sortByColumn) }
+        var ascending by remember { mutableStateOf(sortAscending) }
 
 
         val sortedRows = if (enableSorting && types != null) {
