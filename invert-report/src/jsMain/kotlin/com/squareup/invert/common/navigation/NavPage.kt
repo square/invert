@@ -45,7 +45,17 @@ class NavPage(
                     "General", setOf(
                         HomeReportPage.navPage,
                         OwnersReportPage.navPage,
+                        GitHubMarkdownReportPage.navPage,
                     ).toNavItems()
+                        .plus(
+                            NavItem(
+                                navPage = GitHubMarkdownReportPage.navPage,
+                                itemTitle = GitHubMarkdownReportPage.navPage.displayName,
+                                destinationNavRoute = GithubReadMeNavRoute(
+                                    "square/okhttp"
+                                )
+                            )
+                        )
                 ),
                 NavPageGroup(
                     "Gradle", setOf(

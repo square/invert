@@ -1,14 +1,30 @@
+package com.squareup.invert.common.pages
+
 import androidx.compose.runtime.Composable
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import com.squareup.invert.common.pages.HomeReportPage
+import com.squareup.invert.common.pages.GitHubMarkdownReportPage.navPage
 import org.jetbrains.compose.web.dom.H2
 import org.jetbrains.compose.web.dom.Text
 import ui.RemoteGitHubMarkdown
 import kotlin.reflect.KClass
 
-object GitHubMarkdownReportPage : InvertReportPage<GitHubMarkdownReportPage.GithubReadMeNavRoute> {
+data class GithubReadMeNavRoute(val orgSlashRepo: String? = null) : BaseNavRoute(navPage) {
+    override fun toSearchParams(): Map<String, String> {
+        val searchParams = super.toSearchParams().toMutableMap()
+        orgSlashRepo?.let {
+            searchParams[REPO_KEY] = it
+        }
+        return searchParams
+    }
+
+    companion object {
+        val REPO_KEY = "repo"
+    }
+}
+
+object GitHubMarkdownReportPage : InvertReportPage<GithubReadMeNavRoute> {
     override val navPage: NavPage = NavPage(
         pageId = "github_readme",
         displayName = "ReadMe on GitHub",
@@ -22,6 +38,7 @@ object GitHubMarkdownReportPage : InvertReportPage<GitHubMarkdownReportPage.Gith
             }
         }
     )
+
     override val navRouteKClass: KClass<GithubReadMeNavRoute> = GithubReadMeNavRoute::class
 
     override val composableContent: @Composable (GithubReadMeNavRoute) -> Unit = { navRoute ->
@@ -36,18 +53,4 @@ object GitHubMarkdownReportPage : InvertReportPage<GitHubMarkdownReportPage.Gith
 
     private const val REPO_KEY = "repo"
 
-
-    data class GithubReadMeNavRoute(val orgSlashRepo: String? = null) : BaseNavRoute(navPage) {
-        override fun toSearchParams(): Map<String, String> {
-            val searchParams = super.toSearchParams().toMutableMap()
-            orgSlashRepo?.let {
-                searchParams[REPO_KEY] = it
-            }
-            return searchParams
-        }
-
-        companion object {
-            val REPO_KEY = "repo"
-        }
-    }
 }

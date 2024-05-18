@@ -9,6 +9,8 @@ external fun markdownToHtml(markdown: String): String
 
 external fun keysForObject(any: Any): Array<String>
 
+external fun callDecodeURIComponent(str: String): String
+
 
 /**
  * @param domElementId Dom Element id to render the graph in

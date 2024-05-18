@@ -92,6 +92,7 @@ class InvertReport(
             StatDetailReportPage,
             UnusedModulesReportPage,
             SuppressAnnotationGraphReportPage,
+            GitHubMarkdownReportPage,
         )
     }
 }

@@ -90,19 +90,8 @@ window.renderChartJs = function (domElementId, graphDataJson, onClick) {
                     var value = this.data.datasets[0].data[elementIndex];
                     onClick(label, value)
                 }
-                // let chart = this
-                // console.log("Chart " + Object.keys(this))
-                // const canvasPosition = Chart.helpers.getRelativePosition(e, chart);
-                // console.log("canvasPosition " + canvasPosition +  Object.keys(canvasPosition))
-                // console.log("canvasPositionX " + canvasPosition.x)
-                // console.log("canvasPositionY " + canvasPosition.y)
-                //
-                // // Substitute the appropriate scale IDs
-                // const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
-                // const dataY = chart.scales.y.getValueForPixel(canvasPosition.y);
-                // onClick({x: dataX, y: dataY})
             }
-            let chart = new Chart(ctx, chartJsData);
+            new Chart(ctx, chartJsData);
         });
     }
 }
@@ -111,17 +100,6 @@ window.markdownToHtml = function (markdownStr) {
     return marked.parse(markdownStr)
 }
 
-//function githubMarkdownCallback(response) {
-//    let decodedContent = atob(response.data.content);
-//    let div = document.createElement("div");
-//    div.innerHTML = marked.parse(decodedContent);
-//    document.getElementsByTagName('body')[0].append(div);
-//}
-
-//setTimeout(function () {
-//
-//    let script = document.createElement('script');
-//    script.src = 'https://api.github.com/repos/square/anvil/contents/README.md?callback=githubMarkdownCallback';
-//    document.getElementsByTagName('head')[0].appendChild(script);
-//}, 1000)
-
+window.callDecodeURIComponent = function(str){
+    return decodeURIComponent(escape(str))
+}

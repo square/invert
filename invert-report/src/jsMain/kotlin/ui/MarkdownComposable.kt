@@ -3,6 +3,7 @@ package ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import callDecodeURIComponent
 import kotlinx.browser.window
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +15,7 @@ import loadJsFileAsync
 import markdownToHtml
 import org.jetbrains.compose.web.dom.Div
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.css.CSS.Companion.escape
 import kotlin.collections.set
 
 @Serializable
@@ -53,7 +55,9 @@ fun loadRemoteMarkdownFromGitHubUrl(url: String, markdownCallback: (String) -> U
         val json = JSON.stringify(it)
         val result = json1.decodeFromString<GitHubRepositoryContentsResult>(json)
         val resultContentEncoded = result.data.content
-        val decodedString = window.atob(resultContentEncoded)
+        val fromBinary = window.atob(resultContentEncoded)
+        val decodedString = callDecodeURIComponent(fromBinary)//.replace("â\u0080\u0099", "'")
+        println("decodedString: $decodedString")
         markdownCallback(decodedString)
         println("Nulling out $callbackName")
         window.asDynamic()[callbackName] = null
