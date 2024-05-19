@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import callDecodeURIComponent
+import highlightJsHighlightAll
 import kotlinx.browser.window
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
@@ -12,10 +13,8 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import loadJsFileAsync
-import markdownToHtml
 import org.jetbrains.compose.web.dom.Div
 import org.w3c.dom.HTMLElement
-import org.w3c.dom.css.CSS.Companion.escape
 import kotlin.collections.set
 
 @Serializable
@@ -48,7 +47,7 @@ private object MarkedLoaded {
     }
 }
 
-fun loadRemoteMarkdownFromGitHubUrl(url: String, markdownCallback: (String) -> Unit) {
+fun loadRemoteContentFromGitHubUrl(url: String, markdownCallback: (String) -> Unit) {
     val callbackName = "callback_${urlToIdString(url)}"
     println("Requesting $url")
     val lambda: (Any) -> Unit = {
@@ -56,10 +55,8 @@ fun loadRemoteMarkdownFromGitHubUrl(url: String, markdownCallback: (String) -> U
         val result = json1.decodeFromString<GitHubRepositoryContentsResult>(json)
         val resultContentEncoded = result.data.content
         val fromBinary = window.atob(resultContentEncoded)
-        val decodedString = callDecodeURIComponent(fromBinary)//.replace("â\u0080\u0099", "'")
-        println("decodedString: $decodedString")
+        val decodedString = callDecodeURIComponent(fromBinary)
         markdownCallback(decodedString)
-        println("Nulling out $callbackName")
         window.asDynamic()[callbackName] = null
     }
 
@@ -69,9 +66,9 @@ fun loadRemoteMarkdownFromGitHubUrl(url: String, markdownCallback: (String) -> U
     }
 }
 
-suspend fun loadRemoteMarkdownFromGitHubUrl(url: String): String {
+suspend fun loadRemoteContentFromGitHubUrl(url: String): String {
     val completableDeferred = CompletableDeferred<String>()
-    loadRemoteMarkdownFromGitHubUrl(url) {
+    loadRemoteContentFromGitHubUrl(url) {
         completableDeferred.complete(it)
     }
     return completableDeferred.await()
@@ -93,19 +90,19 @@ fun RawHtmlComposable(htmlString: String) {
     )
 }
 
-@Composable
-fun RenderMarkdown(markdown: String) {
-    val isMarkedLibLoaded by MarkedLoaded.isLoaded.collectAsState()
-
-    if (!isMarkedLibLoaded) {
-        MarkedLoaded.load()
-        BootstrapLoadingSpinner()
-        return
-    }
-
-    val html = markdownToHtml(markdown)
-    RawHtmlComposable(html)
-}
+//@Composable
+//fun RenderMarkdown(markdown: String) {
+//    val isMarkedLibLoaded by MarkedLoaded.isLoaded.collectAsState()
+//
+//    if (!isMarkedLibLoaded) {
+//        MarkedLoaded.load()
+//        BootstrapLoadingSpinner()
+//        return
+//    }
+//
+//    val html = markdownToHtml(markdown)
+//    RawHtmlComposable(html)
+//}
 
 fun urlToIdString(url: String): String {
     val rgx = Regex("[^a-zA-Z0-9 -]")
@@ -115,40 +112,38 @@ fun urlToIdString(url: String): String {
 
 // State to hold the fetched HTML
 
-sealed interface MarkdownLoadingState {
-    object Loading : MarkdownLoadingState
-    data class Loaded(val markdown: String) : MarkdownLoadingState
+sealed interface RemoteGitHubContentLoadingState {
+    object Loading : RemoteGitHubContentLoadingState
+    data class Loaded(val content: String) : RemoteGitHubContentLoadingState
 }
 
 object MarkdownRepo {
 
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
-    private val urlToMarkdownFlow = MutableStateFlow<Map<String, MarkdownLoadingState>>(mapOf())
+    private val urlToMarkdownFlow = MutableStateFlow<Map<String, RemoteGitHubContentLoadingState>>(mapOf())
 
-    fun update(key: String, value: MarkdownLoadingState) {
+    fun update(key: String, value: RemoteGitHubContentLoadingState) {
         urlToMarkdownFlow.value = urlToMarkdownFlow.value.toMutableMap().apply {
             this[key] = value
         }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun load(url: String): Flow<MarkdownLoadingState> {
+    fun load(url: String): Flow<RemoteGitHubContentLoadingState> {
         coroutineScope.launch {
             if (urlToMarkdownFlow.value[url] == null) {
-                update(url, MarkdownLoadingState.Loading)
-                val markdown = loadRemoteMarkdownFromGitHubUrl(url)
-                val markdownHtml = markdownToHtml(markdown)
-                update(url, MarkdownLoadingState.Loaded(markdownHtml))
+                update(url, RemoteGitHubContentLoadingState.Loading)
+                val content = loadRemoteContentFromGitHubUrl(url)
+                update(url, RemoteGitHubContentLoadingState.Loaded(content))
             }
         }
-        return urlToMarkdownFlow.mapLatest { it[url] ?: MarkdownLoadingState.Loading }
+        return urlToMarkdownFlow.mapLatest { it[url] ?: RemoteGitHubContentLoadingState.Loading }
     }
 }
 
-
 @Composable
-fun RemoteGitHubMarkdown(url: String) {
+fun RemoteGitHubContent(url: String, transform: @Composable (String) -> Unit) {
     val isMarkedLibLoaded by MarkedLoaded.isLoaded.collectAsState()
 
     if (!isMarkedLibLoaded) {
@@ -158,18 +153,23 @@ fun RemoteGitHubMarkdown(url: String) {
     }
 
     // State to hold the fetched HTML
-    val htmlContentForCurrentUrl: MarkdownLoadingState by MarkdownRepo.load(url)
-        .collectAsState(MarkdownLoadingState.Loading)
+    val htmlContentForCurrentUrl: RemoteGitHubContentLoadingState by MarkdownRepo.load(url)
+        .collectAsState(RemoteGitHubContentLoadingState.Loading)
 
-    MarkdownRepo.load(url)
     val local = htmlContentForCurrentUrl
     when (local) {
-        is MarkdownLoadingState.Loaded -> {
-            RawHtmlComposable(local.markdown)
+        is RemoteGitHubContentLoadingState.Loaded -> {
+            transform(local.content)
+            CoroutineScope(Dispatchers.Main).launch {
+                delay(100)
+                highlightJsHighlightAll()
+            }
         }
-
         else -> {
             BootstrapLoadingSpinner()
         }
     }
 }
+
+
+//<pre><code class="language-html">...</code></pre>

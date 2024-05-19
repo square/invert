@@ -38,24 +38,13 @@ class NavPage(
             }.toSet()
         }
 
-
         val ROOT_NAV_ITEMS
             get() = listOf(
                 NavPageGroup(
                     "General", setOf(
                         HomeReportPage.navPage,
                         OwnersReportPage.navPage,
-                        GitHubMarkdownReportPage.navPage,
                     ).toNavItems()
-                        .plus(
-                            NavItem(
-                                navPage = GitHubMarkdownReportPage.navPage,
-                                itemTitle = GitHubMarkdownReportPage.navPage.displayName,
-                                destinationNavRoute = GithubReadMeNavRoute(
-                                    "square/okhttp"
-                                )
-                            )
-                        )
                 ),
                 NavPageGroup(
                     "Gradle", setOf(
@@ -103,6 +92,26 @@ class NavPage(
                         DependencyDiffReportPage.navPage,
                         ModuleDependencyGraphReportPage.navPage,
                     ).toNavItems()
+                ),
+                NavPageGroup(
+                    "GitHub", setOf(
+                        NavItem(
+                            navPage = GitHubMarkdownReportPage.navPage,
+                            itemTitle = "README.md",
+                            destinationNavRoute = GithubReadMeNavRoute(
+                                "square/okhttp",
+                                "README.md"
+                            )
+                        ),
+                        NavItem(
+                            navPage = GitHubMarkdownReportPage.navPage,
+                            itemTitle = "OkHttp.kt",
+                            destinationNavRoute = GithubReadMeNavRoute(
+                                "square/okhttp",
+                                "okhttp/src/main/kotlin/okhttp3/OkHttp.kt"
+                            ),
+                        )
+                    )
                 ),
             )
     }

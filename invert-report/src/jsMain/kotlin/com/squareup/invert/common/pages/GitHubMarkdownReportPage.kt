@@ -5,22 +5,33 @@ import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.GitHubMarkdownReportPage.navPage
+import com.squareup.invert.common.pages.GithubReadMeNavRoute.Companion.FILE_KEY
+import com.squareup.invert.common.pages.GithubReadMeNavRoute.Companion.REPO_KEY
+import markdownToHtml
+import org.jetbrains.compose.web.dom.Code
 import org.jetbrains.compose.web.dom.H2
+import org.jetbrains.compose.web.dom.Pre
 import org.jetbrains.compose.web.dom.Text
-import ui.RemoteGitHubMarkdown
+import ui.RawHtmlComposable
+import ui.RemoteGitHubContent
 import kotlin.reflect.KClass
 
-data class GithubReadMeNavRoute(val orgSlashRepo: String? = null) : BaseNavRoute(navPage) {
+data class GithubReadMeNavRoute(
+    val orgSlashRepo: String,
+    val filePath: String,
+) : BaseNavRoute(navPage) {
     override fun toSearchParams(): Map<String, String> {
         val searchParams = super.toSearchParams().toMutableMap()
-        orgSlashRepo?.let {
-            searchParams[REPO_KEY] = it
-        }
+
+        searchParams[REPO_KEY] = orgSlashRepo
+
+        searchParams[FILE_KEY] = filePath
         return searchParams
     }
 
     companion object {
-        val REPO_KEY = "repo"
+        const val REPO_KEY = "repo"
+        const val FILE_KEY = "file"
     }
 }
 
@@ -30,9 +41,10 @@ object GitHubMarkdownReportPage : InvertReportPage<GithubReadMeNavRoute> {
         displayName = "ReadMe on GitHub",
         navIconSlug = "file-earmark-bar-graph",
         navRouteParser = {
-            val repo = it[REPO_KEY]
-            if (repo != null) {
-                GithubReadMeNavRoute(repo)
+            val orgSlashRepo = it[REPO_KEY]
+            val filePath = it[FILE_KEY]
+            if (orgSlashRepo != null && filePath != null) {
+                GithubReadMeNavRoute(orgSlashRepo, filePath)
             } else {
                 HomeReportPage.HomeNavRoute
             }
@@ -42,15 +54,25 @@ object GitHubMarkdownReportPage : InvertReportPage<GithubReadMeNavRoute> {
     override val navRouteKClass: KClass<GithubReadMeNavRoute> = GithubReadMeNavRoute::class
 
     override val composableContent: @Composable (GithubReadMeNavRoute) -> Unit = { navRoute ->
-        println("RENDER ${navRoute.orgSlashRepo}")
-        // Your Composable content here
         H2 {
-            Text("README for ${navRoute.orgSlashRepo}")
+            Text("Loaded ${navRoute.filePath} from ${navRoute.orgSlashRepo}")
         }
-        val url = "https://api.github.com/repos/${navRoute.orgSlashRepo}/contents/README.md"
-        RemoteGitHubMarkdown(url)
+        val url = "https://api.github.com/repos/${navRoute.orgSlashRepo}/contents/${navRoute.filePath}"
+        RemoteCodeHighlighted(url)
+//        RemoteGitHubContent(url) { content ->
+//            RawHtmlComposable(markdownToHtml(content))
+//        }
     }
+}
 
-    private const val REPO_KEY = "repo"
-
+@Composable
+fun RemoteCodeHighlighted(remoteUrl: String = "https://api.github.com/repos/square/okhttp/contents/okhttp/src/main/kotlin/okhttp3/OkHttp.kt") {
+    RemoteGitHubContent(remoteUrl) { content ->
+        Pre {
+            val fileExtension = remoteUrl.substringAfterLast(".")
+            Code({ classes(("language-$fileExtension")) }) {
+                Text(content)
+            }
+        }
+    }
 }

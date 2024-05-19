@@ -91,6 +91,8 @@ window.renderChartJs = function (domElementId, graphDataJson, onClick) {
                     onClick(label, value)
                 }
             }
+            // chartJsData['type']='bar'
+            chartJsData['options']['indexAxis'] = 'y'
             new Chart(ctx, chartJsData);
         });
     }
@@ -102,4 +104,8 @@ window.markdownToHtml = function (markdownStr) {
 
 window.callDecodeURIComponent = function(str){
     return decodeURIComponent(escape(str))
+}
+
+window.highlightJsHighlightAll = function() {
+    hljs.highlightAll();
 }

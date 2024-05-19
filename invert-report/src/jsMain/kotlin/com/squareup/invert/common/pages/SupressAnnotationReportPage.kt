@@ -85,8 +85,6 @@ fun SuppressAnnotationGraphComposable(
     val rootModulePath = dependencyGraphNavRoute.module ?: ":api:sales-report:impl"
     val allModules by reportDataRepo.allModules.collectAsState(null)
     val statsData by reportDataRepo.statsData.collectAsState(null)
-
-
     val statsByModule = statsData?.statsByModule
 
     if (allModules == null) {
@@ -142,7 +140,6 @@ fun SuppressAnnotationGraphComposable(
             count += it.value
         }
 
-//        count += onlySuppressStatsForModule
         statsByModule[modulePath]?.forEach { entry ->
             val statKey = entry.key
             val stat = entry.value
@@ -152,10 +149,6 @@ fun SuppressAnnotationGraphComposable(
         }
         count
     } ?: emptyList()
-
-    println(labels)
-    println(chartData)
-
 
     BootstrapRow {
         BootstrapColumn(12) {
@@ -229,13 +222,13 @@ fun SuppressAnnotationGraphComposable(
                 BootstrapColumn(6) {
                     ChartJsChartComposable(
                         domId = "chart-js-pie-graph",
-                        type = "pie",
+                        type = "bar",
                         data = ChartsJs.ChartJsData(
-                            labels = labels.subList(0, minOf(labels.size, 5)),
+                            labels = labels,
                             datasets = listOf(
                                 ChartsJs.ChartJsDataset(
                                     label = "Number of Suppressions",
-                                    data = chartData.subList(0, minOf(labels.size, 5)),
+                                    data = chartData,
                                     borderWidth = 1
                                 )
                             ),
@@ -250,9 +243,6 @@ fun SuppressAnnotationGraphComposable(
                     )
                 }
             }
-
         }
     }
-
-
 }

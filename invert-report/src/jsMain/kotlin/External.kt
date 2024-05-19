@@ -11,6 +11,8 @@ external fun keysForObject(any: Any): Array<String>
 
 external fun callDecodeURIComponent(str: String): String
 
+external fun highlightJsHighlightAll()
+
 
 /**
  * @param domElementId Dom Element id to render the graph in
