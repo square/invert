@@ -38,6 +38,15 @@ class NavPage(
             }.toSet()
         }
 
+        private fun gitHubContentNavItem(title: String, destinationNavRoute: NavRoute): NavItem {
+            return NavItem(
+                navPage = GitHubMarkdownReportPage.navPage,
+                itemTitle = title,
+                destinationNavRoute = destinationNavRoute,
+                matchesCurrentNavRoute = { it == destinationNavRoute }
+            )
+        }
+
         val ROOT_NAV_ITEMS
             get() = listOf(
                 NavPageGroup(
@@ -60,23 +69,6 @@ class NavPage(
                     "Stats", setOf(
                         AllStatsReportPage.navPage,
                     ).toNavItems()
-//                        .plus(
-//                            NavItem(
-//                                itemTitle = "@Suppress Stat",
-//                                destinationNavRoute = StatDetailNavRoute(
-//                                    statKeys = listOf("SuppressAnnotationUsages"),
-//                                    pluginIds = emptyList(),
-//                                ),
-//                                matchesCurrentNavRoute = { currentNavRoute ->
-//                                    if (currentNavRoute is StatDetailNavRoute) {
-//                                        currentNavRoute.statKeys.firstOrNull()?.startsWith("suppress_annotation_")
-//                                            ?: false
-//                                    } else {
-//                                        false
-//                                    }
-//                                }
-//                            )
-//                        )
                 ),
                 NavPageGroup(
                     "Insights", setOf(
@@ -95,24 +87,22 @@ class NavPage(
                 ),
                 NavPageGroup(
                     "GitHub", setOf(
-                        NavItem(
-                            navPage = GitHubMarkdownReportPage.navPage,
-                            itemTitle = "README.md",
+                        gitHubContentNavItem(
+                            title = "README.md",
                             destinationNavRoute = GithubReadMeNavRoute(
                                 "square/okhttp",
                                 "README.md"
                             )
                         ),
-                        NavItem(
-                            navPage = GitHubMarkdownReportPage.navPage,
-                            itemTitle = "OkHttp.kt",
+                        gitHubContentNavItem(
+                            title = "OkHttp.kt",
                             destinationNavRoute = GithubReadMeNavRoute(
                                 "square/okhttp",
                                 "okhttp/src/main/kotlin/okhttp3/OkHttp.kt"
-                            ),
-                        )
+                            )
+                        ),
                     )
-                ),
+                )
             )
     }
 }
