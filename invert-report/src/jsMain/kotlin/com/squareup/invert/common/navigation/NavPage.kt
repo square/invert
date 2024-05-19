@@ -95,19 +95,10 @@ class NavPage(
                     )
                 ),
                 NavPageGroup(
-                    "Stats", setOf(
-                        AllStatsReportPage.navPage.toNavItem().copy(
-                            matchesCurrentNavRoute = {
-                                it is AllStatsNavRoute || it is StatDetailNavRoute
-                            }
-                        ),
-                    )
-                ),
-                NavPageGroup(
                     "Insights", setOf(
                         LeafModulesNavRoute.navPage,
                         UnusedModulesReportPage.navPage,
-                        SuppressAnnotationGraphReportPage.navPage,
+                        SuppressAnnotationReportPage.navPage,
                     ).toNavItems()
                 ),
                 NavPageGroup(
@@ -118,24 +109,24 @@ class NavPage(
                         ModuleDependencyGraphReportPage.navPage,
                     ).toNavItems()
                 ),
-                NavPageGroup(
-                    "GitHub", setOf(
-                        gitHubContentNavItem(
-                            title = "README.md",
-                            destinationNavRoute = GithubReadMeNavRoute(
-                                "square/okhttp",
-                                "README.md"
-                            )
-                        ),
-                        gitHubContentNavItem(
-                            title = "OkHttp.kt",
-                            destinationNavRoute = GithubReadMeNavRoute(
-                                "square/okhttp",
-                                "okhttp/src/main/kotlin/okhttp3/OkHttp.kt"
-                            )
-                        ),
-                    )
-                )
+//                NavPageGroup(
+//                    "GitHub", setOf(
+//                        gitHubContentNavItem(
+//                            title = "README.md",
+//                            destinationNavRoute = GithubReadMeNavRoute(
+//                                "square/okhttp",
+//                                "README.md"
+//                            )
+//                        ),
+//                        gitHubContentNavItem(
+//                            title = "OkHttp.kt",
+//                            destinationNavRoute = GithubReadMeNavRoute(
+//                                "square/okhttp",
+//                                "okhttp/src/main/kotlin/okhttp3/OkHttp.kt"
+//                            )
+//                        ),
+//                    )
+//                )
             )
     }
 }

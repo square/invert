@@ -13,11 +13,10 @@ import com.squareup.invert.common.charts.ChartsJs
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import com.squareup.invert.common.pages.SuppressAnnotationGraphNavRoute.Companion.parser
+import com.squareup.invert.common.pages.SuppressAnnotationNavRoute.Companion.parser
 import com.squareup.invert.models.GradlePath
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatKey
-import kotlinx.browser.window
 import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.Text
 import ui.BootstrapColumn
@@ -26,10 +25,10 @@ import ui.BootstrapRow
 import ui.BootstrapTable
 import kotlin.reflect.KClass
 
-data class SuppressAnnotationGraphNavRoute(
+data class SuppressAnnotationNavRoute(
     val module: String? = null,
     val configuration: String? = null,
-) : BaseNavRoute(SuppressAnnotationGraphReportPage.navPage) {
+) : BaseNavRoute(SuppressAnnotationReportPage.navPage) {
 
     override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
         .also { params ->
@@ -46,8 +45,8 @@ data class SuppressAnnotationGraphNavRoute(
         private const val MODULE_PARAM = "module"
         private const val CONFIGURATION_PARAM = "configuration"
 
-        fun parser(params: Map<String, String?>): SuppressAnnotationGraphNavRoute {
-            return SuppressAnnotationGraphNavRoute(
+        fun parser(params: Map<String, String?>): SuppressAnnotationNavRoute {
+            return SuppressAnnotationNavRoute(
                 module = params[MODULE_PARAM],
                 configuration = params[CONFIGURATION_PARAM]
             )
@@ -56,7 +55,7 @@ data class SuppressAnnotationGraphNavRoute(
 }
 
 
-object SuppressAnnotationGraphReportPage : InvertReportPage<SuppressAnnotationGraphNavRoute> {
+object SuppressAnnotationReportPage : InvertReportPage<SuppressAnnotationNavRoute> {
     override val navPage: NavPage = NavPage(
         pageId = "suppress_annotation",
         displayName = "Suppress Annotation",
@@ -64,10 +63,10 @@ object SuppressAnnotationGraphReportPage : InvertReportPage<SuppressAnnotationGr
         navRouteParser = { parser(it) }
     )
 
-    override val navRouteKClass: KClass<SuppressAnnotationGraphNavRoute> = SuppressAnnotationGraphNavRoute::class
+    override val navRouteKClass: KClass<SuppressAnnotationNavRoute> = SuppressAnnotationNavRoute::class
 
-    override val composableContent: @Composable (SuppressAnnotationGraphNavRoute) -> Unit = { navRoute ->
-        SuppressAnnotationGraphComposable(navRoute)
+    override val composableContent: @Composable (SuppressAnnotationNavRoute) -> Unit = { navRoute ->
+        SuppressAnnotationComposable(navRoute)
     }
 }
 
@@ -79,17 +78,17 @@ data class SuppressTypeByModule(
 )
 
 @Composable
-fun SuppressAnnotationGraphComposable(
-    dependencyGraphNavRoute: SuppressAnnotationGraphNavRoute,
+fun SuppressAnnotationComposable(
+    dependencyGraphNavRoute: SuppressAnnotationNavRoute,
     reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
     navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
-    val rootModulePath = dependencyGraphNavRoute.module ?: ":api:sales-report:impl"
     val allModules by reportDataRepo.allModules.collectAsState(null)
     val statsData by reportDataRepo.statsData.collectAsState(null)
+    val statInfos by reportDataRepo.statInfos.collectAsState(null)
     val statsByModule = statsData?.statsByModule
 
-    if (allModules == null) {
+    if (allModules == null || statInfos == null) {
         BootstrapLoadingMessageWithSpinner()
         return
     }
@@ -168,7 +167,11 @@ fun SuppressAnnotationGraphComposable(
                         types = listOf(String::class, Int::class),
                         maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
                         onItemClick = { row ->
-                            window.alert("$row")
+                            navRouteRepo.updateNavRoute(
+                                StatDetailNavRoute(
+                                    statKeys = listOf(statInfos!!.firstOrNull { it.description == row[0] }).mapNotNull { it?.key }
+                                )
+                            )
                         },
                         sortByColumn = 1,
                         sortAscending = false,

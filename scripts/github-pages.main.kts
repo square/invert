@@ -127,6 +127,7 @@ data class TargetRepo(
     val org: String,
     val project: String,
     val runOnGitHubAction: Boolean = true,
+    val works: Boolean = true,
     val buildDirPath: String = "build",
     val invertGradleCmd: () -> String = { DEFAULT_INIT_SCRIPT_LINE },
     val postCheckout: (File) -> Unit = { projectCloneDir -> },
@@ -275,6 +276,12 @@ val ALL_REPOS = listOf(
         }
     ),
     TargetRepo(
+        org = "airbnb",
+        project = "mavericks",
+        runOnGitHubAction = false,
+        works = false,
+    ),
+    TargetRepo(
         org = "rickbusarow",
         project = "ModuleCheck"
     ),
@@ -290,7 +297,16 @@ val ALL_REPOS = listOf(
         org = "handstandsam",
         project = "ShoppingApp",
     ),
+    TargetRepo(
+        org = "PaulWoitaschek",
+        project = "Voice",
+    ),
+    TargetRepo(
+        org = "flipperdevices",
+        project = "Flipper-Android-App",
+    ),
 )
+    .filter { it.works }
     .filter {
         val isCi = System.getenv().containsKey("GITHUB_ACTIONS")
         if (isCi) {
@@ -300,7 +316,7 @@ val ALL_REPOS = listOf(
         }
     }
     .filter {
-        it.org == "duckduckgo"
+        it.org == "flipperdevices"
     }
 
 val CLONES_DIR = File("build/clones").apply {

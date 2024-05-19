@@ -22,7 +22,7 @@ class ReportDataRepo(
 
     val statsData: Flow<StatsJsReportModel?> = collectedDataRepo.statsData
 
-    val statInfos: Flow<Map<StatKey, StatMetadata>?> = collectedDataRepo.statsData.mapLatest { it?.statInfos }
+    val statInfos: Flow<Collection<StatMetadata>?> = collectedDataRepo.statsData.mapLatest { it?.statInfos?.values }
 
     val statTotals: Flow<CollectedStatTotalsJsReportModel?> = collectedDataRepo.statTotals
 

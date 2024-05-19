@@ -85,8 +85,9 @@ fun ModuleDetailComposable(
 
     val directDependenciesMapOrig by reportDataRepo.directDependenciesOf(modulePath).collectAsState(null)
     val moduleToOwnerMapCollected by reportDataRepo.moduleToOwnerMap.collectAsState(null)
+    val statInfos by reportDataRepo.statInfos.collectAsState(null)
 
-    if (moduleToOwnerMapCollected == null || pluginsForModule == null) {
+    if (moduleToOwnerMapCollected == null || pluginsForModule == null || statInfos == null) {
         H2 {
             BootstrapLoadingMessageWithSpinner()
         }
@@ -121,10 +122,11 @@ fun ModuleDetailComposable(
         BootstrapTabData(tabName = "Stats") {
             val statsForModule: Map<StatKey, Stat>? by reportDataRepo.statsData.map { it?.statsByModule?.get(navRoute.path) }
                 .collectAsState(null)
-            val statInfos by reportDataRepo.statInfos.collectAsState(null)
 
             if (statsForModule != null && statInfos != null) {
-                val statsForModuleMap: Map<StatMetadata?, Stat> = statsForModule!!.mapKeys { statInfos?.get(it.key) }
+                val statsForModuleMap: Map<StatMetadata?, Stat> = statsForModule!!.mapKeys {
+                    statInfos!!.first { statInfo -> statInfo.key == it.key }
+                }
                 BootstrapTable(
                     headers = listOf("Stat", "Value"),
                     rows = statsForModuleMap.filter { it.key != null && it.value is Stat.NumericStat }
@@ -134,7 +136,11 @@ fun ModuleDetailComposable(
                     types = listOf(String::class, Int::class),
                     maxResultsLimitConstant = MAX_RESULTS,
                     onItemClick = {
-                        navRouteRepo.updateNavRoute(ModuleDetailNavRoute(it[0]))
+                        navRouteRepo.updateNavRoute(
+                            StatDetailNavRoute(
+                                statKeys = listOf(statInfos!!.first { statInfo -> statInfo.description == it[0] }).map { it.key }
+                            )
+                        )
                     },
                     sortAscending = false,
                     sortByColumn = 0

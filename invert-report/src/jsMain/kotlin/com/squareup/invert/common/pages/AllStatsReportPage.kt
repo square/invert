@@ -116,29 +116,6 @@ fun AllStatsComposable(
             }
         }
     }
-    val rows = statInfos
-        .filter {
-            listOfNotNull(
-                CollectedStatType.NUMERIC,
-                CollectedStatType.BOOLEAN,
-                CollectedStatType.STRING
-            ).contains(it.statType)
-        }
-        .map { statInfo -> listOf(statInfo.description, statInfo.statType.name, statInfo.key) }
-
-//    BootstrapTable(
-//        headers = listOf("Description", "Type", "Key"),
-//        rows = rows,
-//        types = statInfos.map { String::class },
-//        maxResultsLimitConstant = MAX_RESULTS
-//    ) { cellValues ->
-//        navRouteRepo.updateNavRoute(
-//            StatDetailNavRoute(
-//                pluginIds = listOf(),
-//                statKeys = listOf(cellValues[2])
-//            )
-//        )
-//    }
 
     BootstrapButton("View All",
         BootstrapButtonType.PRIMARY,

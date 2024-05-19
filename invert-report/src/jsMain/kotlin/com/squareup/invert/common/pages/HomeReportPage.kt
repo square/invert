@@ -11,10 +11,10 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.utils.FormattingUtils.formatDecimalSeparator
 import kotlinx.coroutines.flow.map
+import org.jetbrains.compose.web.attributes.ATarget
+import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.dom.*
-import ui.AppLink
-import ui.BootstrapJumbotron
-import ui.BootstrapLoadingSpinner
+import ui.*
 import kotlin.reflect.KClass
 
 object HomeReportPage : InvertReportPage<HomeReportPage.HomeNavRoute> {
@@ -46,30 +46,23 @@ fun HomeComposable(
     val pluginIdsCount by reportDataRepo.allPluginIds.map { it?.size }.collectAsState(null)
     val reportMetadata by reportDataRepo.reportMetadata.collectAsState(null)
 
-    val metadata = reportMetadata
+    if (reportMetadata == null) {
+        BootstrapLoadingMessageWithSpinner("Loading Invert Report...")
+        return
+    }
+    val metadata = reportMetadata!!
     BootstrapJumbotron(
         centered = false,
         headerContent = {
             Text("Invert Report")
-            Br { }
-            if (metadata == null) {
-                BootstrapLoadingSpinner()
-            } else {
-                H5 {
-                    Text("Collected on ${metadata.timeStr} (${metadata.timezoneId})")
+            H5 {
+                Text("for ")
+                A(href = metadata.remoteRepoUrl) {
+                    Text(metadata.remoteRepoUrl.substringAfter("//").substringAfter("/"))
                 }
             }
         }) {
-        if (metadata == null) {
-            BootstrapLoadingSpinner()
-        } else {
-            Br {}
-            P {
-                Text("Git Repo ")
-                A(href = metadata.remoteRepoUrl) {
-                    Text(metadata.remoteRepoUrl)
-                }
-            }
+        Div({ classes("text-center") }) {
             metadata.gitSha?.let { gitSha ->
                 P({
                     classes("fs-6")
@@ -77,13 +70,13 @@ fun HomeComposable(
                     Text("Last Commit ")
                     metadata.branchName?.let { branchName ->
                         Text("from ")
-                        A(href = "${metadata.remoteRepoUrl}/tree/${branchName}/") {
+                        A(href = "${metadata.remoteRepoUrl}/tree/${branchName}/", { target(ATarget.Blank) }) {
                             Text(branchName)
                         }
                         Text(" branch ")
                     }
                     val commitUrl = metadata.remoteRepoUrl + "/commits/" + gitSha
-                    A(href = commitUrl) {
+                    A(href = commitUrl, { target(ATarget.Blank) }) {
                         Text(gitSha)
                     }
                 }
@@ -95,49 +88,139 @@ fun HomeComposable(
                     }
                 }
             }
-            HomeCountComposable(
-                moduleCount,
-                AllModulesReportPage.navPage
-            ) { navRouteRepo.updateNavRoute(AllModulesNavRoute()) }
-
-            HomeCountComposable(
-                artifactCount,
-                ArtifactsReportPage.navPage
-            ) { navRouteRepo.updateNavRoute(ArtifactsNavRoute()) }
-
-            HomeCountComposable(
-                ownersCount,
-                OwnersReportPage.navPage
-            ) { navRouteRepo.updateNavRoute(OwnersNavRoute) }
-
-            HomeCountComposable(
-                pluginIdsCount,
-                GradlePluginsReportPage.navPage
-            ) { navRouteRepo.updateNavRoute(GradlePluginsNavRoute(null)) }
         }
     }
-}
 
-@Composable
-fun HomeCountComposable(count: Int?, navItem: NavPage, onClick: () -> Unit) {
-    P {
-        count?.let {
-            Text(count.formatDecimalSeparator())
-        } ?: BootstrapLoadingSpinner()
+    val statsDataOrig by reportDataRepo.statsData.collectAsState(null)
+    val statTotalsOrig by reportDataRepo.statTotals.collectAsState(null)
+    val moduleToOwnerMapFlowValue by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
-        navItem.displayName.let { displayName ->
-            AppLink({
-                onClick {
-                    onClick()
+    H3 { Text("Stats") }
+
+    if (moduleToOwnerMapFlowValue == null) {
+        BootstrapLoadingSpinner()
+        return
+    }
+
+    if (statsDataOrig == null || statTotalsOrig == null) {
+        BootstrapLoadingMessageWithSpinner("Loading...")
+        return
+    }
+
+    val statTotals = statTotalsOrig!!
+    val statsData = statsDataOrig!!
+
+    val statInfos = statsData.statInfos.values
+
+
+    BootstrapRow {
+        HomeCountComposable(
+            moduleCount,
+            AllModulesReportPage.navPage
+        ) { navRouteRepo.updateNavRoute(AllModulesNavRoute()) }
+
+        HomeCountComposable(
+            artifactCount,
+            ArtifactsReportPage.navPage
+        ) { navRouteRepo.updateNavRoute(ArtifactsNavRoute()) }
+
+        HomeCountComposable(
+            pluginIdsCount,
+            GradlePluginsReportPage.navPage
+        ) { navRouteRepo.updateNavRoute(GradlePluginsNavRoute(null)) }
+
+        HomeCountComposable(
+            ownersCount,
+            OwnersReportPage.navPage
+        ) { navRouteRepo.updateNavRoute(OwnersNavRoute) }
+
+        var suppressionCount = 0
+        statTotals.statTotals.entries.forEach { statTotal ->
+            if (statTotal.key.category == null) {
+                BootstrapColumn(3) {
+                    BootstrapJumbotron(
+                        centered = true,
+                        paddingNum = 2,
+                        headerContent = {
+                            Text(statTotal.value.formatDecimalSeparator())
+                        }
+                    ) {
+                        A(href = "#", {
+                            onClick {
+                                navRouteRepo.updateNavRoute(
+                                    StatDetailNavRoute(
+                                        pluginIds = listOf(),
+                                        statKeys = listOf(statTotal.key.key)
+                                    )
+                                )
+                            }
+                        }) {
+                            Small {
+                                Text(statTotal.key.description)
+                            }
+                        }
+                    }
                 }
-            }) {
-                Button({
-                    classes("btn", "btn-link")
-                }) {
-                    Text(displayName)
+            } else if (statTotal.key.category == "suppress_annotation") {
+                suppressionCount += statTotal.value
+            }
+        }
+        if (suppressionCount > 0) {
+            BootstrapColumn(3) {
+                BootstrapJumbotron(
+                    centered = true,
+                    paddingNum = 2,
+                    headerContent = {
+                        Text(suppressionCount.formatDecimalSeparator())
+                    }
+                ) {
+                    A(href = "#", {
+                        onClick {
+                            navRouteRepo.updateNavRoute(
+                                SuppressAnnotationNavRoute()
+                            )
+                        }
+                    }) {
+                        Small {
+                            Text("@Suppress Annotations")
+                        }
+                    }
                 }
             }
         }
     }
 
+
+
+    BootstrapButton("View All",
+        BootstrapButtonType.PRIMARY,
+        onClick = {
+            navRouteRepo.updateNavRoute(
+                AllStatsNavRoute()
+            )
+        }
+    )
+}
+
+@Composable
+fun HomeCountComposable(count: Int?, navItem: NavPage, onClick: () -> Unit) {
+    count?.let { count ->
+        BootstrapColumn(3) {
+            BootstrapJumbotron(
+                centered = true,
+                paddingNum = 2,
+                headerContent = {
+                    Text(count.formatDecimalSeparator())
+                }
+            ) {
+                A(href = "#", {
+                    onClick {
+                        onClick()
+                    }
+                }) {
+                    Small { Text(navItem.displayName) }
+                }
+            }
+        }
+    }
 }

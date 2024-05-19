@@ -2,6 +2,7 @@ package com.squareup.invert.common.pages
 
 
 import PagingConstants
+import PagingConstants.MAX_RESULTS
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -14,11 +15,10 @@ import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.GradlePluginId
 import org.jetbrains.compose.web.dom.*
-import ui.BoostrapExpandingCard
-import ui.BootstrapAccordion
-import ui.BootstrapLoadingSpinner
-import ui.BootstrapTable
+import ui.*
+import kotlin.math.max
 import kotlin.reflect.KClass
 
 object KotlinCompilerPluginsReportPage :

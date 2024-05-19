@@ -323,13 +323,13 @@ fun BootstrapJumbotron(
         })
     }) {
         Div({
-            classes("container-fluid py-5".split(" "))
+            classes("container-fluid py-3".split(" "))
         }) {
             H1({
                 classes("display-5 fw-bold text-center".split(" "))
             }) { headerContent() }
             P({
-                classes("fs-5".split(" "))
+                classes(listOf("fs-5"))
             }) { content() }
         }
     }

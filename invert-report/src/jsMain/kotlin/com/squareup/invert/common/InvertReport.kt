@@ -88,7 +88,7 @@ class InvertReport(
             GradlePluginsReportPage,
             StatDetailReportPage,
             UnusedModulesReportPage,
-            SuppressAnnotationGraphReportPage,
+            SuppressAnnotationReportPage,
             GitHubMarkdownReportPage,
             GradleRepositoriesReportPage,
         )
