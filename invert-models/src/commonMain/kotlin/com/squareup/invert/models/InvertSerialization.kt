@@ -10,6 +10,7 @@ object InvertSerialization {
    * This binds serializers of interfaces to concrete classes.
    */
   val InvertJson = Json {
+    allowStructuredMapKeys = true
     ignoreUnknownKeys = true
     serializersModule = SerializersModule {
       polymorphic(

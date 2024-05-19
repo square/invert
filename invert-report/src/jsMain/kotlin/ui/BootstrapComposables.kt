@@ -310,11 +310,17 @@ fun BootstrapNavSectionHeader(title: String, iconSlug: String? = null) {
 
 @Composable
 fun BootstrapJumbotron(
+    centered: Boolean = false,
+    paddingNum: Int = 4,
     headerContent: @Composable () -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     Div({
-        classes("p-5 mb-4 bg-body-tertiary rounded-3".split(" "))
+        classes("p-${paddingNum} mb-4 bg-body-tertiary rounded-3".split(" ").toMutableList().apply {
+            if (centered) {
+                add("text-center")
+            }
+        })
     }) {
         Div({
             classes("container-fluid py-5".split(" "))
@@ -323,7 +329,7 @@ fun BootstrapJumbotron(
                 classes("display-5 fw-bold text-center".split(" "))
             }) { headerContent() }
             P({
-                classes("offset-md-1 col-md-10 fs-5".split(" "))
+                classes("fs-5".split(" "))
             }) { content() }
         }
     }

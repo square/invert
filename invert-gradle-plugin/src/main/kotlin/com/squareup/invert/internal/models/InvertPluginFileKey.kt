@@ -13,5 +13,6 @@ enum class InvertPluginFileKey(
   PLUGINS("plugins.json", "Plugins"),
   OWNERS("owners.json", "Owners"),
   METADATA("metadata.json", "Metadata"),
-  STATS("stats.json", "Stats")
+  STATS("stats.json", "Stats"),
+  STAT_TOTALS("stat_totals.json", "Stat Totals"),
 }

@@ -82,17 +82,17 @@ fun InverteDependenciesComposable(
             BootstrapTabData("Results") {
                 if (navRoute.pluginGroupByFilter.isEmpty() || navRoute.configurations.isEmpty()) {
                     BootstrapJumbotron(
-                        {
+                        headerContent = {
                             BootstrapIcon("exclamation-triangle", 48)
                             Text(" No configuration provided.")
-                        },
-                        {
-                            P({
-                                classes("text-center")
-                            }) {
-                                Text("Plugins and Configuration Names are not selected.  Go to the settings tab, set them and return to this page.")
-                            }
-                        })
+                        }
+                    ) {
+                        P({
+                            classes("text-center")
+                        }) {
+                            Text("Plugins and Configuration Names are not selected.  Go to the settings tab, set them and return to this page.")
+                        }
+                    }
                 } else {
                     TitleRow("Module Consumption (Grouped By Plugin Type)")
                     val query by reportDataRepo.moduleQuery.collectAsState(null)

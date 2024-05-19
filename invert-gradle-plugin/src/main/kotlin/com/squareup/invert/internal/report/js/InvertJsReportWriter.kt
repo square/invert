@@ -4,6 +4,7 @@ import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.models.CollectedConfigurationsForProject
 import com.squareup.invert.internal.models.CollectedDependenciesForProject
 import com.squareup.invert.internal.models.CollectedPluginsForProject
+import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import com.squareup.invert.models.InvertSerialization.InvertJson
 import com.squareup.invert.models.js.ConfigurationsJsReportModel
 import com.squareup.invert.models.js.DependenciesJsReportModel
@@ -31,6 +32,7 @@ class InvertJsReportWriter(
         invertedDependencies: DependenciesJsReportModel,
         allPluginsData: List<CollectedPluginsForProject>,
         collectedOwnershipInfo: OwnershipJsReportModel,
+        globalStatTotals: CollectedStatTotalsJsReportModel,
     ) {
         val pluginsReport = InvertJsReportUtils.toCollectedPlugins(allPluginsData)
         val modulesList = allProjectsDependencyData.map { it.path }
@@ -45,6 +47,12 @@ class InvertJsReportWriter(
             fileKey = JsReportFileKey.OWNERS,
             serializer = OwnershipJsReportModel.serializer(),
             value = collectedOwnershipInfo
+        )
+
+        writeJsFileInDir(
+            fileKey = JsReportFileKey.STAT_TOTALS,
+            serializer = CollectedStatTotalsJsReportModel.serializer(),
+            value = globalStatTotals
         )
 
         writeJsFileInDir(

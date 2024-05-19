@@ -5,13 +5,7 @@ import com.squareup.invert.internal.models.CollectedDependenciesForProject
 import com.squareup.invert.internal.models.CollectedOwnershipForProject
 import com.squareup.invert.internal.models.CollectedPluginsForProject
 import com.squareup.invert.internal.models.CollectedStatsForProject
-import com.squareup.invert.models.ConfigurationName
-import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.GradlePath
-import com.squareup.invert.models.GradlePluginId
-import com.squareup.invert.models.Stat
-import com.squareup.invert.models.StatMetadata
-import com.squareup.invert.models.StatKey
+import com.squareup.invert.models.*
 import com.squareup.invert.models.js.ConfigurationsJsReportModel
 import com.squareup.invert.models.js.DependenciesJsReportModel
 import com.squareup.invert.models.js.DirectDependenciesJsReportModel
@@ -38,6 +32,29 @@ object InvertJsReportUtils {
         .associateBy { it.ownerInfo.name }
         .mapValues { it.value.ownerInfo }
     )
+  }
+
+
+  fun computeGlobalStats(allProjectsStatsData: StatsJsReportModel): Map<StatMetadata, Int> {
+    val globalStats: Map<StatMetadata, Int> = allProjectsStatsData.statInfos.values
+      .filter { it.statType == CollectedStatType.NUMERIC }
+      .associateWith { statMetadata ->
+        val statKey = statMetadata.key
+        allProjectsStatsData.statsByModule.values.sumOf {
+          val stat = it[statKey]
+          when (stat) {
+            is Stat.NumericStat -> stat.value
+            is Stat.BooleanStat -> if (stat.value) {
+              1
+            } else {
+              0
+            }
+
+            else -> 0
+          }
+        }
+      }.toMap()
+    return globalStats
   }
 
   /**

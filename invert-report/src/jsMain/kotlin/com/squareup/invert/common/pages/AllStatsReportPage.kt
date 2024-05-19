@@ -13,6 +13,7 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.models.CollectedStatType
 import org.jetbrains.compose.web.dom.H1
+import org.jetbrains.compose.web.dom.Pre
 import org.jetbrains.compose.web.dom.Text
 import ui.*
 import kotlin.reflect.KClass
@@ -58,7 +59,6 @@ object AllStatsReportPage : InvertReportPage<AllStatsReportPage.AllStatsNavRoute
     }
 }
 
-
 @Composable
 fun AllStatsComposable(
     statsNavRoute: AllStatsReportPage.AllStatsNavRoute,
@@ -66,6 +66,7 @@ fun AllStatsComposable(
     navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo
 ) {
     val statsDataOrig by reportDataRepo.statsData.collectAsState(null)
+    val statTotalsOrig by reportDataRepo.statTotals.collectAsState(null)
     val moduleToOwnerMapFlowValue by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
     H1 { Text("Stats") }
@@ -75,16 +76,50 @@ fun AllStatsComposable(
         return
     }
 
-    if (statsDataOrig == null) {
+    if (statsDataOrig == null || statTotalsOrig == null) {
         BootstrapLoadingMessageWithSpinner("Loading...")
         return
     }
+
+    val statTotals = statTotalsOrig!!
     val statsData = statsDataOrig!!
 
     val statInfos = statsData.statInfos.values
 
+
+    BootstrapRow {
+        statTotals.statTotals.entries.forEach {
+            BootstrapColumn(4) {
+                BootstrapJumbotron(
+                    centered = true,
+                    paddingNum = 2,
+                    headerContent = {
+                        Text(it.value.toString())
+                    }
+                ) {
+                    Text(it.key.description)
+                }
+            }
+        }
+    }
+
+    Pre {
+        val preText = buildString {
+            statTotals.statTotals.entries.forEach {
+                appendLine(it.toString())
+            }
+        }
+        Text(preText)
+    }
+
     val rows = statInfos
-        .filter { listOfNotNull(CollectedStatType.NUMERIC, CollectedStatType.BOOLEAN, CollectedStatType.STRING).contains(it.statType) }
+        .filter {
+            listOfNotNull(
+                CollectedStatType.NUMERIC,
+                CollectedStatType.BOOLEAN,
+                CollectedStatType.STRING
+            ).contains(it.statType)
+        }
         .map { statInfo -> listOf(statInfo.description, statInfo.statType.name, statInfo.key) }
 
     BootstrapTable(

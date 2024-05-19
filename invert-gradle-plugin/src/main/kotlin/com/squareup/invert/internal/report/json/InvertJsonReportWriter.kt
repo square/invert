@@ -1,12 +1,10 @@
 package com.squareup.invert.internal.report.json
 
 import com.squareup.invert.internal.InvertFileUtils
-import com.squareup.invert.internal.models.CollectedConfigurationsForProject
-import com.squareup.invert.internal.models.CollectedDependenciesForProject
-import com.squareup.invert.internal.models.CollectedOwnershipForProject
-import com.squareup.invert.internal.models.CollectedPluginsForProject
-import com.squareup.invert.internal.models.InvertPluginFileKey
+import com.squareup.invert.internal.models.*
 import com.squareup.invert.models.InvertSerialization.InvertJson
+import com.squareup.invert.models.StatMetadata
+import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import com.squareup.invert.models.js.StatsJsReportModel
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -24,11 +22,18 @@ class InvertJsonReportWriter(
     allProjectsStatsData: StatsJsReportModel,
     allPluginsData: List<CollectedPluginsForProject>,
     allOwnersData: List<CollectedOwnershipForProject>,
+    globalStats: Map<StatMetadata, Int>,
   ) {
     writeJsonFileInDir(
       jsonFileKey = InvertPluginFileKey.PLUGINS,
       serializer = ListSerializer(CollectedPluginsForProject.serializer()),
       value = allPluginsData
+    )
+
+    writeJsonFileInDir(
+      jsonFileKey = InvertPluginFileKey.STAT_TOTALS,
+      serializer = CollectedStatTotalsJsReportModel.serializer(),
+      value = CollectedStatTotalsJsReportModel(globalStats)
     )
 
     writeJsonFileInDir(

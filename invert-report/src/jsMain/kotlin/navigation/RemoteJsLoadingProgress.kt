@@ -4,15 +4,7 @@ import com.squareup.invert.common.CollectedDataRepo
 import com.squareup.invert.common.Log
 import com.squareup.invert.common.PerformanceAndTiming
 import com.squareup.invert.models.InvertSerialization.InvertJson
-import com.squareup.invert.models.js.ConfigurationsJsReportModel
-import com.squareup.invert.models.js.DependenciesJsReportModel
-import com.squareup.invert.models.js.DirectDependenciesJsReportModel
-import com.squareup.invert.models.js.HomeJsReportModel
-import com.squareup.invert.models.js.JsReportFileKey
-import com.squareup.invert.models.js.MetadataJsReportModel
-import com.squareup.invert.models.js.OwnershipJsReportModel
-import com.squareup.invert.models.js.PluginsJsReportModel
-import com.squareup.invert.models.js.StatsJsReportModel
+import com.squareup.invert.models.js.*
 import externalLoadJavaScriptFile
 import kotlinx.browser.window
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,6 +86,12 @@ object RemoteJsLoadingProgress {
         JsReportFileKey.CONFIGURATIONS -> {
           collectedDataRepo.configurationsUpdated(
             InvertJson.decodeFromString(ConfigurationsJsReportModel.serializer(), json)
+          )
+        }
+
+        JsReportFileKey.STAT_TOTALS -> {
+          collectedDataRepo.statTotalsUpdated(
+            InvertJson.decodeFromString(CollectedStatTotalsJsReportModel.serializer(), json)
           )
         }
       }

@@ -8,6 +8,8 @@ import androidx.compose.runtime.getValue
 import com.squareup.invert.common.DependencyGraph
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ReportDataRepo
+import com.squareup.invert.common.charts.ChartJsChartComposable
+import com.squareup.invert.common.charts.ChartsJs
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
@@ -43,7 +45,7 @@ fun OwnersComposable(
     navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
     H1 {
-        Text("Owners")
+        Text("Owners (Using GitHub CODEOWNERS)")
     }
 
     val ownersCollected: Map<OwnerName, List<GradlePath>>? by reportDataRepo.ownerNameToModulesMap.collectAsState(null)
@@ -54,13 +56,33 @@ fun OwnersComposable(
     }
     val owners = ownersCollected!!
 
-    val values: List<List<String>> = owners.map {
+    ChartJsChartComposable(
+        data = ChartsJs.ChartJsData(
+            labels = owners.keys.map { it },
+            datasets = listOf(
+                ChartsJs.ChartJsDataset(
+                    label = "Module Count",
+                    data = owners.values.map { it.size }
+                )
+            )
+        ),
+        onClick = { label, value ->
+            navRouteRepo.updateNavRoute(
+                OwnerDetailNavRoute(
+                    owner = label,
+                )
+            )
+        }
+    )
+
+
+    val ownerToModuleCount: List<List<String>> = owners.map {
         listOf(it.key, it.value.size.toString())
     }
 
     BootstrapTable(
         headers = listOf("Owner", "Module Count"),
-        rows = values,
+        rows = ownerToModuleCount,
         types = listOf(String::class, Int::class),
         maxResultsLimitConstant = PagingConstants.MAX_RESULTS
     ) { cellValues ->

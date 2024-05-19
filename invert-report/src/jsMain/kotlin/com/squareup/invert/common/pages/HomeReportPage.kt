@@ -46,17 +46,19 @@ fun HomeComposable(
     val reportMetadata by reportDataRepo.reportMetadata.collectAsState(null)
 
     val metadata = reportMetadata
-    BootstrapJumbotron({
-        Text("Invert Report")
-        Br { }
-        if (metadata == null) {
-            BootstrapLoadingSpinner()
-        } else {
-            H5 {
-                Text("Collected on ${metadata.timeStr} (${metadata.timezoneId})")
+    BootstrapJumbotron(
+        centered = false,
+        headerContent = {
+            Text("Invert Report")
+            Br { }
+            if (metadata == null) {
+                BootstrapLoadingSpinner()
+            } else {
+                H5 {
+                    Text("Collected on ${metadata.timeStr} (${metadata.timezoneId})")
+                }
             }
-        }
-    }, {
+        }) {
         if (metadata == null) {
             BootstrapLoadingSpinner()
         } else {
@@ -124,7 +126,7 @@ fun HomeComposable(
                 }
             }
         }
-    })
+    }
 }
 
 @Composable

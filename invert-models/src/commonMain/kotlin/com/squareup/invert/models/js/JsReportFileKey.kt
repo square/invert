@@ -15,7 +15,8 @@ enum class JsReportFileKey(
   OWNERS("owners", "Owners"),
   METADATA("metadata", "Metadata"),
   CONFIGURATIONS("configurations", "Configurations"),
-  STATS("stats", "Stats");
+  STATS("stats", "Stats"),
+  STAT_TOTALS("stat_totals", "Stat Totals");
 
   val jsFilename = "$key.js"
 }

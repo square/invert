@@ -5,6 +5,7 @@ import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.pages.InvertedDependenciesNavRoute
 import com.squareup.invert.common.utils.DependencyComputations
 import com.squareup.invert.models.*
+import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import com.squareup.invert.models.js.MetadataJsReportModel
 import com.squareup.invert.models.js.PluginsJsReportModel
 import com.squareup.invert.models.js.StatsJsReportModel
@@ -20,6 +21,8 @@ class ReportDataRepo(
     val reportMetadata: Flow<MetadataJsReportModel?> = collectedDataRepo.reportMetadata
 
     val statsData: Flow<StatsJsReportModel?> = collectedDataRepo.statsData
+
+    val statTotals: Flow<CollectedStatTotalsJsReportModel?> = collectedDataRepo.statTotals
 
     val collectedPluginInfoReport: Flow<PluginsJsReportModel?> = collectedDataRepo.collectedPluginInfoReport
 

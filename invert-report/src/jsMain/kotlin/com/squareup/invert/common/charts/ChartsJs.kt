@@ -9,6 +9,8 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Canvas
 import renderChartJs
+import kotlin.math.absoluteValue
+import kotlin.random.Random
 
 object ChartsJs {
 
@@ -79,10 +81,12 @@ private fun ChartJsComposable(
 }
 
 
+private val random = Random(0)
+
 @Composable
 fun ChartJsChartComposable(
-    domId: String,
-    type: String,
+    domId: String = "chart-${random.nextInt().absoluteValue}",
+    type: String = "pie",
     data: ChartsJs.ChartJsData,
     onClick: (String, Int) -> Unit = { _, _ -> }
 ) {

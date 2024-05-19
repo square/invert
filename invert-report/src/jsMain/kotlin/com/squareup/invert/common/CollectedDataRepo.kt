@@ -1,14 +1,6 @@
 package com.squareup.invert.common
 
-import com.squareup.invert.models.js.ConfigurationsJsReportModel
-import com.squareup.invert.models.js.DependenciesJsReportModel
-import com.squareup.invert.models.js.DirectDependenciesJsReportModel
-import com.squareup.invert.models.js.HomeJsReportModel
-import com.squareup.invert.models.js.JsReportFileKey
-import com.squareup.invert.models.js.MetadataJsReportModel
-import com.squareup.invert.models.js.OwnershipJsReportModel
-import com.squareup.invert.models.js.PluginsJsReportModel
-import com.squareup.invert.models.js.StatsJsReportModel
+import com.squareup.invert.models.js.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -75,6 +67,11 @@ class CollectedDataRepo(
     loadJsOfType(JsReportFileKey.CONFIGURATIONS)
   }
 
+  private val _statTotals: MutableStateFlow<CollectedStatTotalsJsReportModel?> = MutableStateFlow(null)
+  val statTotals: Flow<CollectedStatTotalsJsReportModel?> = _statTotals.onEach {
+    loadJsOfType(JsReportFileKey.STAT_TOTALS)
+  }
+
   fun reportDataUpdated(reportData: DependenciesJsReportModel) {
     this._combinedReportData.value = reportData
   }
@@ -101,6 +98,10 @@ class CollectedDataRepo(
 
   fun configurationsUpdated(configurationsData: ConfigurationsJsReportModel) {
     this._configurations.value = configurationsData
+  }
+
+  fun statTotalsUpdated(statTotals: CollectedStatTotalsJsReportModel) {
+    this._statTotals.value = statTotals
   }
 
   fun homeUpdated(data: HomeJsReportModel) {
