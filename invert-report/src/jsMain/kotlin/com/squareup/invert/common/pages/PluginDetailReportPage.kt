@@ -35,7 +35,7 @@ data class PluginDetailNavRoute(
             params[PLUGIN_ID_PARAM]?.let {
                 return PluginDetailNavRoute(it)
             }
-            return PluginsNavRoute
+            return GradlePluginsNavRoute(null)
         }
     }
 }

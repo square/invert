@@ -16,6 +16,7 @@ import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.SuppressAnnotationGraphNavRoute.Companion.parser
 import com.squareup.invert.models.GradlePath
 import com.squareup.invert.models.Stat
+import com.squareup.invert.models.StatKey
 import kotlinx.browser.window
 import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.Text
@@ -59,7 +60,7 @@ object SuppressAnnotationGraphReportPage : InvertReportPage<SuppressAnnotationGr
     override val navPage: NavPage = NavPage(
         pageId = "suppress_annotation",
         displayName = "Suppress Annotation",
-        navIconSlug = "diagram-3",
+        navIconSlug = "at",
         navRouteParser = { parser(it) }
     )
 
@@ -74,6 +75,7 @@ data class SuppressTypeByModule(
     val gradlePath: GradlePath,
     val suppressType: String,
     val count: Int,
+    val statKey: StatKey,
 )
 
 @Composable
@@ -101,7 +103,8 @@ fun SuppressAnnotationGraphComposable(
                         SuppressTypeByModule(
                             gradlePath = modulePath,
                             suppressType = statMetadataForStatKey.description,
-                            count = stat.value
+                            count = stat.value,
+                            statKey = statMetadataForStatKey.key
                         )
                     )
                 }
@@ -188,7 +191,9 @@ fun SuppressAnnotationGraphComposable(
                         onClick = { label: String, value: Int ->
                             navRouteRepo.updateNavRoute(
                                 StatDetailNavRoute(
-                                    statKeys = listOf("suppress_annotation_$label"),
+                                    statKeys = listOf(
+                                        statsData?.statInfos?.values?.firstOrNull { it.description == label }?.key ?: ""
+                                    ),
                                 )
                             )
                         }

@@ -2,39 +2,35 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.squareup.invert.common.ReportDataRepo
-import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteManager
 import com.squareup.invert.common.navigation.NavRouteRepo
-import com.squareup.invert.common.navigation.routes.*
 import history.JavaScriptNavigationAndHistory
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.html.ATarget
 import navigation.CustomNavItem
 import navigation.LeftNavigationComposable
 import navigation.RemoteJsLoadingProgress
-import org.jetbrains.compose.web.attributes.ATarget.*
+import org.jetbrains.compose.web.attributes.ATarget.Blank
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
-import ui.*
+import ui.NavBarComposable
 
 
 fun invertComposeMain(
     initialRoute: NavRoute,
     routeManager: NavRouteManager,
     navRouteRepo: NavRouteRepo,
-    customNavItems: List<CustomNavItem>,
     reportDataRepo: ReportDataRepo,
 ) {
     setupNavigation(routeManager, navRouteRepo)
 
     renderComposable(rootElementId = "navigation") {
-        LeftNavigationComposable(initialRoute, navRouteRepo, customNavItems)
+        LeftNavigationComposable(initialRoute, navRouteRepo, reportDataRepo)
     }
 
     renderComposable(rootElementId = "main_content") {

@@ -43,7 +43,7 @@ data class AllModulesNavRoute(
 object AllModulesReportPage : InvertReportPage<AllModulesNavRoute> {
     override val navPage: NavPage = NavPage(
         pageId = "modules",
-        displayName = "Gradle Modules",
+        displayName = "Modules",
         navIconSlug = "folder",
         navRouteParser = {
             AllModulesNavRoute.parser(it)

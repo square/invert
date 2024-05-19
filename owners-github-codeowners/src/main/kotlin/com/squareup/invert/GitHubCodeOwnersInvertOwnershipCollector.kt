@@ -12,12 +12,7 @@ object GitHubCodeOwnersInvertOwnershipCollector : InvertOwnershipCollector {
     override fun collect(rootProjectDir: String, gradlePath: GradlePath): OwnerInfo? {
 
         val gitRoot = File(rootProjectDir).findGitRootPath()
-
-        if (gitRoot == null) {
-            throw IllegalStateException("This is not a Git Repository.  Could not locate the .git folder at the root.")
-        } else {
-            println("gitRoot $gitRoot")
-        }
+            ?: throw IllegalStateException("This is not a Git Repository.  Could not locate the .git folder at the root.")
 
         val CODEOWNERS_FILES = gitRoot.findCodeOwnerLocations()
 
@@ -42,7 +37,6 @@ object GitHubCodeOwnersInvertOwnershipCollector : InvertOwnershipCollector {
                 val relativePath = projectDir.absolutePath.replace(gitRoot.absolutePath, "")
                 val owners = ownersResolver
                     .resolveOwnership(relativePath)
-                println("RESOLVING OWNERSHIP OF $relativePath is $owners")
                 owners?.joinToString("/n") ?: "NONE"
             }
         )

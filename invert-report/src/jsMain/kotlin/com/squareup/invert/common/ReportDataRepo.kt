@@ -22,6 +22,8 @@ class ReportDataRepo(
 
     val statsData: Flow<StatsJsReportModel?> = collectedDataRepo.statsData
 
+    val statInfos: Flow<Map<StatKey, StatMetadata>?> = collectedDataRepo.statsData.mapLatest { it?.statInfos }
+
     val statTotals: Flow<CollectedStatTotalsJsReportModel?> = collectedDataRepo.statTotals
 
     val collectedPluginInfoReport: Flow<PluginsJsReportModel?> = collectedDataRepo.collectedPluginInfoReport
@@ -112,7 +114,7 @@ class ReportDataRepo(
             }
         }
 
-    fun moduleUsedBy(path: GradlePath): Flow<Map<GradlePath, List<ConfigurationName>>?> =
+    fun moduleTransitivelyUsedBy(path: GradlePath): Flow<Map<GradlePath, List<ConfigurationName>>?> =
         allInvertedDependencies.mapLatest { allInvertedDependenciesMap: Map<DependencyId, Map<GradlePath, List<ConfigurationName>>>? ->
             if (allInvertedDependenciesMap != null) {
                 allInvertedDependenciesMap[path] ?: mapOf()
@@ -120,6 +122,7 @@ class ReportDataRepo(
                 null
             }
         }
+
 
     fun directDependenciesOf(gradlePath: GradlePath?): Flow<Map<ConfigurationName, Set<DependencyId>>?> =
         collectedDataRepo.directDependenciesData.mapLatest { directDependenciesData ->

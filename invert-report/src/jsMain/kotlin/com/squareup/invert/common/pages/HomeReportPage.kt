@@ -9,6 +9,7 @@ import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
+import com.squareup.invert.common.utils.FormattingUtils.formatDecimalSeparator
 import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.web.dom.*
 import ui.AppLink
@@ -107,24 +108,12 @@ fun HomeComposable(
             HomeCountComposable(
                 ownersCount,
                 OwnersReportPage.navPage
-            ) { navRouteRepo.updateNavRoute(OwnersReportPage.OwnersNavRoute) }
+            ) { navRouteRepo.updateNavRoute(OwnersNavRoute) }
 
             HomeCountComposable(
                 pluginIdsCount,
-                PluginsNavRoute.navPage
-            ) { navRouteRepo.updateNavRoute(PluginsNavRoute) }
-
-            Text("Remote Repositories")
-            Br()
-            Ul({ classes("fs-6") }) {
-                metadata.mavenRepoUrls.forEach { mavenRepoUrl ->
-                    Li {
-                        A(href = mavenRepoUrl) {
-                            Text(mavenRepoUrl)
-                        }
-                    }
-                }
-            }
+                GradlePluginsReportPage.navPage
+            ) { navRouteRepo.updateNavRoute(GradlePluginsNavRoute(null)) }
         }
     }
 }
@@ -133,7 +122,7 @@ fun HomeComposable(
 fun HomeCountComposable(count: Int?, navItem: NavPage, onClick: () -> Unit) {
     P {
         count?.let {
-            Text("$count")
+            Text(count.formatDecimalSeparator())
         } ?: BootstrapLoadingSpinner()
 
         navItem.displayName.let { displayName ->

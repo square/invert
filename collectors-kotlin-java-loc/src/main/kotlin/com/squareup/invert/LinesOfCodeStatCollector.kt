@@ -42,14 +42,14 @@ class LinesOfCodeStatCollector : StatCollector {
 
     private val KOTLIN_FILE_COUNT: StatMetadata = StatMetadata(
         key = "file_count_kotlin",
-        description = "Kotlin File Count",
+        description = "File Count - Kotlin",
         statType = CollectedStatType.NUMERIC,
         category = "file_count",
     )
 
     private val KOTLIN_LINES_OF_CODE: StatMetadata = StatMetadata(
         key = "lines_of_code_kotlin",
-        description = "Kotlin Lines of Code",
+        description = "Lines of Code - Kotlin",
         statType = CollectedStatType.NUMERIC,
         category = "lines_of_code",
     )

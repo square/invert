@@ -1,7 +1,6 @@
 package com.squareup.invert.common.pages
 
 
-import PagingConstants.MAX_RESULTS
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -11,14 +10,44 @@ import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
+import com.squareup.invert.common.pages.AllStatsReportPage.navPage
+import com.squareup.invert.common.utils.FormattingUtils.formatDecimalSeparator
 import com.squareup.invert.models.CollectedStatType
+import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.H1
-import org.jetbrains.compose.web.dom.Pre
 import org.jetbrains.compose.web.dom.Text
 import ui.*
 import kotlin.reflect.KClass
 
-object AllStatsReportPage : InvertReportPage<AllStatsReportPage.AllStatsNavRoute> {
+
+data class AllStatsNavRoute(
+    val statType: CollectedStatType? = null
+) : BaseNavRoute(
+    navPage
+) {
+    override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
+        .also { params ->
+            statType?.name?.let {
+                params[STAT_TYPE_PARAM] =
+                    it
+            }
+        }
+
+    companion object {
+
+        private const val STAT_TYPE_PARAM = "types"
+
+        fun parser(params: Map<String, String?>): AllStatsNavRoute {
+            val statTypeParam = params[STAT_TYPE_PARAM]
+            val statType = CollectedStatType.entries.firstOrNull { it.name == statTypeParam }
+            return AllStatsNavRoute(
+                statType = statType,
+            )
+        }
+    }
+}
+
+object AllStatsReportPage : InvertReportPage<AllStatsNavRoute> {
     override val navPage: NavPage = NavPage(
         pageId = "stats",
         displayName = "Stats",
@@ -31,37 +60,11 @@ object AllStatsReportPage : InvertReportPage<AllStatsReportPage.AllStatsNavRoute
         AllStatsComposable(navRoute)
     }
 
-    data class AllStatsNavRoute(
-        val statType: CollectedStatType? = null
-    ) : BaseNavRoute(
-        navPage
-    ) {
-        override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
-            .also { params ->
-                statType?.name?.let {
-                    params[STAT_TYPE_PARAM] =
-                        it
-                }
-            }
-
-        companion object {
-
-            private const val STAT_TYPE_PARAM = "types"
-
-            fun parser(params: Map<String, String?>): AllStatsNavRoute {
-                val statTypeParam = params[STAT_TYPE_PARAM]
-                val statType = CollectedStatType.entries.firstOrNull { it.name == statTypeParam }
-                return AllStatsNavRoute(
-                    statType = statType,
-                )
-            }
-        }
-    }
 }
 
 @Composable
 fun AllStatsComposable(
-    statsNavRoute: AllStatsReportPage.AllStatsNavRoute,
+    statsNavRoute: AllStatsNavRoute,
     reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
     navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo
 ) {
@@ -88,30 +91,31 @@ fun AllStatsComposable(
 
 
     BootstrapRow {
-        statTotals.statTotals.entries.forEach {
+        statTotals.statTotals.entries.forEach { statTotal ->
             BootstrapColumn(4) {
                 BootstrapJumbotron(
                     centered = true,
                     paddingNum = 2,
                     headerContent = {
-                        Text(it.value.toString())
+                        Text(statTotal.value.formatDecimalSeparator())
                     }
                 ) {
-                    Text(it.key.description)
+                    A(href = "#", {
+                        onClick {
+                            navRouteRepo.updateNavRoute(
+                                StatDetailNavRoute(
+                                    pluginIds = listOf(),
+                                    statKeys = listOf(statTotal.key.key)
+                                )
+                            )
+                        }
+                    }) {
+                        Text(statTotal.key.description)
+                    }
                 }
             }
         }
     }
-
-    Pre {
-        val preText = buildString {
-            statTotals.statTotals.entries.forEach {
-                appendLine(it.toString())
-            }
-        }
-        Text(preText)
-    }
-
     val rows = statInfos
         .filter {
             listOfNotNull(
@@ -122,19 +126,19 @@ fun AllStatsComposable(
         }
         .map { statInfo -> listOf(statInfo.description, statInfo.statType.name, statInfo.key) }
 
-    BootstrapTable(
-        headers = listOf("Description", "Type", "Key"),
-        rows = rows,
-        types = statInfos.map { String::class },
-        maxResultsLimitConstant = MAX_RESULTS
-    ) { cellValues ->
-        navRouteRepo.updateNavRoute(
-            StatDetailNavRoute(
-                pluginIds = listOf(),
-                statKeys = listOf(cellValues[2])
-            )
-        )
-    }
+//    BootstrapTable(
+//        headers = listOf("Description", "Type", "Key"),
+//        rows = rows,
+//        types = statInfos.map { String::class },
+//        maxResultsLimitConstant = MAX_RESULTS
+//    ) { cellValues ->
+//        navRouteRepo.updateNavRoute(
+//            StatDetailNavRoute(
+//                pluginIds = listOf(),
+//                statKeys = listOf(cellValues[2])
+//            )
+//        )
+//    }
 
     BootstrapButton("View All",
         BootstrapButtonType.PRIMARY,

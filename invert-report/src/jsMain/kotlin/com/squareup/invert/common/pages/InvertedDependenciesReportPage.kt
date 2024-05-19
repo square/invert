@@ -145,7 +145,7 @@ fun SettingsComposable(reportDataRepo: ReportDataRepo, navRouteRepo: NavRouteRep
         val invertedDependenciesNavRoute = navRoute!! as InvertedDependenciesNavRoute
         val groupByFilterItems = invertedDependenciesNavRoute.pluginGroupByFilter
         H1 {
-            Text("Module Consumption Settings")
+            Text("Inverted Transitive Dependency Search Settings")
         }
         Br {}
         BootstrapRow {

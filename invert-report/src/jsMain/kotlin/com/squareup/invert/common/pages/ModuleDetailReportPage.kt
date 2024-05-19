@@ -13,10 +13,12 @@ import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.ModuleDetailNavRoute.Companion.parser
-import com.squareup.invert.models.ConfigurationName
-import com.squareup.invert.models.GradlePath
-import com.squareup.invert.models.OwnerName
-import org.jetbrains.compose.web.dom.H1
+import com.squareup.invert.models.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import org.jetbrains.compose.web.dom.Br
+import org.jetbrains.compose.web.dom.H2
 import org.jetbrains.compose.web.dom.Text
 import ui.*
 import kotlin.reflect.KClass
@@ -65,6 +67,12 @@ object ModuleDetailReportPage : InvertReportPage<ModuleDetailNavRoute> {
     }
 }
 
+private data class DependencyIdAndConfiguration(
+    val dependencyId: DependencyId,
+    val configurationName: ConfigurationName,
+)
+
+@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun ModuleDetailComposable(
     navRoute: ModuleDetailNavRoute,
@@ -73,19 +81,21 @@ fun ModuleDetailComposable(
 ) {
     val modulePath = navRoute.path
 
+    val pluginsForModule by reportDataRepo.allPlugins.mapLatest { it?.get(navRoute.path) }.collectAsState(null)
+
     val directDependenciesMapOrig by reportDataRepo.directDependenciesOf(modulePath).collectAsState(null)
     val moduleToOwnerMapCollected by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
-    if (moduleToOwnerMapCollected == null) {
-        H1 {
-            BootstrapLoadingMessageWithSpinner("Loading Module Ownership...")
+    if (moduleToOwnerMapCollected == null || pluginsForModule == null) {
+        H2 {
+            BootstrapLoadingMessageWithSpinner()
         }
         return
     }
     val moduleToOwnerMap = moduleToOwnerMapCollected!!
     val ownerName: OwnerName? = moduleToOwnerMap[modulePath]
     ownerName?.let {
-        H1 {
+        H2 {
             Text("Module $modulePath is owned by ")
             AppLink({
                 onClick {
@@ -94,87 +104,156 @@ fun ModuleDetailComposable(
             }) {
                 Text(ownerName)
             }
+            Br { }
+            Br { }
         }
     }
-    val tabs = mutableListOf<BootstrapTabData>()
 
     if (directDependenciesMapOrig == null) {
         BootstrapLoadingMessageWithSpinner("Loading Direct Dependencies...")
         return
     }
-    directDependenciesMapOrig?.keys?.forEach { configurationName ->
-        tabs.add(
-            BootstrapTabData("Direct Dependencies for $configurationName") {
-                val rows = directDependenciesMapOrig?.get(configurationName)
-                    ?.filter { it.startsWith(":") }
-                    ?.sorted() ?: listOf()
+
+    val directDependenciesMap = directDependenciesMapOrig!!
+
+    val pageTabs = mutableListOf<BootstrapTabData>()
+    pageTabs.add(
+        BootstrapTabData(tabName = "Stats") {
+            val statsForModule: Map<StatKey, Stat>? by reportDataRepo.statsData.map { it?.statsByModule?.get(navRoute.path) }
+                .collectAsState(null)
+            val statInfos by reportDataRepo.statInfos.collectAsState(null)
+
+            if (statsForModule != null && statInfos != null) {
+                val statsForModuleMap: Map<StatMetadata?, Stat> = statsForModule!!.mapKeys { statInfos?.get(it.key) }
                 BootstrapTable(
-                    headers = listOf("Module"),
-                    rows = rows.map { listOf(it) },
-                    types = listOf(String::class),
+                    headers = listOf("Stat", "Value"),
+                    rows = statsForModuleMap.filter { it.key != null && it.value is Stat.NumericStat }
+                        .map { (key, value) ->
+                            listOf(key!!.description, (value as Stat.NumericStat).value.toString())
+                        },
+                    types = listOf(String::class, Int::class),
                     maxResultsLimitConstant = MAX_RESULTS,
                     onItemClick = {
                         navRouteRepo.updateNavRoute(ModuleDetailNavRoute(it[0]))
-                    }
+                    },
+                    sortAscending = false,
+                    sortByColumn = 0
                 )
             }
-        )
-    }
 
+        })
+    pageTabs.add(
+        BootstrapTabData(tabName = "Direct Dependencies") {
+
+            val allDirectDependencyToConfigurationEntries = mutableSetOf<DependencyIdAndConfiguration>()
+            directDependenciesMap.entries.forEach {
+                it.value
+                    .filter { it.startsWith(":") }
+                    .forEach { depId: DependencyId ->
+                        allDirectDependencyToConfigurationEntries.add(
+                            DependencyIdAndConfiguration(
+                                dependencyId = depId,
+                                configurationName = it.key
+                            )
+                        )
+                    }
+            }
+            val directDepsDependencyIdToConfigurations: Map<DependencyId, List<ConfigurationName>> =
+                allDirectDependencyToConfigurationEntries
+                    .groupBy { it.dependencyId }
+                    .mapValues { entry ->
+                        entry.value
+                            .map { it.configurationName }
+                            .distinct()
+                            .sorted()
+                    }
+
+            BootstrapTable(
+                headers = listOf("Module", "Configurations"),
+                rows = directDepsDependencyIdToConfigurations.entries.map {
+                    listOf(
+                        it.key,
+                        it.value.joinToString("\n")
+                    )
+                },
+                types = listOf(String::class, String::class),
+                maxResultsLimitConstant = MAX_RESULTS,
+                onItemClick = {
+                    navRouteRepo.updateNavRoute(ModuleDetailNavRoute(it[0]))
+                }
+            )
+        }
+    )
 
     val configurationToDependencyMapCollected by reportDataRepo.dependenciesOf(navRoute.path).collectAsState(null)
-    if (configurationToDependencyMapCollected == null) {
-        H1 {
-            BootstrapLoadingMessageWithSpinner("Loading Transitive Dependencies...")
-        }
-        return
-    }
-    H1 { Text("Direct Dependencies") }
-    BootstrapTabPane(tabs)
-
-    val tabs2 = mutableListOf<BootstrapTabData>()
-    val configurationToDependencyMap = configurationToDependencyMapCollected!!
-    configurationToDependencyMap.keys.forEach { configurationName ->
-        tabs2.add(
-            BootstrapTabData("Transitive Dependencies for $configurationName") {
-                val rows = configurationToDependencyMap[configurationName]
-                    ?.filter { it.startsWith(":") }
-                    ?.sorted() ?: listOf()
-                BootstrapTable(
-                    headers = listOf("Module"),
-                    rows = rows.map { listOf(it) },
-                    types = listOf(String::class),
-                    maxResultsLimitConstant = MAX_RESULTS,
-                    onItemClick = {
-                        navRouteRepo.updateNavRoute(ModuleDetailNavRoute(it[0]))
+    if (configurationToDependencyMapCollected != null) {
+        pageTabs.add(BootstrapTabData(tabName = "Transitive Dependencies") {
+            val configurationToDependencyMap = configurationToDependencyMapCollected!!
+            val allTransitiveDependencyToConfigurationEntries = mutableSetOf<DependencyIdAndConfiguration>()
+            configurationToDependencyMap.entries.forEach {
+                it.value
+                    .filter { it.startsWith(":") }
+                    .forEach { depId: DependencyId ->
+                        allTransitiveDependencyToConfigurationEntries.add(
+                            DependencyIdAndConfiguration(
+                                dependencyId = depId,
+                                configurationName = it.key
+                            )
+                        )
                     }
-                )
             }
-        )
-    }
-    H1 { Text("Transitive Dependencies") }
-    BootstrapTabPane(tabs2)
-    H1 { Text("Module Used By...") }
-        val moduleUsageCollected by reportDataRepo.moduleUsedBy(modulePath).collectAsState(null)
-        if (moduleUsageCollected == null) {
-            H1 {
-                BootstrapLoadingMessageWithSpinner("Loading Module Usage...")
-            }
-            return
-        }
-        val moduleUsage = moduleUsageCollected!!
-        BootstrapTable(
-            headers = listOf("Module", "Used in Configurations"),
-            rows = moduleUsage.keys.map { key -> listOf(key, moduleUsage[key].toString()) },
-            types = moduleUsage.keys.map { String::class },
-            maxResultsLimitConstant = MAX_RESULTS,
-            onItemClick = {
-                navRouteRepo.updateNavRoute(
-                    ModuleDetailNavRoute(
-                        it[0]
-                    )
-                )
-            }
-        )
 
+            val transitiveDepsDependencyIdToConfigurations: Map<DependencyId, List<ConfigurationName>> =
+                allTransitiveDependencyToConfigurationEntries
+                    .groupBy { it.dependencyId }
+                    .mapValues { entry ->
+                        entry.value
+                            .map { it.configurationName }
+                            .distinct()
+                            .sorted()
+                    }
+
+            BootstrapTable(
+                headers = listOf("Module", "Configurations"),
+                rows = transitiveDepsDependencyIdToConfigurations.entries.map {
+                    listOf(
+                        it.key,
+                        it.value.joinToString("\n")
+                    )
+                },
+                types = listOf(String::class, String::class),
+                maxResultsLimitConstant = MAX_RESULTS,
+                onItemClick = {
+                    navRouteRepo.updateNavRoute(ModuleDetailNavRoute(it[0]))
+                }
+            )
+        })
+    }
+
+    val moduleUsageCollected by reportDataRepo.moduleTransitivelyUsedBy(modulePath).collectAsState(null)
+    moduleUsageCollected?.let {
+        pageTabs.add(BootstrapTabData(tabName = "Used Transitively By") {
+            val moduleUsage = moduleUsageCollected!!
+            BootstrapTable(
+                headers = listOf("Module", "Used in Configurations"),
+                rows = moduleUsage.keys.map { key -> listOf(key, moduleUsage[key]?.joinToString() ?: "") },
+                types = moduleUsage.keys.map { String::class },
+                maxResultsLimitConstant = MAX_RESULTS,
+                onItemClick = {
+                    navRouteRepo.updateNavRoute(
+                        ModuleDetailNavRoute(
+                            it[0]
+                        )
+                    )
+                }
+            )
+        })
+    }
+
+    pageTabs.add(BootstrapTabData(tabName = "Gradle Plugins") {
+        val pluginsForModuleNonNull = pluginsForModule!!
+        BootstrapClickableList("Gradle Plugins", pluginsForModuleNonNull, MAX_RESULTS) {}
+    })
+
+    BootstrapTabPane(pageTabs)
 }

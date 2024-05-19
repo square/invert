@@ -3,13 +3,14 @@ package navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
+import org.jetbrains.compose.web.attributes.ATarget.Blank
+import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.dom.*
 import ui.BootstrapIcon
-import ui.BootstrapNavItem
-import ui.BootstrapNavSectionHeader
 import kotlin.random.Random
 
 data class CustomNavItem(
@@ -19,8 +20,13 @@ data class CustomNavItem(
 )
 
 @Composable
-fun LeftNavigationComposable(initialRoute: NavRoute, navRouteRepo: NavRouteRepo, customReports: List<CustomNavItem>) {
+fun LeftNavigationComposable(
+    initialRoute: NavRoute,
+    navRouteRepo: NavRouteRepo,
+    reportDataRepo: ReportDataRepo,
+) {
     val currentNavRoute by navRouteRepo.navRoute.collectAsState(initialRoute)
+    val metadataOrig by reportDataRepo.reportMetadata.collectAsState(null)
 
     Ul({ classes("list-unstyled", "ps-0") }) {
         val random = Random(0)
@@ -77,39 +83,27 @@ fun LeftNavigationComposable(initialRoute: NavRoute, navRouteRepo: NavRouteRepo,
                 }
             }
     }
-    return
+
+    metadataOrig?.let { metadata ->
+        Small({classes("text-center")}) {
+            Br()
+            metadata.branchName?.let { branchName ->
+                Text("Branch ")
+                A(href = metadata.remoteRepoUrl + "/tree/${branchName}", attrs = { target(Blank) }) {
+                    Text(branchName)
+                }
+            }
+            Br()
+            metadata.currentBranchHash?.let { currentBranchHash ->
+                Text("Commit ")
+                A(href = metadata.remoteRepoUrl + "/tree/${currentBranchHash}", attrs = { target(Blank) }) {
+                    Text(currentBranchHash.substring(0, 7))
+                }
+            }
+            Br()
+            Text("${metadata.timeStr}")
+            Br()
+            Text("(${metadata.timezoneId})")
+        }
+    }
 }
-//
-//@Composable
-//fun OldNav(currentNavRoute: NavRoute, navRouteRepo: NavRouteRepo, customReports: List<CustomNavItem>) {
-//    Hr { }
-//
-//    /** Entry Point */
-//    NavPage
-//        .ROOT_NAV_ITEMS.map { it.navItems }.flatten()
-//        .forEach { rootNavItem: NavPage.NavItem ->
-//            val displayName = rootNavItem.navPage.displayName
-//            val navIconSlug = rootNavItem.navPage.navIconSlug
-//            val newNavRoute = rootNavItem.destinationNavRoute
-//            BootstrapNavItem(
-//                text = displayName,
-//                iconSlug = navIconSlug,
-//                activeTab = currentNavRoute::class == newNavRoute::class,
-//                onClick = {
-//                    navRouteRepo.updateNavRoute(newNavRoute)
-//                }
-//            )
-//        }
-//
-//    if (customReports.isNotEmpty()) {
-//        BootstrapNavSectionHeader("Custom Reports", "fire")
-//
-//        customReports.forEach {
-//            BootstrapNavItem(
-//                text = it.text,
-//                iconSlug = it.iconSlug,
-//                onClick = { navRouteRepo.updateNavRoute(it.navRoute) }
-//            )
-//        }
-//    }
-//}

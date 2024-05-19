@@ -8,14 +8,12 @@ import androidx.compose.runtime.getValue
 import com.squareup.invert.common.DependencyGraph
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ReportDataRepo
+import com.squareup.invert.common.charts.ChartJsChartComposable
+import com.squareup.invert.common.charts.ChartsJs
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import com.squareup.invert.common.pages.ArtifactsNavRoute.Companion.parser
-import ui.BootstrapLoadingMessageWithSpinner
-import ui.BootstrapSearchBox
-import ui.BootstrapTable
-import ui.TitleRow
+import ui.*
 import kotlin.reflect.KClass
 
 data class ArtifactsNavRoute(
@@ -46,7 +44,7 @@ object ArtifactsReportPage : InvertReportPage<ArtifactsNavRoute> {
         pageId = "artifacts",
         displayName = "Artifacts",
         navIconSlug = "newspaper",
-        navRouteParser = { parser(it) }
+        navRouteParser = { ArtifactsNavRoute.parser(it) }
     )
     override val navRouteKClass: KClass<ArtifactsNavRoute> = ArtifactsNavRoute::class
 
@@ -54,6 +52,12 @@ object ArtifactsReportPage : InvertReportPage<ArtifactsNavRoute> {
         ArtifactsComposable(navRoute)
     }
 }
+
+private data class Gav(
+    val group: String,
+    val artifact: String,
+    val version: String,
+)
 
 @Composable
 fun ArtifactsComposable(
@@ -73,16 +77,6 @@ fun ArtifactsComposable(
 
     val allArtifacts = allArtifactsCollected!!
 
-    val allArtifactsCount = allArtifacts.size
-    TitleRow("Artifacts (${artifactsMatchingQuery.size} of $allArtifactsCount)")
-    BootstrapSearchBox(
-        navRoute.query ?: "",
-        "Search For Artifact..."
-    ) {
-        navRouteRepo.updateNavRoute(
-            ArtifactsNavRoute(it)
-        )
-    }
 
     val groupedByGroupAndArtifact = artifactsMatchingQuery.groupBy {
         val split = it.split(":")
@@ -92,6 +86,63 @@ fun ArtifactsComposable(
             val split = it.split(":")
             split[2]
         }.keys
+    }
+
+
+    val gavs: List<Gav> = groupedByGroupAndArtifact.keys.mapNotNull {
+        val split = it.split(":")
+        if (split.size == 2) {
+            Gav(
+                group = split[0],
+                artifact = split[1],
+                version = if (groupedByGroupAndArtifact.size > 1) {
+                    groupedByGroupAndArtifact[it].toString()
+                } else {
+                    groupedByGroupAndArtifact.get(it)?.elementAt(0) ?: ""
+                }
+            )
+        } else {
+            null
+        }
+    }
+
+    val gavByGroup = gavs.groupBy { it.group }
+
+    val allArtifactsCount = allArtifacts.size
+    TitleRow("Artifacts (${artifactsMatchingQuery.size} of $allArtifactsCount)")
+    BootstrapRow {
+        BootstrapColumn(6) {
+            BootstrapSearchBox(
+                navRoute.query ?: "",
+                "Search For Artifact..."
+            ) {
+                navRouteRepo.updateNavRoute(
+                    ArtifactsNavRoute(it)
+                )
+            }
+        }
+        BootstrapColumn(6) {
+            ChartJsChartComposable(
+                type = "bar",
+                domId = "chart-invert-artifacts",
+                data = ChartsJs.ChartJsData(
+                    labels = gavByGroup.keys.map { it },
+                    datasets = listOf(
+                        ChartsJs.ChartJsDataset(
+                            label = "Group",
+                            data = gavByGroup.values.map { it.size }
+                        )
+                    )
+                ),
+                onClick = { label, value ->
+                    navRouteRepo.updateNavRoute(
+                        ArtifactsNavRoute(
+                            query = "$label:"
+                        )
+                    )
+                }
+            )
+        }
     }
 
     BootstrapTable(

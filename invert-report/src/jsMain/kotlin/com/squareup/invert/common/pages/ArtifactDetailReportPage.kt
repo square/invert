@@ -14,10 +14,7 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.ArtifactDetailReportPage.navPage
 import com.squareup.invert.models.DependencyId
-import org.jetbrains.compose.web.dom.Br
-import org.jetbrains.compose.web.dom.H1
-import org.jetbrains.compose.web.dom.H4
-import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.dom.*
 import ui.BootstrapLoadingMessageWithSpinner
 import ui.BootstrapTable
 import kotlin.reflect.KClass
@@ -78,11 +75,12 @@ fun ArtifactDetailComposable(
 ) {
     val allDependencyIds by reportDataRepo.allDependencyIds.collectAsState(null)
 
-    if (allDependencyIds == null) {
+    val metadata by reportDataRepo.reportMetadata.collectAsState(null)
+
+    if (allDependencyIds == null || metadata == null) {
         BootstrapLoadingMessageWithSpinner()
         return
     }
-
 
     val versions = allDependencyIds!!.filter { it.startsWith(navRoute.group + ":" + navRoute.artifact + ":") }
 
@@ -96,13 +94,14 @@ fun ArtifactDetailComposable(
     if (allInvertedDependencies == null) {
         BootstrapLoadingMessageWithSpinner()
     }
-    H1 {
-        Text(navRoute.group + ":" + navRoute.artifact)
+    H3 {
+        Text("Artifact ${navRoute.group}:${navRoute.artifact}")
     }
     Br()
     versions.forEach { dependencyId: DependencyId ->
-        H4 {
-            Text("Version ${dependencyId.substringAfterLast(":")}")
+        val versionNumber = dependencyId.substringAfterLast(":")
+        H6 {
+            Text("Version $versionNumber (${navRoute.group}:${navRoute.artifact}:$versionNumber)")
         }
         val whoDependsOnThis = allInvertedDependencies?.get(dependencyId)
         BootstrapTable(

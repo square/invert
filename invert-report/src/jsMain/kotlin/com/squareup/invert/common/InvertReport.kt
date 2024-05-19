@@ -7,11 +7,9 @@ import com.squareup.invert.common.pages.*
 import invertComposeMain
 import kotlinx.browser.window
 import kotlinx.coroutines.Dispatchers
-import navigation.CustomNavItem
 import navigation.RemoteJsLoadingProgress
 
 class InvertReport(
-    customNavItems: List<CustomNavItem> = emptyList(),
     customReportPages: List<InvertReportPage<out NavRoute>> = emptyList(),
 ) {
     private val routeManager = NavRouteManager()
@@ -54,7 +52,6 @@ class InvertReport(
             initialRoute = initialRoute,
             routeManager = routeManager,
             navRouteRepo = navRouteRepo,
-            customNavItems = customNavItems,
             reportDataRepo = reportDataRepo,
         )
     }
@@ -88,11 +85,12 @@ class InvertReport(
             OwnerDetailReportPage,
             OwnersReportPage,
             PluginDetailReportPage,
-            PluginsReportPage,
+            GradlePluginsReportPage,
             StatDetailReportPage,
             UnusedModulesReportPage,
             SuppressAnnotationGraphReportPage,
             GitHubMarkdownReportPage,
+            GradleRepositoriesReportPage,
         )
     }
 }

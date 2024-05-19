@@ -119,7 +119,7 @@ fun executeCmd(command: String, workingDir: File, envVars: Map<String, String> =
     )
 }
 
-executeCmd("./gradlew publishToMavenLocal --no-daemon --no-configuration-cache", PROJECT_ROOT_DIR)
+executeCmd("./gradlew publishToMavenLocal --no-daemon --no-configuration-cache --rerun-tasks", PROJECT_ROOT_DIR)
 
 val DEFAULT_INIT_SCRIPT_LINE = "./gradlew --init-script ${INVERT_INIT_SCRIPT.canonicalPath} :invert --no-daemon"
 
@@ -298,6 +298,9 @@ val ALL_REPOS = listOf(
         } else {
             true
         }
+    }
+    .filter {
+        it.org == "duckduckgo"
     }
 
 val CLONES_DIR = File("build/clones").apply {

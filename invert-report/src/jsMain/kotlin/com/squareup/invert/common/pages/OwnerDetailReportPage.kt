@@ -38,7 +38,7 @@ data class OwnerDetailNavRoute(
             return if (!owner.isNullOrEmpty()) {
                 OwnerDetailNavRoute(owner)
             } else {
-                OwnersReportPage.OwnersNavRoute
+                OwnersNavRoute
             }
         }
     }

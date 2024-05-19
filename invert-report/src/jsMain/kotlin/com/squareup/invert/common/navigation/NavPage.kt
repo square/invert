@@ -29,6 +29,13 @@ class NavPage(
 
 
     companion object {
+        fun NavPage.toNavItem(): NavItem {
+            return NavItem(
+                itemTitle = this.displayName,
+                navPage = this,
+            )
+        }
+
         fun Set<NavPage>.toNavItems(): Set<NavItem> {
             return map {
                 NavItem(
@@ -51,24 +58,50 @@ class NavPage(
             get() = listOf(
                 NavPageGroup(
                     "General", setOf(
-                        HomeReportPage.navPage,
-                        OwnersReportPage.navPage,
-                    ).toNavItems()
+                        HomeReportPage.navPage.toNavItem(),
+                        OwnersReportPage.navPage.toNavItem().copy(
+                            matchesCurrentNavRoute = {
+                                it is OwnerDetailNavRoute || it is OwnersNavRoute
+                            }
+                        ),
+                    )
                 ),
                 NavPageGroup(
                     "Gradle", setOf(
-                        AllModulesReportPage.navPage,
-                        ArtifactsReportPage.navPage,
-                        ConfigurationsNavRoute.navPage,
-                        PluginsNavRoute.navPage,
-                        AnnotationProcessorsReportPage.navPage,
-                        KotlinCompilerPluginsReportPage.navPage,
-                    ).toNavItems()
+                        AllModulesReportPage.navPage.toNavItem().copy(
+                            matchesCurrentNavRoute = {
+                                it is ModuleDetailNavRoute || it is AllModulesNavRoute
+                            }
+                        ),
+                        GradlePluginsReportPage.navPage.toNavItem().copy(
+                            matchesCurrentNavRoute = {
+                                it is GradlePluginsNavRoute || it is PluginDetailNavRoute
+                            },
+                            destinationNavRoute = GradlePluginsNavRoute(null)
+                        ),
+                        ArtifactsReportPage.navPage.toNavItem().copy(
+                            matchesCurrentNavRoute = {
+                                it is ArtifactsNavRoute || it is ArtifactDetailNavRoute
+                            }
+                        ),
+                        GradleRepositoriesReportPage.navPage.toNavItem(),
+                        ConfigurationsNavRoute.navPage.toNavItem().copy(
+                            matchesCurrentNavRoute = {
+                                it is ConfigurationsNavRoute || it is ConfigurationDetailNavRoute
+                            }
+                        ),
+                        AnnotationProcessorsReportPage.navPage.toNavItem(),
+                        KotlinCompilerPluginsReportPage.navPage.toNavItem(),
+                    )
                 ),
                 NavPageGroup(
                     "Stats", setOf(
-                        AllStatsReportPage.navPage,
-                    ).toNavItems()
+                        AllStatsReportPage.navPage.toNavItem().copy(
+                            matchesCurrentNavRoute = {
+                                it is AllStatsNavRoute || it is StatDetailNavRoute
+                            }
+                        ),
+                    )
                 ),
                 NavPageGroup(
                     "Insights", setOf(

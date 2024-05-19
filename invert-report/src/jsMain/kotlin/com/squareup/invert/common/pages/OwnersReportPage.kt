@@ -21,7 +21,9 @@ import ui.BootstrapLoadingSpinner
 import ui.BootstrapTable
 import kotlin.reflect.KClass
 
-object OwnersReportPage : InvertReportPage<OwnersReportPage.OwnersNavRoute> {
+object OwnersNavRoute : BaseNavRoute(OwnersReportPage.navPage)
+
+object OwnersReportPage : InvertReportPage<OwnersNavRoute> {
     override val navPage: NavPage = NavPage(
         pageId = "owners",
         displayName = "Owners",
@@ -34,13 +36,12 @@ object OwnersReportPage : InvertReportPage<OwnersReportPage.OwnersNavRoute> {
         OwnersComposable(navRoute)
     }
 
-    object OwnersNavRoute : BaseNavRoute(navPage)
 }
 
 
 @Composable
 fun OwnersComposable(
-    navRoute: OwnersReportPage.OwnersNavRoute,
+    navRoute: OwnersNavRoute,
     reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
     navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
