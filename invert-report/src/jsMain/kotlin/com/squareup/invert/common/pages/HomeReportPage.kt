@@ -54,9 +54,8 @@ fun HomeComposable(
     BootstrapJumbotron(
         centered = false,
         headerContent = {
-            Text("Invert Report")
+            Text("\uD83D\uDD03 Invert Report")
             H5 {
-                Text("for ")
                 A(href = metadata.remoteRepoUrl) {
                     Text(metadata.remoteRepoUrl.substringAfter("//").substringAfter("/"))
                 }
@@ -67,9 +66,7 @@ fun HomeComposable(
                 P({
                     classes("fs-6")
                 }) {
-                    Text("Last Commit ")
                     metadata.branchName?.let { branchName ->
-                        Text("from ")
                         A(href = "${metadata.remoteRepoUrl}/tree/${branchName}/", { target(ATarget.Blank) }) {
                             Text(branchName)
                         }
@@ -77,7 +74,7 @@ fun HomeComposable(
                     }
                     val commitUrl = metadata.remoteRepoUrl + "/commits/" + gitSha
                     A(href = commitUrl, { target(ATarget.Blank) }) {
-                        Text(gitSha)
+                        Text(gitSha.substring(0, minOf(7, gitSha.length)) )
                     }
                 }
                 if (metadata.branchName != metadata.currentBranch) {

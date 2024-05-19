@@ -49,6 +49,7 @@ class NavPage(
             return NavItem(
                 navPage = GitHubMarkdownReportPage.navPage,
                 itemTitle = title,
+                navIconSlug = "github",
                 destinationNavRoute = destinationNavRoute,
                 matchesCurrentNavRoute = { it == destinationNavRoute }
             )

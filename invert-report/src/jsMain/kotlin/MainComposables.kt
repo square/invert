@@ -5,12 +5,12 @@ import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteManager
 import com.squareup.invert.common.navigation.NavRouteRepo
+import com.squareup.invert.common.pages.HomeReportPage
 import history.JavaScriptNavigationAndHistory
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import navigation.CustomNavItem
 import navigation.LeftNavigationComposable
 import navigation.RemoteJsLoadingProgress
 import org.jetbrains.compose.web.attributes.ATarget.Blank
@@ -44,7 +44,7 @@ fun invertComposeMain(
     renderComposable(rootElementId = "navbar_title") {
         val reportMetadata by reportDataRepo.reportMetadata.collectAsState(null)
 
-        Text("Invert Report")
+        Text("\uD83D\uDD03 Invert Report")
         reportMetadata?.let { metadata ->
             Text(" for ")
             A(href = metadata.remoteRepoUrl, attrs = { target(Blank) }) {

@@ -142,6 +142,15 @@ data class TargetRepo(
     val url = "https://github.com/$org/$project"
 }
 
+val OTHER_REPOS = listOf(
+    TargetRepo(
+        org = "airbnb",
+        project = "mavericks",
+        runOnGitHubAction = false,
+        works = false,
+    ),
+)
+
 val ALL_REPOS = listOf(
     TargetRepo(
         org = "JetBrains",
@@ -274,12 +283,6 @@ val ALL_REPOS = listOf(
                 envVars,
             )
         }
-    ),
-    TargetRepo(
-        org = "airbnb",
-        project = "mavericks",
-        runOnGitHubAction = false,
-        works = false,
     ),
     TargetRepo(
         org = "rickbusarow",
