@@ -123,7 +123,7 @@ fun ModuleListComposable(allModules: List<String>?, limit: Int = MAX_RESULTS, on
             rows = allModules.map { listOf(it) },
             types = listOf(String::class),
             maxResultsLimitConstant = limit,
-            onItemClick = onRowClicked,
+            onItemClickCallback = onRowClicked,
         )
     }
 }

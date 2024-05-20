@@ -167,7 +167,7 @@ fun DependencyInjectionComposable(
         types = columnsHeaders.map { String::class },
         headers = columnsHeaders,
         maxResultsLimitConstant = MAX_RESULTS,
-        onItemClick = {
+        onItemClickCallback = {
             val filePath = it[3]
             window.open("${gitRepoHttpsUrlForBranch}/$filePath", ATarget.blank)
         }
@@ -192,7 +192,7 @@ fun DependencyInjectionComposable(
         types = columnsHeaders.map { String::class },
         headers = columnsHeaders,
         maxResultsLimitConstant = MAX_RESULTS,
-        onItemClick = {
+        onItemClickCallback = {
             val filePath = it[3]
             window.open("${gitRepoHttpsUrlForBranch}/$filePath", ATarget.blank)
         }

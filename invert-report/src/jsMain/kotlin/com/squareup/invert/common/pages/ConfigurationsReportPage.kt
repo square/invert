@@ -76,7 +76,7 @@ fun ConfigurationsComposable(
         },
         types = listOf<KClass<*>>(String::class),
         maxResultsLimitConstant = MAX_RESULTS,
-        onItemClick = {
+        onItemClickCallback = {
             window.alert("Clicked ${it[0]}")
         }
     )

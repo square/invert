@@ -15,7 +15,7 @@ import java.io.File
  * of the Anvil ContributesBinding annotation, and puts it into a Stat that can be used collected
  * by the [InvertGradlePlugin]
  */
-class SupressionsStatCollector : StatCollector {
+class SuppressionsStatCollector : StatCollector {
     override fun collect(
         rootProjectFolder: File,
         projectPath: String,
@@ -25,7 +25,7 @@ class SupressionsStatCollector : StatCollector {
         kotlinSourceFiles.forEach { file ->
             if (file.exists()) {
                 val ktFile = file.toKtFile()
-                val relativePath = file.absolutePath.replace(rootProjectFolder.absolutePath, "")
+                val relativePath = file.absolutePath.replace(rootProjectFolder.absolutePath, "").drop(1)
 
                 val suppressionsVisitor = SuppressionsVisitor()
                 PsiTreeUtil.findChildrenOfType(ktFile, KtAnnotationEntry::class.java).forEach {
@@ -43,12 +43,33 @@ class SupressionsStatCollector : StatCollector {
 
             suppressionsByTypeMap.keys.sorted().map { type ->
                 suppressionsByTypeMap[type]?.let { suppressionsByTypeList ->
+                    collectedStats.add(
+                        CollectedStat(
+                            metadata = StatMetadata(
+                                key = "code_reference_suppress_annotation_$type",
+                                description = "@Suppress(\"$type\")",
+                                statType = CollectedStatType.CODE_REFERENCES,
+                                category = "code_reference_suppress_annotation"
+                            ),
+                            stat = Stat.CodeReferencesStat(
+                                value = suppressionsByTypeList
+                                    .map { suppression ->
+                                        Stat.CodeReferencesStat.CodeReference(
+                                            filePath = suppression.filePath,
+                                            startLine = suppression.startLine,
+                                            endLine = suppression.endLine,
+                                        )
+                                    }
+                            )
+                        )
+                    )
+
                     val numericStat = suppressionsByTypeList.let {
                         Stat.NumericStat(
                             value = suppressionsByTypeList.size,
                             details = buildString {
                                 suppressionsByTypeList
-                                    .map { "${it.filePath}:${it.startLine}:${it.startColumn}" }
+                                    .map { "${it.filePath}#L${it.startLine}" }
                                     .sorted()
                                     .forEach { appendLine("* $it") }
                             }

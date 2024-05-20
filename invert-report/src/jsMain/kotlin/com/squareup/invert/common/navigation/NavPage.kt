@@ -27,7 +27,6 @@ class NavPage(
         val navItems: Set<NavItem>,
     )
 
-
     companion object {
         private fun NavPage.toNavItem(): NavItem {
             return NavItem(
@@ -56,6 +55,7 @@ class NavPage(
                                 it is OwnerDetailNavRoute || it is OwnersNavRoute
                             }
                         ),
+                        AllStatsNavRoute().navPage.toNavItem(),
                     )
                 ),
                 NavPageGroup(
@@ -101,24 +101,24 @@ class NavPage(
                         ModuleDependencyGraphReportPage.navPage.toNavItem(),
                     )
                 ),
-//                NavPageGroup(
-//                    "GitHub", setOf(
-//                        gitHubContentNavItem(
-//                            title = "README.md",
-//                            destinationNavRoute = GithubReadMeNavRoute(
-//                                "square/okhttp",
-//                                "README.md"
-//                            )
-//                        ),
-//                        gitHubContentNavItem(
-//                            title = "OkHttp.kt",
-//                            destinationNavRoute = GithubReadMeNavRoute(
-//                                "square/okhttp",
-//                                "okhttp/src/main/kotlin/okhttp3/OkHttp.kt"
-//                            )
-//                        ),
-//                    )
-//                )
+                NavPageGroup(
+                    "GitHub", setOf(
+                        gitHubContentNavItem(
+                            title = "README.md",
+                            destinationNavRoute = GithubReadMeNavRoute(
+                                "square/okhttp",
+                                "README.md"
+                            )
+                        ),
+                        gitHubContentNavItem(
+                            title = "OkHttp.kt",
+                            destinationNavRoute = GithubReadMeNavRoute(
+                                "square/okhttp",
+                                "okhttp/src/main/kotlin/okhttp3/OkHttp.kt"
+                            )
+                        ),
+                    )
+                )
             )
     }
 }

@@ -3,15 +3,12 @@ import com.squareup.invert.InvertExtension
 
 initscript {
     repositories {
-        mavenLocal()
         mavenCentral()
+        gradlePluginPortal()
+        mavenLocal()
         // SNAPSHOT Versions
         maven {
             url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
-        }
-        // SNAPSHOT Versions for statik
-        maven {
-            url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content")
         }
     }
     dependencies {
@@ -34,15 +31,10 @@ class InvertInitScriptPlugin : Plugin<Gradle> {
                     repositories {
                         mavenCentral()
                         gradlePluginPortal()
-                        google()
                         mavenLocal()
                         // SNAPSHOT Versions
                         maven {
                             url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
-                        }
-                        // SNAPSHOT Versions for statik
-                        maven {
-                            url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content")
                         }
                     }
 
@@ -51,7 +43,7 @@ class InvertInitScriptPlugin : Plugin<Gradle> {
                         classpath("com.squareup.invert:invert-gradle-plugin:$invertVersion")
                         classpath("com.squareup.invert:collectors-anvil-dagger:$invertVersion")
                         classpath("com.squareup.invert:collectors-kotlin-java-loc:$invertVersion")
-                        classpath("com.squareup.invert:owners-github-codeowners:$invertVersion")
+//                        classpath("com.squareup.invert:owners-github-codeowners:$invertVersion")
                     }
                 }
             }
@@ -62,7 +54,7 @@ class InvertInitScriptPlugin : Plugin<Gradle> {
                     this.extensions.getByType(com.squareup.invert.InvertExtension::class.java).apply {
                         ownershipCollector(com.squareup.invert.GitHubCodeOwnersInvertOwnershipCollector)
                         addStatCollector(com.squareup.invert.DiProvidesAndInjectsStatCollector())
-                        addStatCollector(com.squareup.invert.suppress.SupressionsStatCollector())
+                        addStatCollector(com.squareup.invert.suppress.SuppressionsStatCollector())
                         addStatCollector(com.squareup.invert.LinesOfCodeStatCollector())
                     }
                 }

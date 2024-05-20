@@ -35,6 +35,6 @@ plugins {
 invert {
     ownershipCollector(com.squareup.invert.GitHubCodeOwnersInvertOwnershipCollector)
     addStatCollector(com.squareup.invert.DiProvidesAndInjectsStatCollector())
-    addStatCollector(com.squareup.invert.suppress.SupressionsStatCollector())
+    addStatCollector(com.squareup.invert.suppress.SuppressionsStatCollector())
     addStatCollector(com.squareup.invert.LinesOfCodeStatCollector())
 }

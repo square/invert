@@ -10,7 +10,6 @@ import kotlinx.serialization.Serializable
  */
 sealed interface Stat {
 
-
     @Serializable
     @SerialName("numeric_stat")
     data class NumericStat(
@@ -31,6 +30,21 @@ sealed interface Stat {
         val value: Boolean,
         val details: String? = null,
     ) : Stat
+
+    @Serializable
+    @SerialName("code_reference")
+    data class CodeReferencesStat(
+        val value: List<CodeReference>,
+    ) : Stat {
+
+        @Serializable
+        data class CodeReference(
+            val filePath: String,
+            val startLine: Int,
+            val endLine: Int,
+            val code: String? = null
+        )
+    }
 
 
     @Serializable

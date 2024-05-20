@@ -96,7 +96,7 @@ fun ConfigurationDetailComposable(
         rows = configurationUsages.map { listOf(it) },
         types = listOf(String::class),
         maxResultsLimitConstant = MAX_RESULTS,
-        onItemClick = {
+        onItemClickCallback = {
             navRouteRepo.updateNavRoute(
                 ModuleDetailNavRoute(
                     it[0]

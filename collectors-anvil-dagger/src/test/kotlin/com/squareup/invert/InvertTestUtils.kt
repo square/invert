@@ -1,4 +1,4 @@
-package com.squareup.invert.testutils
+package com.squareup.invert
 
 import com.squareup.invert.models.InvertSerialization
 import kotlinx.serialization.KSerializer

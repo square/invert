@@ -1,6 +1,5 @@
 package com.squareup.invert
 
-import com.rickbusarow.statik.InternalStatikApi
 import com.squareup.invert.models.Stat.DiProvidesAndInjectsStat.*
 import com.squareup.psi.classesAndInnerClasses
 import com.squareup.psi.requireFqName
@@ -109,13 +108,6 @@ class FindAnvilContributesBinding {
         val bindingsInFile = mutableListOf<DiContribution>()
         if (file.exists()) {
             val ktFile = file.toKtFile()
-
-            ktFile.accept(object : KtTreeVisitorVoid() {
-                override fun visitConstructorDelegationCall(call: KtConstructorDelegationCall) {
-                    super.visitConstructorDelegationCall(call)
-                }
-            })
-
             ktFile.classesAndInnerClasses()
                 .toList()
                 .forEach { ktClassOrObject ->
@@ -187,7 +179,6 @@ class FindAnvilContributesBinding {
             } ?: emptyList()
     }
 
-    @OptIn(InternalStatikApi::class)
     private fun findConstructorInjections(ktFile: KtFile, ktClassOrObject: KtClassOrObject): List<DiInjection> {
         val anvilInjections = mutableListOf<DiInjection>()
         ktClassOrObject.primaryConstructor?.let { primaryConstructor ->

@@ -1,6 +1,7 @@
 package com.squareup.invert.common.pages
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
@@ -64,9 +65,6 @@ object GitHubMarkdownReportPage : InvertReportPage<GithubReadMeNavRoute> {
         }
         val url = "https://api.github.com/repos/${navRoute.orgSlashRepo}/contents/${navRoute.filePath}"
         RemoteCodeHighlighted(url)
-//        RemoteGitHubContent(url) { content ->
-//            RawHtmlComposable(markdownToHtml(content))
-//        }
     }
 }
 
@@ -77,8 +75,7 @@ fun RemoteCodeHighlighted(remoteUrl: String = "https://api.github.com/repos/squa
             val fileExtension = remoteUrl.substringAfterLast(".")
             Code({ classes(("language-$fileExtension")) }) {
                 Text(content)
-                CoroutineScope(Dispatchers.Main).launch {
-                    delay(100)
+                SideEffect {
                     highlightJsHighlightAll()
                 }
             }

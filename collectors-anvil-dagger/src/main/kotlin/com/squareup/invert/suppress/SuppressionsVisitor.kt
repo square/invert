@@ -2,9 +2,8 @@ package com.squareup.invert.suppress
 
 import com.squareup.psi.requireFqName
 import org.jetbrains.kotlin.com.intellij.psi.util.PsiTreeUtil
-import org.jetbrains.kotlin.psi.*
-
 import org.jetbrains.kotlin.diagnostics.DiagnosticUtils.getLineAndColumnRangeInPsiFile
+import org.jetbrains.kotlin.psi.*
 
 class SuppressionsVisitor {
 
@@ -23,7 +22,6 @@ class SuppressionsVisitor {
     fun processAnnotationEntry(ktFile: KtFile, annotationEntry: KtAnnotationEntry, fileName: String) {
 
         val annotationClassType = PsiTreeUtil.findChildOfType(annotationEntry, KtTypeReference::class.java)
-
 
         val annotationArgumentList: List<String> =
             PsiTreeUtil.findChildOfType(
@@ -53,8 +51,9 @@ class SuppressionsVisitor {
                         Suppression(
                             type = ignoredType,
                             startLine = lineAndColumnRange.start.line,
-                            startColumn = lineAndColumnRange.start.column,
-                            filePath = fileName
+                            endLine = lineAndColumnRange.end.line,
+                            filePath = fileName,
+                            code = annotationData.text
                         )
                     )
                 }

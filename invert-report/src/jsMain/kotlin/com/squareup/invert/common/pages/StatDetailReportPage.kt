@@ -13,6 +13,7 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.StatDetailNavRoute.Companion.parser
 import com.squareup.invert.models.*
+import com.squareup.invert.models.js.MetadataJsReportModel
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.Text
@@ -53,6 +54,23 @@ data class StatDetailNavRoute(
     }
 }
 
+fun Collection<Stat.CodeReferencesStat.CodeReference>.toMarkdown(projectMetadata: MetadataJsReportModel): String {
+    val codeReferences = this
+    return buildString {
+        codeReferences.forEach { codeReference ->
+            val gitRepoHttpsUrlForBranch = if (projectMetadata.remoteRepoUrl?.contains("square/invert") == true) {
+                // Hack for examples during development
+                "${projectMetadata.remoteRepoUrl}/tree/${projectMetadata.branchName}/examples"
+            } else {
+                "${projectMetadata.remoteRepoUrl}/tree/${projectMetadata.branchName}"
+            }
+            val urlToFile =
+                "${gitRepoHttpsUrlForBranch}/${codeReference.filePath}#L${codeReference.startLine}-L${codeReference.endLine}"
+            appendLine("* <a href='$urlToFile' target='_blank'>${codeReference.filePath}:${codeReference.startLine}</a>")
+        }
+    }
+}
+
 object StatDetailReportPage : InvertReportPage<StatDetailNavRoute> {
     override val navPage: NavPage = NavPage(
         pageId = "stat_detail",
@@ -77,12 +95,14 @@ fun StatDetailComposable(
     val allModulesOrig by reportDataRepo.allModules.collectAsState(null)
     val moduleToOwnerMapFlowValue by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
+    val metadata by reportDataRepo.reportMetadata.collectAsState(null)
+
     val statKeys = statsNavRoute.statKeys.ifEmpty {
         statsData?.statInfos?.map { it.key } ?: listOf()
     }
     H1 { Text("Stats") }
 
-    if (moduleToOwnerMapFlowValue == null) {
+    if (moduleToOwnerMapFlowValue == null || metadata == null) {
         BootstrapLoadingSpinner()
         return
     }
@@ -128,7 +148,12 @@ fun StatDetailComposable(
         navRouteRepo.updateNavRoute(statsNavRoute.copy(moduleQuery = it))
     }
 
-    val SUPPORTED_TYPES = listOf(CollectedStatType.STRING, CollectedStatType.BOOLEAN, CollectedStatType.NUMERIC)
+    val SUPPORTED_TYPES = listOf(
+        CollectedStatType.STRING,
+        CollectedStatType.BOOLEAN,
+        CollectedStatType.NUMERIC,
+        CollectedStatType.CODE_REFERENCES
+    )
     val resultsTab = BootstrapTabData("Results") {
         val statsColumns = mutableListOf<List<String>>().apply {
             statKeys.forEach { statKey ->
@@ -150,6 +175,14 @@ fun StatDetailComposable(
 
                                     is Stat.NumericStat -> {
                                         stat.value.toString()
+                                    }
+
+                                    is Stat.CodeReferencesStat -> {
+                                        if (metadata != null) {
+                                            stat.value.toMarkdown(metadata!!)
+                                        } else {
+                                            stat.value.toString()
+                                        }
                                     }
 
                                     else -> ""
@@ -218,7 +251,7 @@ fun StatDetailComposable(
                 BootstrapTable(
                     headers = headers,
                     rows = values,
-                    types = headers.map { String::class },
+                    types = headers.map { MarkdownCellContent::class },
                     maxResultsLimitConstant = PagingConstants.MAX_RESULTS
                 ) { cellValues ->
                     navRouteRepo.updateNavRoute(ModuleDetailNavRoute(cellValues[0]))

@@ -135,21 +135,22 @@ fun BootstrapTabPane(
 @Composable
 fun BootstrapTableRow(
     cellValues: List<String>,
-    onClicked: (() -> Unit)?,
+    onClicked: ((cellIdx: Int) -> Unit)?,
 ) {
     Tr({
-        onClicked?.let {
-            onClick { onClicked() }
-        }
-        style {
-            cursor("pointer")
-        }
     }) {
         cellValues.forEachIndexed { idx, cellValue ->
-            Td {
-                Pre {
-                    Text(cellValue)
+            Td({
+                if (idx == 0) {
+                    onClicked?.let {
+                        onClick { onClicked(idx) }
+                        style {
+                            cursor("pointer")
+                        }
+                    }
                 }
+            }) {
+                MarkdownText(cellValue)
             }
         }
     }
@@ -159,7 +160,7 @@ fun BootstrapTableRow(
 fun BootstrapClickableList(
     header: String? = null,
     items: Collection<String>,
-    maxResults: Int,
+    maxResults: Int = MAX_RESULTS,
     onItemClick: (String) -> Unit,
 ) {
     BootstrapTable(
@@ -171,11 +172,13 @@ fun BootstrapClickableList(
         rows = items.map { listOf(it) },
         types = listOf(String::class),
         maxResultsLimitConstant = maxResults,
-        onItemClick = {
-            onItemClick(it[0])
+        onItemClickCallback = { cells ->
+            onItemClick(cells[0])
         },
     )
 }
+
+interface MarkdownCellContent {}
 
 
 @Composable
@@ -187,7 +190,7 @@ fun BootstrapTable(
     maxResultsLimitConstant: Int,
     sortByColumn: Int = 0,
     sortAscending: Boolean = true,
-    onItemClick: ((List<String>) -> Unit)?,
+    onItemClickCallback: ((cells: List<String>) -> Unit)? = null,
 ) {
     val enableSorting = types != null
     if (rows.isEmpty()) {
@@ -199,7 +202,6 @@ fun BootstrapTable(
     }) {
         var sortIdx by remember { mutableStateOf(sortByColumn) }
         var ascending by remember { mutableStateOf(sortAscending) }
-
 
         val sortedRows = if (enableSorting && types != null) {
             val typeToSortBy = types[sortIdx]
@@ -237,8 +239,8 @@ fun BootstrapTable(
         Tbody {
             val sortedTrimmedRows = sortedRows.subList(0, minOf(sortedRows.size, maxNumberOfRows))
             sortedTrimmedRows.forEachIndexed { idx, cellValues ->
-                BootstrapTableRow(cellValues, onClicked = {
-                    onItemClick?.let { onItemClick(cellValues) }
+                BootstrapTableRow(cellValues, onClicked = { idx ->
+                    onItemClickCallback?.invoke(cellValues)
                 })
             }
         }

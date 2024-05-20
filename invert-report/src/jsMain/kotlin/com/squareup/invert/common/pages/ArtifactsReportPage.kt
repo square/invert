@@ -163,7 +163,7 @@ fun ArtifactsComposable(
         },
         types = artifactsMatchingQuery.map { String::class },
         maxResultsLimitConstant = MAX_RESULTS,
-        onItemClick = {
+        onItemClickCallback = {
             navRouteRepo.updateNavRoute(
                 ArtifactDetailNavRoute(
                     group = it[0],

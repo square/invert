@@ -77,24 +77,54 @@ fun InverteDependenciesComposable(
     reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
     navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
+    val allModules by reportDataRepo.allModules.collectAsState(null)
+    val allConfigurationNames by reportDataRepo.allAnalyzedConfigurationNames.collectAsState(listOf())
+    val allPluginIds by reportDataRepo.allPluginIds.collectAsState(listOf())
+
+    if (allModules == null || allConfigurationNames == null || allPluginIds == null) {
+        BootstrapLoadingMessageWithSpinner()
+        return
+    }
+
     BootstrapTabPane(
         listOf(
             BootstrapTabData("Results") {
                 if (navRoute.pluginGroupByFilter.isEmpty() || navRoute.configurations.isEmpty()) {
                     BootstrapJumbotron(
                         headerContent = {
-                            BootstrapIcon("exclamation-triangle", 48)
-                            Text(" No configuration provided.")
+//                            BootstrapIcon("exclamation-triangle", 48)
+                            Text(" Inverted Dependency Search")
                         }
                     ) {
+                        Br()
                         P({
-                            classes("text-center")
+//                            classes("text-center")
                         }) {
-                            Text("Plugins and Configuration Names are not selected.  Go to the settings tab, set them and return to this page.")
+                            MarkdownText(
+                                """
+                                ## Find modules that depend on your selected module(s)
+                                1. Click the 'Settings' tab, select the scanned configurations you are interested in.
+                                1. Selected the Gradle configuration(s) you are interested in
+                                1. Select the Plugin(s) to group the search results from.
+                                1. Click the 'Results' tab, and then find you target module using the search box.
+                                """.trimIndent()
+                            )
+                            Br()
+                            Text("or... ")
+                            Br()
+                            BootstrapButton("Start by Searching Everything") {
+                                navRouteRepo.updateNavRoute(
+                                    InvertedDependenciesNavRoute(
+                                        pluginGroupByFilter = allPluginIds!!,
+                                        configurations = allConfigurationNames!!.toList(),
+                                        moduleQuery = ":"
+                                    )
+                                )
+                            }
                         }
                     }
                 } else {
-                    TitleRow("Module Consumption (Grouped By Plugin Type)")
+                    TitleRow("Inverted Dependency Search (Grouped By Plugin Type)")
                     val query by reportDataRepo.moduleQuery.collectAsState(null)
                     BootstrapSearchBox(query ?: "", "Search For Module...") {
                         navRouteRepo.updateNavRoute(
@@ -105,9 +135,8 @@ fun InverteDependenciesComposable(
                     }
                     BootstrapRow {
                         BootstrapColumn(6) {
-                            val allCountModules by reportDataRepo.allModules.collectAsState(null)
                             val matching by reportDataRepo.allModulesMatchingQuery.collectAsState(null)
-                            val totalCount = allCountModules?.size
+                            val totalCount = allModules?.size
                             GenericList(
                                 "Matching ${matching?.size} of $totalCount",
                                 matching ?: listOf(),
@@ -117,7 +146,8 @@ fun InverteDependenciesComposable(
                                             moduleQuery = it
                                         )
                                     )
-                                })
+                                }
+                            )
                         }
                         BootstrapColumn(6) {
                             RightColumn(reportDataRepo, navRoute)
@@ -128,22 +158,27 @@ fun InverteDependenciesComposable(
             BootstrapTabData("Settings") {
                 SettingsComposable(
                     reportDataRepo = reportDataRepo,
-                    navRouteRepo = navRouteRepo
+                    navRouteRepo = navRouteRepo,
+                    allConfigurationNames = allConfigurationNames?.toList() ?: emptyList(),
+                    allPluginIds = allPluginIds?.toList() ?: emptyList()
                 )
             },
         )
     )
-
 }
 
 @Composable
-fun SettingsComposable(reportDataRepo: ReportDataRepo, navRouteRepo: NavRouteRepo) {
+fun SettingsComposable(
+    reportDataRepo: ReportDataRepo,
+    navRouteRepo: NavRouteRepo,
+    allConfigurationNames: List<ConfigurationName>,
+    allPluginIds: List<GradlePluginId>,
+) {
     val navRoute by navRouteRepo.navRoute.collectAsState(null)
     if (navRoute == null) {
         return
     } else {
         val invertedDependenciesNavRoute = navRoute!! as InvertedDependenciesNavRoute
-        val groupByFilterItems = invertedDependenciesNavRoute.pluginGroupByFilter
         H1 {
             Text("Inverted Transitive Dependency Search Settings")
         }
@@ -151,10 +186,9 @@ fun SettingsComposable(reportDataRepo: ReportDataRepo, navRouteRepo: NavRouteRep
         BootstrapRow {
             BootstrapColumn(6) {
                 H5 { Text("Configurations") }
-                val allConfigurationNames by reportDataRepo.allAnalyzedConfigurationNames.collectAsState(listOf())
                 BootstrapButton("Select All") {
                     navRouteRepo.updateNavRoute(
-                        invertedDependenciesNavRoute.copy(configurations = allConfigurationNames?.toList() ?: listOf())
+                        invertedDependenciesNavRoute.copy(configurations = allConfigurationNames)
                     )
                 }
                 BootstrapButton("Unselect All") {
@@ -162,7 +196,7 @@ fun SettingsComposable(reportDataRepo: ReportDataRepo, navRouteRepo: NavRouteRep
                         invertedDependenciesNavRoute.copy(configurations = listOf())
                     )
                 }
-                allConfigurationNames?.sorted()?.forEach { configurationName ->
+                allConfigurationNames.sorted().forEach { configurationName ->
                     BootstrapSettingsCheckbox(
                         labelText = configurationName,
                         initialIsChecked = invertedDependenciesNavRoute.configurations.contains(configurationName)
@@ -184,7 +218,6 @@ fun SettingsComposable(reportDataRepo: ReportDataRepo, navRouteRepo: NavRouteRep
             }
             BootstrapColumn(6) {
                 H5 { Text("Plugins") }
-                val allPluginIds by reportDataRepo.allPluginIds.collectAsState(listOf())
                 BootstrapButton("Select All") {
                     navRouteRepo.updateNavRoute(
                         invertedDependenciesNavRoute.copy(
@@ -200,6 +233,7 @@ fun SettingsComposable(reportDataRepo: ReportDataRepo, navRouteRepo: NavRouteRep
                     )
                 }
                 allPluginIds?.sorted()?.forEach { gradlePluginId ->
+                    val groupByFilterItems = invertedDependenciesNavRoute.pluginGroupByFilter
                     BootstrapSettingsCheckbox(
                         labelText = gradlePluginId,
                         initialIsChecked = groupByFilterItems.contains(gradlePluginId)
@@ -305,7 +339,7 @@ fun RightColumn(
                                 },
                                 types = matchingModulePathsLimited.map { String::class },
                                 maxResultsLimitConstant = 10,
-                                onItemClick = null
+                                onItemClickCallback = null
                             )
                         }
                     }

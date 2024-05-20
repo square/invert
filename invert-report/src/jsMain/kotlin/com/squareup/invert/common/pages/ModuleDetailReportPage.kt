@@ -134,7 +134,7 @@ fun ModuleDetailComposable(
                         },
                     types = listOf(String::class, Int::class),
                     maxResultsLimitConstant = MAX_RESULTS,
-                    onItemClick = {
+                    onItemClickCallback = {
                         navRouteRepo.updateNavRoute(
                             StatDetailNavRoute(
                                 statKeys = listOf(statInfos!!.first { statInfo -> statInfo.description == it[0] }).map { it.key }
@@ -183,7 +183,7 @@ fun ModuleDetailComposable(
                 },
                 types = listOf(String::class, String::class),
                 maxResultsLimitConstant = MAX_RESULTS,
-                onItemClick = {
+                onItemClickCallback = {
                     navRouteRepo.updateNavRoute(ModuleDetailNavRoute(it[0]))
                 }
             )
@@ -228,7 +228,7 @@ fun ModuleDetailComposable(
                 },
                 types = listOf(String::class, String::class),
                 maxResultsLimitConstant = MAX_RESULTS,
-                onItemClick = {
+                onItemClickCallback = {
                     navRouteRepo.updateNavRoute(ModuleDetailNavRoute(it[0]))
                 }
             )
@@ -244,7 +244,7 @@ fun ModuleDetailComposable(
                 rows = moduleUsage.keys.map { key -> listOf(key, moduleUsage[key]?.joinToString() ?: "") },
                 types = moduleUsage.keys.map { String::class },
                 maxResultsLimitConstant = MAX_RESULTS,
-                onItemClick = {
+                onItemClickCallback = {
                     navRouteRepo.updateNavRoute(
                         ModuleDetailNavRoute(
                             it[0]

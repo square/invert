@@ -234,6 +234,14 @@ val ALL_REPOS = listOf(
     TargetRepo(
         org = "gradle",
         project = "gradle",
+        postCheckout = {
+            // Delete Verification Metadata to disable Dependency Verification
+            File(it, "gradle/verification-metadata.xml").apply {
+                if (exists()) {
+                    delete()
+                }
+            }
+        },
         invertGradleCmd = {
             // ignoreBuildJavaVersionCheck=true is needed for https://github.com/gradle/gradle for the Java 11/Java 17 mix
             "$DEFAULT_INIT_SCRIPT_LINE -Dorg.gradle.ignoreBuildJavaVersionCheck=true"
@@ -310,6 +318,7 @@ val ALL_REPOS = listOf(
             true
         }
     }
+    .filter { it.org == "gradle" }
 
 val CLONES_DIR = File("build/clones").apply {
     if (!exists()) {

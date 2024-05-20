@@ -129,4 +129,13 @@ fun AllStatsComposable(
         }
     )
 
+    val stats = statsData.statInfos.values
+    BootstrapClickableList("Stat", stats.map {it.key}) { clickedValue ->
+        navRouteRepo.updateNavRoute(
+            StatDetailNavRoute(
+                statKeys = listOf(clickedValue)
+            )
+        )
+    }
+
 }

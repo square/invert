@@ -1,9 +1,17 @@
+@file:OptIn(InternalStatikApi::class)
+
 package com.squareup.invert
 
 
+import com.rickbusarow.statik.InternalStatikApi
+import com.rickbusarow.statik.element.kotlin.psi.utils.traversal.PsiTreePrinter.Companion.printEverything
 import com.squareup.invert.models.Stat.DiProvidesAndInjectsStat.DiContribution
-import com.squareup.invert.testutils.InvertTestUtils.assertEqualsAndPrintDiff
+import com.squareup.invert.InvertTestUtils.assertEqualsAndPrintDiff
+import com.squareup.psi.classesAndInnerClasses
+import com.squareup.psi.toKtFile
 import kotlinx.serialization.builtins.ListSerializer
+import org.jetbrains.kotlin.com.intellij.psi.util.PsiTreeUtil
+import org.jetbrains.kotlin.psi.KtAnnotationEntry
 import java.io.File
 import kotlin.test.Test
 
@@ -11,7 +19,7 @@ class FindDiContributionTest {
 
     @Test
     fun `boundType specified and binding found`() {
-        val ktFile = File.createTempFile("kotlin", ".kt").apply {
+        val file = File.createTempFile("kotlin", ".kt").apply {
             writeText(
                 """
         $PACKAGE_AND_IMPORTS
@@ -24,7 +32,7 @@ class FindDiContributionTest {
             )
         }
         val findAnvil = FindAnvilContributesBinding().apply {
-            handleKotlinFile(ktFile, ktFile.parentFile.absolutePath)
+            handleKotlinFile(file, file.parentFile.absolutePath)
         }
 
         assertEqualsAndPrintDiff(

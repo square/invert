@@ -1,10 +1,7 @@
 package ui
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import callDecodeURIComponent
-import highlightJsHighlightAll
 import kotlinx.browser.window
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
@@ -13,9 +10,13 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import loadJsFileAsync
+import markdownToHtml
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.HTMLElement
 import kotlin.collections.set
+import kotlin.math.absoluteValue
+import kotlin.random.Random
 
 @Serializable
 data class GitHubRepositoryContentsResult(
@@ -76,33 +77,31 @@ suspend fun loadRemoteContentFromGitHubUrl(url: String): String {
 
 @Composable
 fun RawHtmlComposable(htmlString: String) {
-    Div(
-        attrs = {
-            id("html-container")
+    key(htmlString) {
+        Div({
             ref {
-                it as HTMLElement
                 it.innerHTML = htmlString
                 onDispose {
                     it.innerHTML = ""  // Clean up when the composable is removed
                 }
             }
-        }
-    )
+        })
+    }
 }
 
-//@Composable
-//fun RenderMarkdown(markdown: String) {
-//    val isMarkedLibLoaded by MarkedLoaded.isLoaded.collectAsState()
-//
-//    if (!isMarkedLibLoaded) {
-//        MarkedLoaded.load()
-//        BootstrapLoadingSpinner()
-//        return
-//    }
-//
-//    val html = markdownToHtml(markdown)
-//    RawHtmlComposable(html)
-//}
+@Composable
+fun MarkdownText(markdown: String) {
+    val isMarkedLibLoaded by MarkedLoaded.isLoaded.collectAsState()
+
+    if (!isMarkedLibLoaded) {
+        MarkedLoaded.load()
+        BootstrapLoadingSpinner()
+        return
+    }
+
+    val html = markdownToHtml(markdown)
+    RawHtmlComposable(html)
+}
 
 fun urlToIdString(url: String): String {
     val rgx = Regex("[^a-zA-Z0-9 -]")
@@ -161,6 +160,7 @@ fun RemoteGitHubContent(url: String, transform: @Composable (String) -> Unit) {
         is RemoteGitHubContentLoadingState.Loaded -> {
             transform(local.content)
         }
+
         else -> {
             BootstrapLoadingSpinner()
         }

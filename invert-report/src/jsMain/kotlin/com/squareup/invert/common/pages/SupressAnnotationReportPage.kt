@@ -166,7 +166,7 @@ fun SuppressAnnotationComposable(
                         },
                         types = listOf(String::class, Int::class),
                         maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
-                        onItemClick = { row ->
+                        onItemClickCallback = { row ->
                             navRouteRepo.updateNavRoute(
                                 StatDetailNavRoute(
                                     statKeys = listOf(statInfos!!.firstOrNull { it.description == row[0] }).mapNotNull { it?.key }
@@ -216,7 +216,7 @@ fun SuppressAnnotationComposable(
                         },
                         types = listOf(String::class, Int::class),
                         maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
-                        onItemClick = { row ->
+                        onItemClickCallback = { row ->
                             navRouteRepo.updateNavRoute(
                                 ModuleDetailNavRoute(
                                     path = row[0]
