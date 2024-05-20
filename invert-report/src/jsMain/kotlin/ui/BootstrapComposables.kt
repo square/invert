@@ -461,12 +461,12 @@ fun BootstrapAccordion(
 
 @Composable
 fun BootstrapSearchBox(
-    query: String,
+    query: String?,
     placeholderText: String,
     dataListId: String? = null,
     textUpdated: (String) -> Unit
 ) {
-    TextInput(query) {
+    TextInput(query ?: "") {
         dataListId?.let {
             list(dataListId)
         }
@@ -474,6 +474,25 @@ fun BootstrapSearchBox(
         classes("form-control", "form-control-lg")
         this.onInput {
             textUpdated(it.value)
+        }
+    }
+}
+
+@Composable
+fun BootstrapSelectDropdown(
+    placeholderText: String,
+    options: List<String>,
+    onValueChange: (String?) -> Unit
+) {
+    Select({
+        classes(listOf("form-select"))
+        attr("aria-label", placeholderText)
+        onChange { event -> onValueChange(event.value) }
+    }) {
+        options.forEach { optionText ->
+            Option(value = optionText) {
+                Text(optionText)
+            }
         }
     }
 }

@@ -20,7 +20,92 @@ class ReportDataRepo(
 
     val reportMetadata: Flow<MetadataJsReportModel?> = collectedDataRepo.reportMetadata
 
+
+    val allModules: Flow<List<GradlePath>?> = collectedDataRepo.home
+        .mapLatest {
+            computeMeasureDuration("allModules") {
+                it?.modules?.sorted()
+            }
+        }
+
     val statsData: Flow<StatsJsReportModel?> = collectedDataRepo.statsData
+
+    val diProvidesAndInjects: Flow<List<DiProvidesAndInjectsItem>> =
+        statsData.mapLatest { statsData: StatsJsReportModel? ->
+            val STAT_KEY = "DiProvidesAndInjects"
+            val diRowDataRows = mutableListOf<DiProvidesAndInjectsItem>()
+            val statsByModule: Map<GradlePath, Map<StatKey, Stat>>? = statsData?.statsByModule
+            statsByModule?.forEach { (moduleGradlePath, statsDataForModule) ->
+                val stat = statsDataForModule[STAT_KEY]
+                if (stat is Stat.DiProvidesAndInjectsStat) {
+                    stat.value.forEach { providesAndInjects ->
+                        if (providesAndInjects.contributions.isNotEmpty()) {
+                            providesAndInjects.contributions.forEach { contribution ->
+                                diRowDataRows.add(
+                                    DiProvidesAndInjectsItem.Provides(
+                                        module = moduleGradlePath,
+                                        filePath = providesAndInjects.filePath,
+                                        startLine = providesAndInjects.startLine,
+                                        endLine = providesAndInjects.endLine,
+                                        type = contribution.boundType,
+                                        implementationType = contribution.boundImplementation,
+                                        scope = null,
+                                        qualifiers = listOf()
+                                    )
+                                )
+                            }
+                        }
+
+                        if (providesAndInjects.consumptions.isNotEmpty()) {
+                            providesAndInjects.consumptions.forEach { consumption ->
+                                diRowDataRows.add(
+                                    DiProvidesAndInjectsItem.Injects(
+                                        module = moduleGradlePath,
+                                        filePath = providesAndInjects.filePath,
+                                        startLine = consumption.startLine,
+                                        endLine = consumption.endLine,
+                                        type = consumption.type,
+                                        qualifiers = consumption.qualifierAnnotations,
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            diRowDataRows
+        }
+
+
+    fun diProvidesAndInjects(
+        moduleGradlePaths: List<GradlePath>? = null,
+    ): Flow<List<DiProvidesAndInjectsItem>> =
+        diProvidesAndInjects.mapLatest { diProvidesAndInjects: List<DiProvidesAndInjectsItem> ->
+            diProvidesAndInjects.filter {
+                when (it) {
+                    is DiProvidesAndInjectsItem.Injects -> moduleGradlePaths?.contains(it.module) ?: true
+                    is DiProvidesAndInjectsItem.Provides -> moduleGradlePaths?.contains(it.module) ?: true
+                }
+            }
+        }
+
+    fun diInjects(moduleGradlePaths: List<GradlePath>): Flow<List<DiProvidesAndInjectsItem.Injects>> =
+        diProvidesAndInjects(moduleGradlePaths).mapLatest {
+            it.filterIsInstance<DiProvidesAndInjectsItem.Injects>().sortedBy { it.type }
+        }
+
+    fun diProvides(): Flow<List<DiProvidesAndInjectsItem.Provides>> =
+        diProvidesAndInjects.mapLatest {
+            it.filterIsInstance<DiProvidesAndInjectsItem.Provides>().sortedBy { it.type }
+        }
+
+
+    fun diProvides(diKey: DiKey): Flow<List<DiProvidesAndInjectsItem.Provides>> =
+        diProvides().mapLatest { providesList ->
+            providesList.filter { it.key == diKey }
+        }
+
+//    fun providesFor(diInjectsItem: DiProvidesAndInjectsItem.Injects) {}
 
     val statInfos: Flow<Collection<StatMetadata>?> = collectedDataRepo.statsData.mapLatest { it?.statInfos?.values }
 
@@ -46,14 +131,9 @@ class ReportDataRepo(
             .mapLatest { it?.invertedDependencies }
             .map { it?.keys }
 
-    val allModules: Flow<List<GradlePath>?> = collectedDataRepo.home
-        .mapLatest {
-            computeMeasureDuration("allModules") {
-                it?.modules?.sorted()
-            }
-        }
 
-    val allPlugins: Flow<Map<GradlePath, List<GradlePluginId>>?> = collectedPluginInfoReport.mapLatest { it?.modules }
+    val allPlugins: Flow<Map<GradlePath, List<GradlePluginId>>?> =
+        collectedPluginInfoReport.mapLatest { it?.modules }
 
     val allModulesMatchingQuery = moduleQuery.combine(allModules) { query, allModules ->
         computeMeasureDuration("allModulesMatchingQuery") {

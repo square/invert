@@ -7,6 +7,11 @@ import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.GitHubMarkdownReportPage.navPage
 import com.squareup.invert.common.pages.GithubReadMeNavRoute.Companion.FILE_KEY
 import com.squareup.invert.common.pages.GithubReadMeNavRoute.Companion.REPO_KEY
+import highlightJsHighlightAll
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import markdownToHtml
 import org.jetbrains.compose.web.dom.Code
 import org.jetbrains.compose.web.dom.H2
@@ -72,6 +77,10 @@ fun RemoteCodeHighlighted(remoteUrl: String = "https://api.github.com/repos/squa
             val fileExtension = remoteUrl.substringAfterLast(".")
             Code({ classes(("language-$fileExtension")) }) {
                 Text(content)
+                CoroutineScope(Dispatchers.Main).launch {
+                    delay(100)
+                    highlightJsHighlightAll()
+                }
             }
         }
     }

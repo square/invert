@@ -107,5 +107,6 @@ window.callDecodeURIComponent = function(str){
 }
 
 window.highlightJsHighlightAll = function() {
+    console.log("hljs.highlightAll()")
     hljs.highlightAll();
 }

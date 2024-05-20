@@ -54,7 +54,6 @@ data class ModuleDetailNavRoute(
     }
 }
 
-
 object ModuleDetailReportPage : InvertReportPage<ModuleDetailNavRoute> {
     override val navPage: NavPage = NavPage(
         pageId = "module_detail",

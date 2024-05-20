@@ -6,14 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.squareup.invert.common.DependencyGraph
+import com.squareup.invert.common.DiProvidesAndInjectsItem
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.DependencyInjectionNavRoute.Companion.parser
-import com.squareup.invert.models.Stat
-import com.squareup.invert.models.StatKey
 import kotlinx.browser.window
 import kotlinx.html.ATarget
 import org.jetbrains.compose.web.dom.*
@@ -65,27 +64,6 @@ object DependencyInjectionReportPage : InvertReportPage<DependencyInjectionNavRo
     }
 }
 
-sealed interface DiRowData {
-    data class Provides(
-        val module: String,
-        val filePath: String,
-        val startLine: Int,
-        val endLine: Int,
-        val type: String,
-        val implementationType: String,
-        val scope: String? = null,
-        val qualifiers: List<String> = emptyList(),
-    ) : DiRowData
-
-    data class Injects(
-        val module: String,
-        val filePath: String,
-        val startLine: Int,
-        val endLine: Int,
-        val type: String,
-        val qualifiers: List<String>,
-    ) : DiRowData
-}
 
 @Composable
 fun DependencyInjectionComposable(
@@ -156,51 +134,10 @@ fun DependencyInjectionComposable(
 
 //    https://github.com/square/invert/blob/a5287e9583895e0fb645e9298f67551da8b72e9a/collectors-anvil-dagger/src/main/kotlin/com/squareup/invert/AnvilContributesBinding.kt
 
-    val STAT_KEY = "DiProvidesAndInjects"
-
-    val diRowDataRows = mutableListOf<DiRowData>()
-
-    modulesMatchingQuery.map { moduleGradlePath ->
-        val statsDataForModule: Map<StatKey, Stat>? = statsData?.statsByModule?.get(moduleGradlePath)
-        val stat = statsDataForModule?.get(STAT_KEY)
-        if (stat is Stat.DiProvidesAndInjectsStat) {
-            stat.value.forEach { providesAndInjects ->
-                if (providesAndInjects.contributions.isNotEmpty()) {
-                    providesAndInjects.contributions.forEach { contribution ->
-                        diRowDataRows.add(
-                            DiRowData.Provides(
-                                module = moduleGradlePath,
-                                filePath = providesAndInjects.filePath,
-                                startLine = providesAndInjects.startLine,
-                                endLine = providesAndInjects.endLine,
-                                type = contribution.boundType,
-                                implementationType = contribution.boundImplementation,
-                                scope = null,
-                                qualifiers = listOf()
-                            )
-                        )
-                        contribution.boundImplementation.contains(typeQuery ?: "")
-                                || contribution.boundType.contains(typeQuery ?: "")
-                    }
-                }
-
-                if (providesAndInjects.consumptions.isNotEmpty()) {
-                    providesAndInjects.consumptions.forEach { consumption ->
-                        diRowDataRows.add(
-                            DiRowData.Injects(
-                                module = moduleGradlePath,
-                                filePath = providesAndInjects.filePath,
-                                startLine = consumption.startLine,
-                                endLine = consumption.endLine,
-                                type = consumption.type,
-                                qualifiers = consumption.qualifierAnnotations,
-                            )
-                        )
-                        consumption.type.contains(typeQuery)
-                    }
-                }
-            }
-        }
+    val diRowDataRows by reportDataRepo.diProvidesAndInjects.collectAsState(null)
+    if(diRowDataRows==null){
+        BootstrapLoadingMessageWithSpinner()
+        return
     }
     val columnsHeaders = mutableListOf<String>(
         "Module",
@@ -210,8 +147,8 @@ fun DependencyInjectionComposable(
     )
     H4 { Text("Provides") }
     BootstrapTable(
-        rows = diRowDataRows
-            .filterIsInstance<DiRowData.Provides>()
+        rows = diRowDataRows!!
+            .filterIsInstance<DiProvidesAndInjectsItem.Provides>()
             .filter { rowData ->
                 rowData.module.contains(moduleQuery)
                         && (
@@ -237,8 +174,8 @@ fun DependencyInjectionComposable(
     )
     H4 { Text("Injects") }
     BootstrapTable(
-        rows = diRowDataRows
-            .filterIsInstance<DiRowData.Injects>()
+        rows = diRowDataRows!!
+            .filterIsInstance<DiProvidesAndInjectsItem.Injects>()
             .filter { rowData ->
 
                 rowData.module.contains(moduleQuery, true)

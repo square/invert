@@ -160,10 +160,6 @@ fun RemoteGitHubContent(url: String, transform: @Composable (String) -> Unit) {
     when (local) {
         is RemoteGitHubContentLoadingState.Loaded -> {
             transform(local.content)
-            CoroutineScope(Dispatchers.Main).launch {
-                delay(100)
-                highlightJsHighlightAll()
-            }
         }
         else -> {
             BootstrapLoadingSpinner()

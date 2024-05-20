@@ -29,20 +29,11 @@ class NavPage(
 
 
     companion object {
-        fun NavPage.toNavItem(): NavItem {
+        private fun NavPage.toNavItem(): NavItem {
             return NavItem(
                 itemTitle = this.displayName,
                 navPage = this,
             )
-        }
-
-        fun Set<NavPage>.toNavItems(): Set<NavItem> {
-            return map {
-                NavItem(
-                    itemTitle = it.displayName,
-                    navPage = it,
-                )
-            }.toSet()
         }
 
         private fun gitHubContentNavItem(title: String, destinationNavRoute: NavRoute): NavItem {
@@ -97,18 +88,18 @@ class NavPage(
                 ),
                 NavPageGroup(
                     "Insights", setOf(
-                        LeafModulesNavRoute.navPage,
-                        UnusedModulesReportPage.navPage,
-                        SuppressAnnotationReportPage.navPage,
-                    ).toNavItems()
+                        LeafModulesNavRoute.navPage.toNavItem(),
+                        UnusedModulesReportPage.navPage.toNavItem(),
+                        SuppressAnnotationReportPage.navPage.toNavItem(),
+                    )
                 ),
                 NavPageGroup(
                     "Explore", setOf(
-                        InvertedDependenciesReportPage.navPage,
-                        DependencyInjectionReportPage.navPage,
-                        DependencyDiffReportPage.navPage,
-                        ModuleDependencyGraphReportPage.navPage,
-                    ).toNavItems()
+                        InvertedDependenciesReportPage.navPage.toNavItem(),
+                        DependencyInjectionReportPage.navPage.toNavItem(),
+                        DependencyDiffReportPage.navPage.toNavItem(),
+                        ModuleDependencyGraphReportPage.navPage.toNavItem(),
+                    )
                 ),
 //                NavPageGroup(
 //                    "GitHub", setOf(

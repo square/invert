@@ -78,6 +78,7 @@ class InvertReport(
             DependencyDiffReportPage,
             ModuleDependencyGraphReportPage,
             HomeReportPage,
+            HotwireReportPage,
             KotlinCompilerPluginsReportPage,
             LeafModulesReportPage,
             ModuleDetailReportPage,
