@@ -70,7 +70,10 @@ fun PluginsComposable(
         return
     }
 
-    val pluginIdToCount = allPluginIds!!.associateWith { pluginIdToModulesMap!!.getValue(it).size }
+    val pluginIdToCount = allPluginIds!!
+        .associateWith { pluginIdToModulesMap!!.getValue(it).size }
+        .entries
+        .sortedByDescending { it.value }
 
     val count = allPluginIds!!.size
     TitleRow("Applied Plugins ($count Total)")
@@ -91,13 +94,13 @@ fun PluginsComposable(
         }
         BootstrapColumn(6) {
             ChartJsChartComposable(
-                type = "polarArea",
+                type = "bar",
                 data = ChartsJs.ChartJsData(
-                    labels = pluginIdToCount.keys.map { it },
+                    labels = pluginIdToCount.map { it.key },
                     datasets = listOf(
                         ChartsJs.ChartJsDataset(
                             label = "Plugin",
-                            data = pluginIdToCount.values.map { it }
+                            data = pluginIdToCount.map { it.value }
                         )
                     )
                 ),

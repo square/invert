@@ -106,7 +106,7 @@ fun ArtifactsComposable(
         }
     }
 
-    val gavByGroup = gavs.groupBy { it.group }
+    val gavByGroup = gavs.groupBy { it.group }.entries.sortedByDescending { it.value.size }
 
     val allArtifactsCount = allArtifacts.size
     TitleRow("Artifacts (${artifactsMatchingQuery.size} of $allArtifactsCount)")
@@ -126,11 +126,11 @@ fun ArtifactsComposable(
                 type = "bar",
                 domId = "chart-invert-artifacts",
                 data = ChartsJs.ChartJsData(
-                    labels = gavByGroup.keys.map { it },
+                    labels = gavByGroup.map { it.key },
                     datasets = listOf(
                         ChartsJs.ChartJsDataset(
                             label = "Group",
-                            data = gavByGroup.values.map { it.size }
+                            data = gavByGroup.map { it.value.size }
                         )
                     )
                 ),

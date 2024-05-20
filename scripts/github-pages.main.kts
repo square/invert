@@ -127,7 +127,7 @@ data class TargetRepo(
     val org: String,
     val project: String,
     val runOnGitHubAction: Boolean = true,
-    val works: Boolean = true,
+    val hasAnvil: Boolean = false,
     val buildDirPath: String = "build",
     val invertGradleCmd: () -> String = { DEFAULT_INIT_SCRIPT_LINE },
     val postCheckout: (File) -> Unit = { projectCloneDir -> },
@@ -142,12 +142,24 @@ data class TargetRepo(
     val url = "https://github.com/$org/$project"
 }
 
-val OTHER_REPOS = listOf(
+val OTHER_REPOS_TO_CONSIDER = listOf(
     TargetRepo(
         org = "airbnb",
         project = "mavericks",
+    ),
+    TargetRepo(
+        org = "SonarSource",
+        project = "sonar-kotlin",
+    ),
+    TargetRepo(
+        org = "apereo",
+        project = "cas",
         runOnGitHubAction = false,
-        works = false,
+    ),
+    TargetRepo(
+        org = "androidx",
+        project = "androidx",
+        runOnGitHubAction = false,
     ),
 )
 
@@ -186,7 +198,6 @@ val ALL_REPOS = listOf(
                 }
             }
         },
-        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "InsertKoinIO",
@@ -197,44 +208,28 @@ val ALL_REPOS = listOf(
                 File(projectCloneDir, "projects")
             )
         },
-        runOnGitHubAction = false,
-    ),
-    TargetRepo(
-        org = "apereo",
-        project = "cas",
-        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "square",
         project = "anvil",
         buildDirPath = "build/root-build",
-        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "square",
         project = "okhttp",
-        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "skydoves",
         project = "pokedex-compose",
-        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "slackhq",
         project = "circuit",
         postCheckout = slackRemoveExclusiveContentPostCheckout,
-        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "chrisbanes",
         project = "tivi",
-        runOnGitHubAction = false,
-    ),
-    TargetRepo(
-        org = "androidx",
-        project = "androidx",
-        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "gradle",
@@ -247,19 +242,20 @@ val ALL_REPOS = listOf(
     TargetRepo(
         org = "spring-projects",
         project = "spring-boot",
-        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "detekt",
         project = "detekt",
-        runOnGitHubAction = false,
     ),
-    // Current issue when running this one
-//    TargetRepo(
-//        org = "SonarSource",
-//        project = "sonar-kotlin",
-//        runOnGitHubAction = false,
-//    ),
+
+    TargetRepo(
+        org = "android",
+        project = "nowinandroid",
+    ),
+    TargetRepo(
+        org = "handstandsam",
+        project = "ShoppingApp",
+    ),
     TargetRepo(
         org = "ZacSweers",
         project = "CatchUp",
@@ -282,34 +278,30 @@ val ALL_REPOS = listOf(
                 clonedProjectDir,
                 envVars,
             )
-        }
+        },
+        hasAnvil = true
     ),
     TargetRepo(
         org = "rickbusarow",
-        project = "ModuleCheck"
+        project = "ModuleCheck",
+        hasAnvil = true,
     ),
     TargetRepo(
         org = "duckduckgo",
         project = "Android",
-    ),
-    TargetRepo(
-        org = "android",
-        project = "nowinandroid",
-    ),
-    TargetRepo(
-        org = "handstandsam",
-        project = "ShoppingApp",
+        hasAnvil = true,
     ),
     TargetRepo(
         org = "PaulWoitaschek",
         project = "Voice",
+        hasAnvil = true,
     ),
     TargetRepo(
         org = "flipperdevices",
         project = "Flipper-Android-App",
+        hasAnvil = true,
     ),
 )
-    .filter { it.works }
     .filter {
         val isCi = System.getenv().containsKey("GITHUB_ACTIONS")
         if (isCi) {
@@ -317,9 +309,6 @@ val ALL_REPOS = listOf(
         } else {
             true
         }
-    }
-    .filter {
-        it.org == "flipperdevices"
     }
 
 val CLONES_DIR = File("build/clones").apply {

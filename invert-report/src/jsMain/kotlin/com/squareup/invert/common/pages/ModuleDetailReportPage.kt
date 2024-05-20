@@ -257,7 +257,13 @@ fun ModuleDetailComposable(
 
     pageTabs.add(BootstrapTabData(tabName = "Gradle Plugins") {
         val pluginsForModuleNonNull = pluginsForModule!!
-        BootstrapClickableList("Gradle Plugins", pluginsForModuleNonNull, MAX_RESULTS) {}
+        BootstrapClickableList("Gradle Plugins", pluginsForModuleNonNull, MAX_RESULTS) {
+            navRouteRepo.updateNavRoute(
+                PluginDetailNavRoute(
+                    pluginId = it
+                )
+            )
+        }
     })
 
     BootstrapTabPane(pageTabs)
