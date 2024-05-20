@@ -130,16 +130,12 @@ fun DependencyInjectionComposable(
         base
     }
 
-    val gitRepoHttpsUrlForCommit = metadata?.remoteRepoUrl + "/blob/" + metadata?.currentBranchHash
-
-//    https://github.com/square/invert/blob/a5287e9583895e0fb645e9298f67551da8b72e9a/collectors-anvil-dagger/src/main/kotlin/com/squareup/invert/AnvilContributesBinding.kt
-
     val diRowDataRows by reportDataRepo.diProvidesAndInjects.collectAsState(null)
     if(diRowDataRows==null){
         BootstrapLoadingMessageWithSpinner()
         return
     }
-    val columnsHeaders = mutableListOf<String>(
+    val columnsHeaders = mutableListOf(
         "Module",
         "Type",
         "Qualifiers",
@@ -164,7 +160,7 @@ fun DependencyInjectionComposable(
                     "${it.filePath}#L${it.startLine}-L${it.endLine}",
                 )
             },
-        types = columnsHeaders.map { String::class },
+        types = columnsHeaders.map { String::class }.dropLast(1).toMutableList<KClass<*>>().apply { add(MarkdownCellContent::class) },
         headers = columnsHeaders,
         maxResultsLimitConstant = MAX_RESULTS,
         onItemClickCallback = {

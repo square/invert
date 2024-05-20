@@ -2,6 +2,7 @@ package com.squareup.invert.common.pages
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.key
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
@@ -9,16 +10,10 @@ import com.squareup.invert.common.pages.GitHubMarkdownReportPage.navPage
 import com.squareup.invert.common.pages.GithubReadMeNavRoute.Companion.FILE_KEY
 import com.squareup.invert.common.pages.GithubReadMeNavRoute.Companion.REPO_KEY
 import highlightJsHighlightAll
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import markdownToHtml
 import org.jetbrains.compose.web.dom.Code
 import org.jetbrains.compose.web.dom.H2
 import org.jetbrains.compose.web.dom.Pre
 import org.jetbrains.compose.web.dom.Text
-import ui.RawHtmlComposable
 import ui.RemoteGitHubContent
 import kotlin.reflect.KClass
 
@@ -70,13 +65,15 @@ object GitHubMarkdownReportPage : InvertReportPage<GithubReadMeNavRoute> {
 
 @Composable
 fun RemoteCodeHighlighted(remoteUrl: String = "https://api.github.com/repos/square/okhttp/contents/okhttp/src/main/kotlin/okhttp3/OkHttp.kt") {
-    RemoteGitHubContent(remoteUrl) { content ->
-        Pre {
-            val fileExtension = remoteUrl.substringAfterLast(".")
-            Code({ classes(("language-$fileExtension")) }) {
-                Text(content)
-                SideEffect {
-                    highlightJsHighlightAll()
+    key(remoteUrl) {
+        RemoteGitHubContent(remoteUrl) { content ->
+            Pre {
+                val fileExtension = remoteUrl.substringAfterLast(".")
+                Code({ classes(("language-$fileExtension")) }) {
+                    Text(content)
+                    SideEffect {
+                        highlightJsHighlightAll()
+                    }
                 }
             }
         }
