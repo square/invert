@@ -318,7 +318,6 @@ val ALL_REPOS = listOf(
             true
         }
     }
-    .filter { it.org == "gradle" }
 
 val CLONES_DIR = File("build/clones").apply {
     if (!exists()) {
