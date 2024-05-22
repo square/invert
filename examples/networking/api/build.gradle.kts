@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.detekt)
 }
 dependencies {
     api(libs.ktor.client)

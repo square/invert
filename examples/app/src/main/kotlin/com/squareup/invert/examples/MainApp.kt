@@ -4,6 +4,7 @@ import com.squareup.invert.examples.network.Response
 import kotlinx.coroutines.runBlocking
 
 object MainApp {
+    @Suppress("UseCheckOrError")
     @JvmStatic
     fun main(args: Array<String>) {
         val appComponent = DaggerAppComponent.create()

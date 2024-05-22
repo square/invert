@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>FunctionOnlyReturningConstant:NetworkDaggerModule.kt$NetworkDaggerModule.Companion$@Provides @ServerBaseUrl fun provideBaseUrl(): String</ID>
+    <ID>WildcardImport:LiveNetworkCategoryRepo.kt$import io.ktor.client.*</ID>
+    <ID>WildcardImport:LiveNetworkCategoryRepo.kt$import io.ktor.client.request.*</ID>
+    <ID>WildcardImport:LiveNetworkCategoryRepo.kt$import io.ktor.client.statement.*</ID>
+    <ID>WildcardImport:LiveNetworkCategoryRepo.kt$import io.ktor.http.*</ID>
+    <ID>WildcardImport:LiveNetworkGraph.kt$import io.ktor.client.*</ID>
+    <ID>WildcardImport:LiveNetworkGraph.kt$import io.ktor.client.plugins.contentnegotiation.*</ID>
+    <ID>WildcardImport:LiveNetworkGraph.kt$import io.ktor.client.plugins.logging.*</ID>
+    <ID>WildcardImport:LiveNetworkGraph.kt$import io.ktor.client.request.*</ID>
+    <ID>WildcardImport:LiveNetworkGraph.kt$import io.ktor.client.statement.*</ID>
+    <ID>WildcardImport:LiveNetworkGraph.kt$import io.ktor.http.*</ID>
+    <ID>WildcardImport:LiveNetworkGraph.kt$import io.ktor.serialization.kotlinx.*</ID>
+    <ID>WildcardImport:LiveNetworkUserRepo.kt$import io.ktor.client.*</ID>
+    <ID>WildcardImport:LiveNetworkUserRepo.kt$import io.ktor.client.call.*</ID>
+    <ID>WildcardImport:LiveNetworkUserRepo.kt$import io.ktor.client.request.*</ID>
+    <ID>WildcardImport:LiveNetworkUserRepo.kt$import io.ktor.http.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

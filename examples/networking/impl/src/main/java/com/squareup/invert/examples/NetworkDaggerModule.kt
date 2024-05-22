@@ -5,11 +5,12 @@ import com.squareup.invert.examples.di.ServerBaseUrl
 import com.squareup.anvil.annotations.ContributesTo
 import dagger.Module
 import dagger.Provides
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
 import okhttp3.OkHttpClient
 import com.squareup.invert.examples.scopes.AppScope
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
 
+@Suppress("UtilityClassWithPublicConstructor")
 @ContributesTo(AppScope::class)
 @Module
 abstract class NetworkDaggerModule {

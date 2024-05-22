@@ -1,4 +1,6 @@
+@file:Suppress("NewLineAtEndOfFile")
 package com.squareup.invert.examples.di
+
 import javax.inject.Qualifier
 
 @Retention(AnnotationRetention.BINARY)

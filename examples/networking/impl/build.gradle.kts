@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.anvil)
+    alias(libs.plugins.detekt)
 }
 
 anvil {

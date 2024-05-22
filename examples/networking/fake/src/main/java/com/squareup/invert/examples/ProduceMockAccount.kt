@@ -87,6 +87,8 @@ class ProduceMockAccount : MockAccount() {
 
     companion object {
 
+        // This should be const, but keeping some suppressions for static analysis
+        @Suppress("MayBeConst")
         val IMAGE_BASE_URL = "https://s3.amazonaws.com/shopping-app/produce/images/"
     }
 }

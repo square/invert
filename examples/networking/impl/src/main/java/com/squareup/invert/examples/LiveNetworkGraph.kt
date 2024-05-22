@@ -1,5 +1,6 @@
 package com.squareup.invert.examples
 
+import com.squareup.anvil.annotations.ContributesBinding
 import com.squareup.invert.examples.di.NetworkGraph
 import com.squareup.invert.examples.models.Item
 import com.squareup.invert.examples.models.NetworkConfig
@@ -7,7 +8,7 @@ import com.squareup.invert.examples.network.Response
 import com.squareup.invert.examples.repository.CategoryRepo
 import com.squareup.invert.examples.repository.ItemRepo
 import com.squareup.invert.examples.repository.UserRepo
-import com.squareup.anvil.annotations.ContributesBinding
+import com.squareup.invert.examples.scopes.AppScope
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
@@ -16,7 +17,6 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
 import kotlinx.serialization.json.Json
-import com.squareup.invert.examples.scopes.AppScope
 import javax.inject.Inject
 
 @ContributesBinding(AppScope::class)

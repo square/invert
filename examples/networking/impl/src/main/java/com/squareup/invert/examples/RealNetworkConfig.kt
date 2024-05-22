@@ -11,6 +11,7 @@ class RealNetworkConfig @Inject constructor(
     @ServerBaseUrl override val baseUrl: String,
 ) : NetworkConfig {
 
+    @Suppress("MagicNumber")
     override val port: Int = 443
     override val isMockServer: Boolean = false
 
