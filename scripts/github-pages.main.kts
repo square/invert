@@ -161,6 +161,34 @@ val OTHER_REPOS_TO_CONSIDER = listOf(
         project = "androidx",
         runOnGitHubAction = false,
     ),
+    TargetRepo(
+        org = "InsertKoinIO",
+        project = "koin",
+        runInvert = { projectCloneDir ->
+            executeCmd(
+                DEFAULT_INIT_SCRIPT_LINE,
+                File(projectCloneDir, "projects")
+            )
+        },
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "square",
+        project = "anvil",
+        buildDirPath = "build/root-build",
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "PaulWoitaschek",
+        project = "Voice",
+        hasAnvil = true,
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "spring-projects",
+        project = "spring-boot",
+        runOnGitHubAction = false,
+    ),
 )
 
 val ALL_REPOS = listOf(
@@ -200,21 +228,6 @@ val ALL_REPOS = listOf(
         },
     ),
     TargetRepo(
-        org = "InsertKoinIO",
-        project = "koin",
-        runInvert = { projectCloneDir ->
-            executeCmd(
-                DEFAULT_INIT_SCRIPT_LINE,
-                File(projectCloneDir, "projects")
-            )
-        },
-    ),
-    TargetRepo(
-        org = "square",
-        project = "anvil",
-        buildDirPath = "build/root-build",
-    ),
-    TargetRepo(
         org = "square",
         project = "okhttp",
     ),
@@ -226,6 +239,7 @@ val ALL_REPOS = listOf(
         org = "slackhq",
         project = "circuit",
         postCheckout = slackRemoveExclusiveContentPostCheckout,
+        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "chrisbanes",
@@ -248,14 +262,9 @@ val ALL_REPOS = listOf(
         },
     ),
     TargetRepo(
-        org = "spring-projects",
-        project = "spring-boot",
-    ),
-    TargetRepo(
         org = "detekt",
         project = "detekt",
     ),
-
     TargetRepo(
         org = "android",
         project = "nowinandroid",
@@ -297,11 +306,6 @@ val ALL_REPOS = listOf(
     TargetRepo(
         org = "duckduckgo",
         project = "Android",
-        hasAnvil = true,
-    ),
-    TargetRepo(
-        org = "PaulWoitaschek",
-        project = "Voice",
         hasAnvil = true,
     ),
     TargetRepo(

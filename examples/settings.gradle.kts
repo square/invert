@@ -6,7 +6,11 @@ pluginManagement {
     }
 }
 
-include(":jvm-with-anvil")
+include(":app")
 include(":custom-detekt-rules")
+include(":networking:api")
+include(":networking:fake")
+include(":networking:impl")
+include(":models")
 include(":scopes")
 includeBuild("../") // Include all of the invert plugin repo
