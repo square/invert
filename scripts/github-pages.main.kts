@@ -194,6 +194,33 @@ val OTHER_REPOS_TO_CONSIDER = listOf(
         project = "pokedex-compose",
         runOnGitHubAction = false,
     ),
+    TargetRepo(
+        org = "square",
+        project = "okhttp",
+    ),
+    TargetRepo(
+        org = "slackhq",
+        project = "circuit",
+        postCheckout = slackRemoveExclusiveContentPostCheckout,
+        runOnGitHubAction = false,
+    ),
+    TargetRepo(
+        org = "chrisbanes",
+        project = "tivi",
+    ),
+    TargetRepo(
+        org = "android",
+        project = "nowinandroid",
+    ),
+    TargetRepo(
+        org = "handstandsam",
+        project = "ShoppingApp",
+    ),
+    TargetRepo(
+        org = "rickbusarow",
+        project = "ModuleCheck",
+        hasAnvil = true,
+    ),
 )
 
 val ALL_REPOS = listOf(
@@ -232,20 +259,7 @@ val ALL_REPOS = listOf(
             }
         },
     ),
-    TargetRepo(
-        org = "square",
-        project = "okhttp",
-    ),
-    TargetRepo(
-        org = "slackhq",
-        project = "circuit",
-        postCheckout = slackRemoveExclusiveContentPostCheckout,
-        runOnGitHubAction = false,
-    ),
-    TargetRepo(
-        org = "chrisbanes",
-        project = "tivi",
-    ),
+
     TargetRepo(
         org = "gradle",
         project = "gradle",
@@ -265,14 +279,6 @@ val ALL_REPOS = listOf(
     TargetRepo(
         org = "detekt",
         project = "detekt",
-    ),
-    TargetRepo(
-        org = "android",
-        project = "nowinandroid",
-    ),
-    TargetRepo(
-        org = "handstandsam",
-        project = "ShoppingApp",
     ),
     TargetRepo(
         org = "ZacSweers",
@@ -298,11 +304,6 @@ val ALL_REPOS = listOf(
             )
         },
         hasAnvil = true
-    ),
-    TargetRepo(
-        org = "rickbusarow",
-        project = "ModuleCheck",
-        hasAnvil = true,
     ),
     TargetRepo(
         org = "duckduckgo",

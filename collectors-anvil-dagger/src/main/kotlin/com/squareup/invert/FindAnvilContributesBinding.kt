@@ -19,10 +19,10 @@ class FindAnvilContributesBinding {
 
     private val allBindings = mutableListOf<DiContribution>()
 
-    private val contributionAndConsumption = mutableListOf<ProvidesAndInjects>()
+    private val contributionAndInjections = mutableListOf<ProvidesAndInjects>()
 
-    fun getCollectedContributionsAndConsumptions(): List<ProvidesAndInjects> {
-        return contributionAndConsumption
+    fun getCollectedContributionsAndInjections(): List<ProvidesAndInjects> {
+        return contributionAndInjections
     }
 
     fun getCollectedContributesBindings(): List<DiContribution> {
@@ -155,7 +155,7 @@ class FindAnvilContributesBinding {
 
                     val lineAndColumnRange = getLineAndColumnRangeInPsiFile(ktFile, ktClassOrObject.textRange)
                     if (bindingsInClassOrObject.isNotEmpty() || consumptions.isNotEmpty()) {
-                        contributionAndConsumption.add(
+                        contributionAndInjections.add(
                             ProvidesAndInjects(
                                 filePath = relativeFilePath,
                                 contributions = bindingsInClassOrObject,

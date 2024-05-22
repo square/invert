@@ -24,7 +24,7 @@ class DiProvidesAndInjectsStatCollector : StatCollector {
             )
         }
 
-        val contributionsAndConsumption = findAnvil.getCollectedContributionsAndConsumptions()
+        val contributionsAndConsumption = findAnvil.getCollectedContributionsAndInjections()
         return if (contributionsAndConsumption.isNotEmpty()) {
             listOf(
                 CollectedStat(
