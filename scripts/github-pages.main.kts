@@ -275,6 +275,7 @@ val ALL_REPOS = listOf(
             // ignoreBuildJavaVersionCheck=true is needed for https://github.com/gradle/gradle for the Java 11/Java 17 mix
             "$DEFAULT_INIT_SCRIPT_LINE -Dorg.gradle.ignoreBuildJavaVersionCheck=true"
         },
+        runOnGitHubAction = false,
     ),
     TargetRepo(
         org = "detekt",
