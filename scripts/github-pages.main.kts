@@ -189,6 +189,11 @@ val OTHER_REPOS_TO_CONSIDER = listOf(
         project = "spring-boot",
         runOnGitHubAction = false,
     ),
+    TargetRepo(
+        org = "skydoves",
+        project = "pokedex-compose",
+        runOnGitHubAction = false,
+    ),
 )
 
 val ALL_REPOS = listOf(
@@ -230,10 +235,6 @@ val ALL_REPOS = listOf(
     TargetRepo(
         org = "square",
         project = "okhttp",
-    ),
-    TargetRepo(
-        org = "skydoves",
-        project = "pokedex-compose",
     ),
     TargetRepo(
         org = "slackhq",
