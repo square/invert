@@ -24,16 +24,15 @@ class LiveNetworkGraph @Inject constructor(
     override val userRepo: UserRepo,
     override val categoryRepo: CategoryRepo,
     val networkConfig: NetworkConfig,
-    val ktorClient: HttpClient,
+    val httpClient: HttpClient,
 ) : NetworkGraph {
 
     override val itemRepo: ItemRepo = object : ItemRepo {
         override suspend fun getItemsForCategory(categoryLabel: String): Response<List<Item>> {
             val itemsForCategoryUrl = "${networkConfig.fullUrl}category/${categoryLabel}/items"
-            val response =
-                ktorClient.request(itemsForCategoryUrl) {
-                    method = HttpMethod.Get
-                }
+            val response = httpClient.request(itemsForCategoryUrl) {
+                method = HttpMethod.Get
+            }
 
             if (response.status == HttpStatusCode.OK) {
                 val responseBody = Json.decodeFromString<List<Item>>(response.bodyAsText())
