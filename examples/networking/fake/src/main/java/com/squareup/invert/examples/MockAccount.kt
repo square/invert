@@ -5,17 +5,15 @@ import com.squareup.invert.examples.models.Category
 import com.squareup.invert.examples.models.Item
 import com.squareup.invert.examples.models.User
 
-abstract class MockAccount {
+interface MockAccount {
 
-    val itemsByCategory: MutableMap<String, List<Item>?> = mutableMapOf()
+    fun getUsername(): String
 
-    abstract fun getUsername(): String
+    fun getUser(): User
 
-    abstract fun getUser(): User
+    fun getCategories(): List<Category>
 
-    abstract fun getCategories(): List<Category>
-
-    open fun getItemsForCategory(categoryLabel: String): List<Item>? {
+    fun getItemsForCategory(categoryLabel: String): List<Item>? {
         return listOf()
     }
 }

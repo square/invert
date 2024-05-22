@@ -1,13 +1,19 @@
 package com.squareup.invert.examples
 
 
+import com.squareup.anvil.annotations.ContributesBinding
 import com.squareup.invert.examples.models.Category
 import com.squareup.invert.examples.models.Item
 import com.squareup.invert.examples.models.User
+import com.squareup.invert.examples.scopes.AppScope
+import javax.inject.Inject
 
-class ProduceMockAccount : MockAccount() {
+@ContributesBinding(AppScope::class)
+class ProduceMockAccount @Inject constructor() : MockAccount {
 
     private val user: User = User("Sam", "Edwards")
+
+    private val itemsByCategory: MutableMap<String, List<Item>?> = mutableMapOf()
 
     private val categories: MutableList<Category> = mutableListOf()
 

@@ -7,8 +7,8 @@ plugins {
 }
 
 dependencies {
-//    implementation(project(":networking:fake"))
-    implementation(project(":networking:impl"))
+    implementation(project(":networking:fake"))
+//    implementation(project(":networking:impl"))
     implementation(project(":scopes"))
 
     implementation(libs.dagger)
