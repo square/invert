@@ -104,6 +104,10 @@ fun LeftNavigationComposable(
             Text("${metadata.timeStr}")
             Br()
             Text("(${metadata.timezoneId})")
+            Br()
+            Br()
+            Br()
+            Br()
         }
     }
 }
