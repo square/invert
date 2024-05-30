@@ -1,75 +1,69 @@
 package com.squareup.invert.internal.report
 
-import com.squareup.invert.internal.models.CollectedConfigurationsForProject
-import com.squareup.invert.internal.models.CollectedDependenciesForProject
-import com.squareup.invert.internal.models.CollectedOwnershipForProject
-import com.squareup.invert.internal.models.CollectedPluginsForProject
-import com.squareup.invert.internal.models.CollectedStatsForProject
+import com.squareup.invert.internal.models.*
 import com.squareup.invert.models.InvertSerialization.InvertJson
 import java.io.File
 
 object InvertReportFileUtils {
 
-  /**
-   * Reads all files in the intermediate stats directory and combines their contents.
-   */
-  fun readCollectedStatsForAllProjectsFromDisk(
-    collectedStatFiles: List<File>
-  ): List<CollectedStatsForProject> {
-    val collectedStats: List<CollectedStatsForProject> = collectedStatFiles
-      .filter { it.exists() && it.nameWithoutExtension.isNotBlank() }
-      .map {
-        InvertJson.decodeFromString(CollectedStatsForProject.serializer(), it.readText())
-      }
-    return collectedStats
-  }
+    /**
+     * Reads all files in the intermediate stats directory and combines their contents.
+     */
+    fun readCollectedStatsForAllProjectsFromDisk(
+        collectedStatFile: File
+    ): CollectedStatsForProject? {
+        return if (collectedStatFile.exists() && collectedStatFile.nameWithoutExtension.isNotBlank()) {
+            InvertJson.decodeFromString(CollectedStatsForProject.serializer(), collectedStatFile.readText())
+        } else {
+            null
+        }
+    }
 
-  fun readCollectedOwnershipForAllProjectsFromDisk(
-    ownersFiles: List<File>
-  ): List<CollectedOwnershipForProject> {
-    val collectedStats: List<CollectedOwnershipForProject> = ownersFiles
-      .filter { it.exists() && it.nameWithoutExtension.isNotBlank() }
-      .map {
-        InvertJson.decodeFromString(
-          deserializer = CollectedOwnershipForProject.serializer(),
-          string = it.readText()
-        )
-      }
-    return collectedStats
-  }
+    fun readCollectedOwnershipForAllProjectsFromDisk(
+        ownersFile: File
+    ): CollectedOwnershipForProject? {
+        return if (ownersFile.exists() && ownersFile.nameWithoutExtension.isNotBlank()) {
+            InvertJson.decodeFromString(
+                deserializer = CollectedOwnershipForProject.serializer(),
+                string = ownersFile.readText()
+            )
+        } else {
+            null
+        }
+    }
 
-  fun readCollectedPluginsForAllModules(pluginsFiles: List<File>): List<CollectedPluginsForProject> {
-    return pluginsFiles
-      .filter { it.exists() && it.nameWithoutExtension.isNotBlank() }
-      .map {
-        InvertJson.decodeFromString(
-          deserializer = CollectedPluginsForProject.serializer(),
-          string = it.readText()
-        )
-      }
-  }
+    fun readCollectedPluginsForAllModules(pluginsFile: File): CollectedPluginsForProject? {
+        return if (pluginsFile.exists() && pluginsFile.nameWithoutExtension.isNotBlank()) {
+            InvertJson.decodeFromString(
+                deserializer = CollectedPluginsForProject.serializer(),
+                string = pluginsFile.readText()
+            )
+        } else {
+            null
+        }
+    }
 
-  fun buildModuleToFeaturesMap(dependenciesFiles: List<File>): List<CollectedDependenciesForProject> {
-    return dependenciesFiles
-      .filter { it.exists() && it.nameWithoutExtension.isNotBlank() }
-      .map {
-        InvertJson.decodeFromString(
-          deserializer = CollectedDependenciesForProject.serializer(),
-          string = it.readText()
-        )
-      }
-  }
+    fun buildModuleToFeaturesMap(dependenciesFile: File): CollectedDependenciesForProject? {
+        return if (dependenciesFile.exists() && dependenciesFile.nameWithoutExtension.isNotBlank()) {
+            InvertJson.decodeFromString(
+                deserializer = CollectedDependenciesForProject.serializer(),
+                string = dependenciesFile.readText()
+            )
+        } else {
+            null
+        }
+    }
 
-  fun readCollectedConfigurationsForAllModules(
-    collectedConfigurationsFiles: List<File>
-  ): List<CollectedConfigurationsForProject> {
-    return collectedConfigurationsFiles
-      .filter { it.exists() && it.nameWithoutExtension.isNotBlank() }
-      .map {
-        InvertJson.decodeFromString(
-          deserializer = CollectedConfigurationsForProject.serializer(),
-          string = it.readText()
-        )
-      }
-  }
+    fun readCollectedConfigurationsForAllModules(
+        collectedConfigurationsFile: File
+    ): CollectedConfigurationsForProject? {
+        return if (collectedConfigurationsFile.exists() && collectedConfigurationsFile.nameWithoutExtension.isNotBlank()) {
+            InvertJson.decodeFromString(
+                deserializer = CollectedConfigurationsForProject.serializer(),
+                string = collectedConfigurationsFile.readText()
+            )
+        } else {
+            null
+        }
+    }
 }

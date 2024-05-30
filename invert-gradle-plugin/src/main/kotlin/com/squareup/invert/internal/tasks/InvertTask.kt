@@ -2,24 +2,23 @@ package com.squareup.invert.internal.tasks
 
 import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.isRootProject
-import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
-import com.squareup.invert.internal.models.InvertPluginFileKey
+import com.squareup.invert.internal.models.*
 import com.squareup.invert.internal.report.InvertReportFileUtils
 import com.squareup.invert.internal.report.js.InvertJsReportUtils
 import com.squareup.invert.internal.report.js.InvertJsReportUtils.computeGlobalStats
 import com.squareup.invert.internal.report.js.InvertJsReportWriter
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
-import com.squareup.invert.models.*
+import com.squareup.invert.models.DependencyId
+import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
+import kotlinx.coroutines.runBlocking
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
-import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.Logger
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import java.io.File
@@ -42,122 +41,126 @@ abstract class InvertTask : DefaultTask() {
     @get:Input
     abstract val projectPath: Property<String>
 
-    @get:InputFiles
-    abstract val subprojectInvertReportDirs: ListProperty<Provider<Directory>>
+    @get:Input
+    abstract val subprojectInvertReportDirs: ListProperty<String>
 
     @get:OutputDirectory
     abstract val rootBuildReportsDir: DirectoryProperty
 
+
     @TaskAction
     internal fun execute() {
-        val configurationsFiles = mutableListOf<File>()
-        val dependenciesFiles = mutableListOf<File>()
-        val ownersFiles = mutableListOf<File>()
-        val statsFiles = mutableListOf<File>()
-        val pluginsFiles = mutableListOf<File>()
+        runBlocking {
+            val collectedConfigurations = mutableListOf<CollectedConfigurationsForProject>()
+            val collectedDependencies = mutableListOf<CollectedDependenciesForProject>()
+            val collectedOwners = mutableListOf<CollectedOwnershipForProject>()
+            val collectedStats = mutableListOf<CollectedStatsForProject>()
+            val collectedPlugins = mutableListOf<CollectedPluginsForProject>()
 
-        subprojectInvertReportDirs.get().forEach { subprojectInvertReportDir ->
-            val subprojectInvertReportDirFile = subprojectInvertReportDir.get().asFile
-            if (subprojectInvertReportDirFile.exists()) {
-                File(
-                    subprojectInvertReportDirFile,
-                    InvertPluginFileKey.DEPENDENCIES.filename
-                ).also {
-                    if (it.exists()) {
-                        dependenciesFiles.add(it)
+            subprojectInvertReportDirs.get()
+                .map { File(it) }
+                .forEach { subprojectInvertReportDirFile ->
+                    if (subprojectInvertReportDirFile.exists()) {
+                        File(
+                            subprojectInvertReportDirFile,
+                            InvertPluginFileKey.DEPENDENCIES.filename
+                        ).also { file ->
+                            if (file.exists()) {
+                                InvertReportFileUtils.buildModuleToFeaturesMap(file)?.let {
+                                    collectedDependencies.add(it)
+                                }
+                            }
+                        }
+
+                        File(
+                            subprojectInvertReportDirFile,
+                            InvertPluginFileKey.CONFIGURATIONS.filename
+                        ).also { file ->
+                            if (file.exists()) {
+                                InvertReportFileUtils.readCollectedConfigurationsForAllModules(file)?.let {
+                                    collectedConfigurations.add(it)
+                                }
+                            }
+                        }
+
+                        File(
+                            subprojectInvertReportDirFile,
+                            InvertPluginFileKey.STATS.filename
+                        ).also { file ->
+                            if (file.exists()) {
+                                InvertReportFileUtils.readCollectedStatsForAllProjectsFromDisk(file)?.let {
+                                    collectedStats.add(it)
+                                }
+                            }
+                        }
+
+                        File(
+                            subprojectInvertReportDirFile,
+                            InvertPluginFileKey.OWNERS.filename
+                        ).also { file ->
+                            InvertReportFileUtils.readCollectedOwnershipForAllProjectsFromDisk(file)
+                                ?.let { collectedOwners.add(it) }
+                        }
+
+                        File(
+                            subprojectInvertReportDirFile,
+                            InvertPluginFileKey.PLUGINS.filename
+                        ).also { file ->
+                            if (file.exists()) {
+                                InvertReportFileUtils.readCollectedPluginsForAllModules(file)?.let {
+                                    synchronized(collectedPlugins) {
+                                        collectedPlugins.add(it)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
-                File(
-                    subprojectInvertReportDirFile,
-                    InvertPluginFileKey.CONFIGURATIONS.filename
-                ).also {
-                    if (it.exists()) {
-                        configurationsFiles.add(it)
-                    }
-                }
+            val collectedOwnershipInfo = InvertJsReportUtils.buildModuleToOwnerMap(collectedOwners)
+            val allProjectsStatsData = InvertJsReportUtils.buildModuleToStatsMap(collectedStats)
+            val directDependenciesJsReportModel =
+                InvertJsReportUtils.toDirectDependenciesJsReportModel(collectedDependencies)
+            val invertedDependenciesJsReportModel =
+                InvertJsReportUtils.toInvertedDependenciesJsReportModel(collectedDependencies)
 
-                File(
-                    subprojectInvertReportDirFile,
-                    InvertPluginFileKey.STATS.filename
-                ).also {
-                    if (it.exists()) {
-                        statsFiles.add(it)
-                    }
-                }
+            assertModuleMatch(
+                logger = logger,
+                modulesList = collectedDependencies.map { it.path },
+                invertedModulesList = invertedDependenciesJsReportModel.getAllModulePaths()
+            )
 
-                File(
-                    subprojectInvertReportDirFile,
-                    InvertPluginFileKey.OWNERS.filename
-                ).also {
-                    if (it.exists()) {
-                        ownersFiles.add(it)
-                    }
-                }
+            val globalStats = computeGlobalStats(allProjectsStatsData)
 
-                File(
-                    subprojectInvertReportDirFile,
-                    InvertPluginFileKey.PLUGINS.filename
-                ).also {
-                    if (it.exists()) {
-                        pluginsFiles.add(it)
-                    }
-                }
-            }
+            val rootBuildReportsDir = rootBuildReportsDir.get().asFile
+
+            // JSON Report
+            InvertJsonReportWriter(logger, rootBuildReportsDir).createInvertJsonReport(
+                allConfigurationsData = collectedConfigurations,
+                allProjectsDependencyData = collectedDependencies,
+                allProjectsStatsData = allProjectsStatsData,
+                allPluginsData = collectedPlugins,
+                allOwnersData = collectedOwners,
+                globalStats = globalStats
+            )
+
+            // HTML/JS Report
+            InvertJsReportWriter(logger, rootBuildReportsDir).createInvertHtmlReport(
+                allProjectsDependencyData = collectedDependencies,
+                allProjectsStatsData = allProjectsStatsData,
+                directDependencies = directDependenciesJsReportModel,
+                invertedDependencies = invertedDependenciesJsReportModel,
+                allPluginsData = collectedPlugins,
+                collectedOwnershipInfo = collectedOwnershipInfo,
+                allProjectsConfigurationsData = collectedConfigurations,
+                globalStatTotals = CollectedStatTotalsJsReportModel(globalStats),
+            )
         }
-
-        val allProjectsDependencyData = InvertReportFileUtils.buildModuleToFeaturesMap(dependenciesFiles)
-        val allProjectsConfigurationsData = InvertReportFileUtils.readCollectedConfigurationsForAllModules(
-            configurationsFiles
-        )
-        val collectedStats = InvertReportFileUtils.readCollectedStatsForAllProjectsFromDisk(statsFiles)
-        val allProjectsStatsData = InvertJsReportUtils.buildModuleToStatsMap(collectedStats)
-        val allOwnersData = InvertReportFileUtils.readCollectedOwnershipForAllProjectsFromDisk(ownersFiles)
-        val collectedOwnershipInfo = InvertJsReportUtils.buildModuleToOwnerMap(allOwnersData)
-        val allPluginsData = InvertReportFileUtils.readCollectedPluginsForAllModules(pluginsFiles)
-
-        val directDependenciesJsReportModel =
-            InvertJsReportUtils.toDirectDependenciesJsReportModel(allProjectsDependencyData)
-
-        val invertedDependenciesJsReportModel =
-            InvertJsReportUtils.toInvertedDependenciesJsReportModel(allProjectsDependencyData)
-        assertModuleMatch(
-            logger = logger,
-            modulesList = allProjectsDependencyData.map { it.path },
-            invertedModulesList = invertedDependenciesJsReportModel.getAllModulePaths()
-        )
-
-        val globalStats = computeGlobalStats(allProjectsStatsData)
-
-        val rootBuildReportsDir = rootBuildReportsDir.get().asFile
-
-
-        // JSON Report
-        InvertJsonReportWriter(logger, rootBuildReportsDir).createInvertJsonReport(
-            allConfigurationsData = allProjectsConfigurationsData,
-            allProjectsDependencyData = allProjectsDependencyData,
-            allProjectsStatsData = allProjectsStatsData,
-            allPluginsData = allPluginsData,
-            allOwnersData = allOwnersData,
-            globalStats = globalStats
-        )
-
-        // HTML/JS Report
-        InvertJsReportWriter(logger, rootBuildReportsDir).createInvertHtmlReport(
-            allProjectsDependencyData = allProjectsDependencyData,
-            allProjectsStatsData = allProjectsStatsData,
-            directDependencies = directDependenciesJsReportModel,
-            invertedDependencies = invertedDependenciesJsReportModel,
-            allPluginsData = allPluginsData,
-            collectedOwnershipInfo = collectedOwnershipInfo,
-            allProjectsConfigurationsData = allProjectsConfigurationsData,
-            globalStatTotals = CollectedStatTotalsJsReportModel(globalStats),
-        )
     }
 
     fun setParams(
         project: Project,
-        subprojectInvertReportDirs: List<Provider<Directory>>,
+        subprojectInvertReportDirs: List<String>,
     ) {
         this.subprojectInvertReportDirs.set(subprojectInvertReportDirs)
         this.forRootProject.set(project.isRootProject())
