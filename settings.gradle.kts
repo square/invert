@@ -6,10 +6,10 @@ pluginManagement {
     }
 }
 
-include(":collectors-anvil-dagger")
-include(":collectors-kotlin-java-loc")
+include(":collectors:collectors-anvil-dagger")
+include(":collectors:collectors-kotlin-java-loc")
 include(":custom-detekt-rules")
 include(":invert-models")
 include(":invert-gradle-plugin")
 include(":invert-report")
-include(":owners-github-codeowners")
+include(":owners:owners-github-codeowners")
