@@ -108,6 +108,9 @@ class FindAnvilContributesBinding {
         val bindingsInFile = mutableListOf<DiContribution>()
         if (file.exists()) {
             val ktFile = file.toKtFile()
+//            analyze(ktFile){
+//
+//            }
             ktFile.classesAndInnerClasses()
                 .toList()
                 .forEach { ktClassOrObject ->

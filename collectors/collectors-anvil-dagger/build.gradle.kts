@@ -14,6 +14,7 @@ dependencies {
 
     api(libs.kotlinx.serialization.core)
     api(libs.kotlinx.serialization.json)
+    implementation(libs.kotlin.analysis.api)
     implementation(libs.kotlin.compiler.embeddable)
     implementation(project(":invert-models"))
     implementation(project(":invert-gradle-plugin"))

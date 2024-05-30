@@ -24,7 +24,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 internal val PSI_FILE_FACTORY by lazy(NONE) {
     val project = KotlinCoreEnvironment.createForProduction(
-        parentDisposable = {},
+        projectDisposable = {},
         configuration = CompilerConfiguration().apply {
             put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
         },
