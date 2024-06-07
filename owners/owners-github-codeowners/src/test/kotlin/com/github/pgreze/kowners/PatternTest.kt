@@ -1,169 +1,147 @@
 package com.github.pgreze.kowners
 
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
+import org.junit.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class PatternTest : Spek({
+class PatternTest {
 
-    describe("single patterns") {
+    @Test
+    fun `single patterns - single pattern`() {
+        // If a separator is at the end, it can only match a folder
+        val pattern = Pattern("docs/")
 
-        context("single pattern") {
-            // If a separator is at the end, it can only match a folder
-            val pattern = Pattern("docs/")
+        // match a single directory
+        assertTrue(pattern.matches("docs"))
+        assertTrue(pattern.matches("docs/"))
 
-            it("match a single directory") {
-                assertTrue(pattern.matches("docs"))
-                assertTrue(pattern.matches("docs/"))
-            }
+        // match a sub-file
+        assertTrue(pattern.matches("docs/item"))
 
-            it("match a sub-file") {
-                assertTrue(pattern.matches("docs/item"))
-            }
-        }
-
-        context("root based pattern") {
-            val pattern = Pattern("/docs")
-
-            it("match a single file") {
-                assertTrue(pattern.matches("docs"))
-                assertTrue(pattern.matches("docs/"))
-            }
-
-            it("not match a sub-file") {
-                assertFalse(pattern.matches("/item/docs/"))
-            }
-        }
-
-        context("sub-tree pattern") {
-            val pattern = Pattern("hello/world")
-
-            it("match only root folder") {
-                assertTrue(pattern.matches("hello/world"))
-                assertTrue(pattern.matches("/hello/world"))
-            }
-
-            it("not match as a sub-folder") {
-                assertFalse(pattern.matches("/root/hello/world"))
-            }
-        }
     }
 
-    // An asterisk "*" matches anything except a slash.
-    // The character "?" matches any one character except a slash.
+    @Test
+    fun `single patterns - root based pattern`() {
+        val pattern = Pattern("/docs")
 
-    describe("wildcard patterns") {
+        // match a single file
+        assertTrue(pattern.matches("docs"))
+        assertTrue(pattern.matches("docs/"))
 
-        context("extension based") {
-            val pattern = Pattern("*.txt")
 
-            it("match a single file") {
-                assertTrue(pattern.matches("file.txt"))
-            }
-            it("match a sub-file") {
-                assertTrue(pattern.matches("docs/file.txt"))
-            }
-            it("match a deep hierarchy") {
-                assertTrue(pattern.matches("docs/file.txt/rtfm"))
-            }
-        }
+        // not match a sub-file
+        assertFalse(pattern.matches("/item/docs/"))
 
-        context("any name") {
-            val pattern = Pattern("docs/*")
-
-            it("not match a non folder") {
-                assertFalse(pattern.matches("docs"))
-            }
-            it("match a sub-file") {
-                assertTrue(pattern.matches("docs/file"))
-            }
-            it("not match a deep hierarchy") {
-                assertTrue(pattern.matches("docs/sub/file.txt"))
-            }
-        }
-
-        context("partial name") {
-            val pattern = Pattern("/core_*")
-
-            it("match a single file") {
-                assertTrue(pattern.matches("core_"))
-                assertTrue(pattern.matches("core_ui/"))
-                assertTrue(pattern.matches("core_ui.txt"))
-            }
-            it("match a sub-file") {
-                assertTrue(pattern.matches("core_ui/file.txt"))
-            }
-            it("not match a deep hierarchy") {
-                assertFalse(pattern.matches("/tmp/core_ui/file.txt"))
-            }
-        }
     }
 
-    describe("double wildcard patterns") {
+    @Test
+    fun `single patterns - sub-tree pattern`() {
+        val pattern = Pattern("hello/world")
+
+        // match only root folder
+        assertTrue(pattern.matches("hello/world"))
+        assertTrue(pattern.matches("/hello/world"))
+
+        // not match as a sub-folder
+        assertFalse(pattern.matches("/root/hello/world"))
+    }
+
+
+    @Test
+    fun `wildcard patterns - extension based`() {
+        val pattern = Pattern("*.txt")
+
+        // match a single file
+        assertTrue(pattern.matches("file.txt"))
+        // match a sub-file
+        assertTrue(pattern.matches("docs/file.txt"))
+        // match a deep hierarchy
+        assertTrue(pattern.matches("docs/file.txt/rtfm"))
+    }
+
+
+    @Test
+    fun `wildcard patterns - any name`() {
+        val pattern = Pattern("docs/*")
+
+        // not match a non folder
+        assertFalse(pattern.matches("docs"))
+        // match a sub-file
+        assertTrue(pattern.matches("docs/file"))
+        // not match a deep hierarchy
+        assertTrue(pattern.matches("docs/sub/file.txt"))
+    }
+
+
+    @Test
+    fun `wildcard patterns - partial name`() {
+        val pattern = Pattern("/core_*")
+
+        // match a single file
+        assertTrue(pattern.matches("core_"))
+        assertTrue(pattern.matches("core_ui/"))
+        assertTrue(pattern.matches("core_ui.txt"))
+        // match a sub-file
+        assertTrue(pattern.matches("core_ui/file.txt"))
+        // not match a deep hierarchy
+        assertFalse(pattern.matches("/tmp/core_ui/file.txt"))
+    }
+
+    @Test
+    fun `wildcard patterns - double wildcard patterns`() {
 
         // Equals to the same pattern without **/
-        describe("prefixed pattern") {
+        // prefixed pattern
+        run {
             val pattern = Pattern("**/docs")
 
-            it("match root folder") {
-                assertTrue(pattern.matches("docs"))
-            }
-            it("match a deep hierarchy") {
-                assertTrue(pattern.matches("my/docs/"))
-                assertTrue(pattern.matches("my/docs/file.txt"))
-            }
+            // match root folder
+            assertTrue(pattern.matches("docs"))
+            // match a deep hierarchy
+            assertTrue(pattern.matches("my/docs/"))
+            assertTrue(pattern.matches("my/docs/file.txt"))
         }
 
-        describe("suffixed pattern") {
+        run {
+            // describe("suffixed pattern
             val pattern = Pattern("docs/**")
 
-            it("not match a non folder") {
-                assertFalse(pattern.matches("docs"))
-            }
-            it("match a sub-file") {
-                assertTrue(pattern.matches("docs/file"))
-                assertTrue(pattern.matches("docs/file.txt"))
-            }
-            it("match a deep hierarchy") {
-                assertTrue(pattern.matches("docs/sub/file.txt"))
-            }
+            // not match a non folder
+            assertFalse(pattern.matches("docs"))
+            // match a sub-file
+            assertTrue(pattern.matches("docs/file"))
+            assertTrue(pattern.matches("docs/file.txt"))
+            // match a deep hierarchy
+            assertTrue(pattern.matches("docs/sub/file.txt"))
         }
 
-        describe("inside a pattern") {
+        run {
+            // describe("inside a pattern
             val pattern = Pattern("a/**/b")
 
-            it("match 0 depth hierarchy") {
-                assertTrue(pattern.matches("a/b"))
-            }
-            it("match n depth hierarchy") {
-                assertTrue(pattern.matches("a/x/b"))
-                assertTrue(pattern.matches("a/x/y/b"))
-            }
-            it("match sub-tree") {
-                assertTrue(pattern.matches("a/x/b/y"))
-                assertTrue(pattern.matches("a/x/y/b/z/x"))
-            }
-            it("not match hierarchy inside other folders") {
-                assertFalse(pattern.matches("x/a/b/y"))
-                assertFalse(pattern.matches("X/a/y/b/Z"))
-            }
+            // match 0 depth hierarchy
+            assertTrue(pattern.matches("a/b"))
+            // match n depth hierarchy
+            assertTrue(pattern.matches("a/x/b"))
+            assertTrue(pattern.matches("a/x/y/b"))
+            // match sub-tree
+            assertTrue(pattern.matches("a/x/b/y"))
+            assertTrue(pattern.matches("a/x/y/b/z/x"))
+            // not match hierarchy inside other folders
+            assertFalse(pattern.matches("x/a/b/y"))
+            assertFalse(pattern.matches("X/a/y/b/Z"))
         }
-    }
 
-    describe("range patterns") {
+        run {
 
-        context("partial name") {
+            // partial name
             val pattern = Pattern("/core_[a-zA-Z]")
-
-            it("match a single file") {
-                assertTrue(pattern.matches("core_a"))
-                assertTrue(pattern.matches("core_b/"))
-                assertTrue(pattern.matches("core_Z"))
-            }
-            it("match a sub-file") {
-                assertTrue(pattern.matches("core_a/file.txt"))
-            }
+            // match a single file
+            assertTrue(pattern.matches("core_a"))
+            assertTrue(pattern.matches("core_b/"))
+            assertTrue(pattern.matches("core_Z"))
+            // match a sub-file
+            assertTrue(pattern.matches("core_a/file.txt"))
         }
     }
-})
+}

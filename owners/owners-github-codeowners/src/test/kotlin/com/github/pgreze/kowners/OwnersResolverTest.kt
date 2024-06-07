@@ -1,12 +1,12 @@
 package com.github.pgreze.kowners
 
 import com.google.common.truth.Truth.assertThat
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
+import org.junit.Test
 
-class OwnersResolverTest : Spek({
+class OwnersResolverTest {
 
-    describe("docs/sample project") {
+    @Test
+    fun `docs-sample project`() {
         val ownersResolver = CODEOWNERS.split("\n")
             .filter(String::isNotEmpty)
             .parseCodeOwners()
@@ -16,11 +16,9 @@ class OwnersResolverTest : Spek({
             .map { it to ownersResolver.resolveOwnership(it) }
             .toMap()
 
-        it("resolve all owners") {
-            assertThat(fileToOwners).isEqualTo(FILE_TO_OWNER)
-        }
+        assertThat(fileToOwners).isEqualTo(FILE_TO_OWNER)
     }
-})
+}
 
 private const val CODEOWNERS = """
 *.md              charlie
