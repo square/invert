@@ -1,3 +1,6 @@
+/**
+ * Implementation from https://github.com/pgreze/kowners
+ */
 package com.github.pgreze.kowners
 
 // Based on a JS implementation: https://github.com/codemix/gitignore-parser/blob/master/lib/index.js

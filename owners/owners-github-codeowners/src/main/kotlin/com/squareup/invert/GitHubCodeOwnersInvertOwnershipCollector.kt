@@ -40,10 +40,5 @@ object GitHubCodeOwnersInvertOwnershipCollector : InvertOwnershipCollector {
                 owners?.joinToString("/n") ?: "NONE"
             }
         )
-
-
-//        val owners = ownersResolver.resolveOwnership(rootProjectDir)
-//        val owners = findOwnersForFile(filePath, entries)
-//        println("Owners for $filePath: $owners")
     }
 }

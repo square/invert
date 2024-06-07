@@ -1,3 +1,6 @@
+/**
+ * Implementation from https://github.com/pgreze/kowners
+ */
 package com.github.pgreze.kowners
 
 import java.io.File
