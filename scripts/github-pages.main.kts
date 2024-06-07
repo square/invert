@@ -1,6 +1,5 @@
 #!/usr/bin/env kotlin
 
-import Github_pages_main.TerminalExecRunnerResult
 import java.io.File
 import java.io.InputStream
 import java.util.concurrent.Executors
