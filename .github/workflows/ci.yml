@@ -27,6 +27,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    if: github.repository == 'square/invert' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
