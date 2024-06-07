@@ -7,7 +7,6 @@ pluginManagement {
 }
 
 include(":app")
-include(":custom-detekt-rules")
 include(":networking:api")
 include(":networking:fake")
 include(":networking:impl")
