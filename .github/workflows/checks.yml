@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Run Tests
+  test-ubuntu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+          check-latest: true
+
+      - name: Gradle Wrapper Validation
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Test on Ubuntu
+        run: ./gradlew assemble check --no-build-cache --no-daemon --stacktrace
