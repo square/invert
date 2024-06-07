@@ -23,22 +23,13 @@ repositories {
 }
 ```
 
-
-## Initialization Script (Great for trying out!)
-Run the following in your project's root folder to download the `invert.gradle` initialization script, and then execute on your project:
-```
-curl -fsSL https://raw.githubusercontent.com/square/invert/main/invert.gradle > invert.gradle && ./gradlew --init-script invert.gradle :invert
-```
-
-This will run the `Invert` report on your project with no other work!
-
 # Running Invert
 
 ```
 ./gradlew :invert
 ```
 
-# Plugin Configuration
+# Plugin Configuration (Optional)
 ``` kotlin
 invert {
     addStatCollector(<<stat collector instance>>)
