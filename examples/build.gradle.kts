@@ -1,5 +1,3 @@
-ext.set("invertVersion", "0.0.1-dev-SNAPSHOT")
-
 buildscript {
     repositories {
         mavenLocal()

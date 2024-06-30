@@ -1,3 +1,5 @@
+rootProject.name = "Invert Examples"
+
 pluginManagement {
     repositories {
         google()
