@@ -1,8 +1,7 @@
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
+    alias(libs.plugins.dokka)
     alias(libs.plugins.vanniktech.maven.publish)
 }
 

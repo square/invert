@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm")
     id("java-gradle-plugin")
-    alias(libs.plugins.vanniktech.maven.publish)
+//    alias(libs.plugins.vanniktech.maven.publish)
 }
 
 dependencies {

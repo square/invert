@@ -2,7 +2,17 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     id("java-gradle-plugin")
+    alias(libs.plugins.dokka)
     alias(libs.plugins.vanniktech.maven.publish)
+}
+
+afterEvaluate {
+    tasks.named("publishMavenPublicationToMavenCentralRepository") {
+        mustRunAfter(tasks.named("signPluginMavenPublication"))
+    }
+    tasks.named("publishPluginMavenPublicationToMavenCentralRepository") {
+        mustRunAfter(tasks.named("signMavenPublication"))
+    }
 }
 
 gradlePlugin {

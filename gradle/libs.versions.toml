@@ -11,10 +11,11 @@ javax-inject = "1"
 kotlin = "2.0.0"
 kotlinx-serialization = "1.6.3"
 ktor = "2.3.11"
-vanniktech-maven-publish = "0.28.0"
+vanniktech-maven-publish = "0.29.0"
 jetbrains-compose = "1.6.10"
 ksp = "1.9.23-1.0.20"
 truth = "1.4.2"
+dokka="1.9.20"
 
 [libraries]
 anvil-annotations = { module = "com.squareup.anvil:annotations", version.ref = "anvil" }
@@ -51,5 +52,6 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "jetbrains-compose" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 
 vanniktech-maven-publish = { id = "com.vanniktech.maven.publish.base", version.ref = "vanniktech-maven-publish" }

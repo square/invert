@@ -1,4 +1,4 @@
-name: Publish
+name: Main Branch
 
 on:
   # Runs on pushes targeting the default branch
@@ -14,7 +14,7 @@ permissions:
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "publish"
+  group: "main"
   cancel-in-progress: false
 
 jobs:
@@ -31,17 +31,18 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '21'
+          java-version: '17'
           check-latest: true
 
       - name: Gradle Wrapper Validation
         uses: gradle/actions/wrapper-validation@v3
 
+
       - name: Test on Ubuntu
         run: ./gradlew assemble check --no-build-cache --no-daemon --stacktrace
 
   # Deploy to Github Pages
-  deploy:
+  github-pages:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -93,21 +94,52 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '21'
+          java-version: '17'
           check-latest: true
 
       - name: Gradle Wrapper Validation
         uses: gradle/actions/wrapper-validation@v3
 
+      - name: Retrieve Version from gradle.properties
+        run: echo "VERSION_NAME=$(cat gradle.properties | grep "^version=" | awk -F'=' '{print $2}')" >> $GITHUB_ENV
+
       - name: Publish Snapshot
         run: ./gradlew :invert-models:publish :invert-gradle-plugin:publish --no-configuration-cache --stacktrace
+        if: success() && endsWith(env.VERSION_NAME, '-SNAPSHOT')
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
 
+
+  publish-release:
+# Temporary to help debug publishing of 0.0.1-dev
+#    needs:
+#      - test-ubuntu
+    runs-on: ubuntu-latest
+    if: github.repository == 'square/invert' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          check-latest: true
+
+      - name: Gradle Wrapper Validation
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Retrieve Version from gradle.properties
+        run: echo "VERSION_NAME=$(cat gradle.properties | grep "^version=" | awk -F'=' '{print $2}')" >> $GITHUB_ENV
+
       - name: Publish release (main only)
-        run: ./gradlew :invert-models:closeAndReleaseRepository :invert-gradle-plugin:closeAndReleaseRepository --no-configuration-cache --stacktrace
+        run: ./gradlew publishToMavenCentral --no-configuration-cache --stacktrace --no-parallel
         if: success() && !endsWith(env.VERSION_NAME, '-SNAPSHOT')
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}

@@ -1,9 +1,7 @@
 name: Checks
 
 on:
-  # Runs on pushes targeting the default branch
-  push:
-    branches: ["main"]
+  # Runs on PRs targeting the default branch
   pull_request:
     branches: ["main"]
 

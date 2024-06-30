@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm")
     id("java-gradle-plugin")
     kotlin("plugin.serialization")
-    alias(libs.plugins.vanniktech.maven.publish)
+//    alias(libs.plugins.vanniktech.maven.publish)
 }
 
 java {
