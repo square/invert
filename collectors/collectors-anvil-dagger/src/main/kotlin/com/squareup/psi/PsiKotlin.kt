@@ -1,7 +1,6 @@
 package com.squareup.psi
 
-import org.jetbrains.kotlin.com.intellij.psi.PsiElement
-import org.jetbrains.kotlin.com.intellij.psi.PsiFileFactory
+import org.jetbrains.kotlin.com.intellij.psi.*
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
@@ -19,6 +18,7 @@ import org.jetbrains.kotlin.psi.KtSuperTypeListEntry
 import org.jetbrains.kotlin.psi.KtTypeArgumentList
 import org.jetbrains.kotlin.psi.KtTypeReference
 import org.jetbrains.kotlin.psi.KtUserType
+import org.jetbrains.kotlin.psi.psiUtil.parents
 import org.jetbrains.kotlin.psi.psiUtil.parentsWithSelf
 import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstance
 import java.io.File
@@ -219,3 +219,17 @@ private fun PsiElement.requireFqNameList(): List<FqName> {
     // That's what we mostly care about.
     return listOf(containingKtFile.packageFqName.child(Name.identifier(classReference)))
 }
+val PsiMethod.fqName: FqName
+    get() {
+        val packageName = parents.filterIsInstance<PsiJavaFile>().first().packageName
+            .let { if (it.isBlank()) "" else "$it." }
+
+        val classNames = parents
+            .filterIsInstance<PsiClass>()
+            .map { requireNotNull(it.name) }
+            .toList()
+            .reversed()
+            .joinToString(separator = ".", postfix = ".")
+
+        return FqName("$packageName${classNames}$name")
+    }

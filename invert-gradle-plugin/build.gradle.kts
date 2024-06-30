@@ -1,5 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
@@ -17,7 +15,12 @@ gradlePlugin {
 }
 
 java {
-//    withSourcesJar()
+    withSourcesJar()
+}
+
+tasks.named<Jar>("sourcesJar") {
+    // Allow overwriting of HTML & JS files in resources/META-INF during publishing
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 dependencies {
