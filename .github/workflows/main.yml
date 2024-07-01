@@ -31,7 +31,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '11'
           check-latest: true
 
       - name: Gradle Wrapper Validation
@@ -58,7 +58,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '21'
+          java-version: '21' # Some of the projects we run invert against require Java 21
           check-latest: true
 
       - name: Run Invert on Test Projects and Generate GitHub Pages
@@ -93,7 +93,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '11'
           check-latest: true
 
       - name: Gradle Wrapper Validation
@@ -125,7 +125,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '11'
           check-latest: true
 
       - name: Gradle Wrapper Validation
