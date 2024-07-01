@@ -50,7 +50,10 @@ subprojects
             if (hasPublishPlugin) {
                 it.extensions.getByType(MavenPublishBaseExtension::class.java).apply {
                     publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
-                    signAllPublications()
+                    val isCI = System.getenv().containsKey("GITHUB_ACTIONS")
+                    if (isCI) {
+                        signAllPublications()
+                    }
                     pom {
                         url.set("https://www.github.com/square/invert")
                         name = "Invert"

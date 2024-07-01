@@ -8,11 +8,11 @@ buildscript {
 //        maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") } // SNAPSHOT Versions
     }
     dependencies {
-        val invertVersion = "0.0.1-dev-SNAPSHOT"
+        val invertVersion = "0.0.2-dev00-SNAPSHOT"
         classpath("com.squareup.invert:invert-gradle-plugin:$invertVersion")
-        classpath("com.squareup.invert:collectors-anvil-dagger:$invertVersion")
-        classpath("com.squareup.invert:collectors-kotlin-java-loc:$invertVersion")
-        classpath("com.squareup.invert:owners-github-codeowners:$invertVersion")
+//        classpath("com.squareup.invert:collectors-anvil-dagger:$invertVersion")
+//        classpath("com.squareup.invert:collectors-kotlin-java-loc:$invertVersion")
+//        classpath("com.squareup.invert:owners-github-codeowners:$invertVersion")
     }
 }
 
@@ -30,8 +30,8 @@ plugins {
 }
 
 invert {
-    ownershipCollector(com.squareup.invert.GitHubCodeOwnersInvertOwnershipCollector)
-    addStatCollector(com.squareup.invert.DiProvidesAndInjectsStatCollector())
-    addStatCollector(com.squareup.invert.suppress.SuppressionsStatCollector())
-    addStatCollector(com.squareup.invert.LinesOfCodeStatCollector())
+//    ownershipCollector(com.squareup.invert.GitHubCodeOwnersInvertOwnershipCollector)
+//    addStatCollector(com.squareup.invert.DiProvidesAndInjectsStatCollector())
+//    addStatCollector(com.squareup.invert.suppress.SuppressionsStatCollector())
+//    addStatCollector(com.squareup.invert.LinesOfCodeStatCollector())
 }
