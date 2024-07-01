@@ -53,6 +53,8 @@ subprojects
                     signAllPublications()
                     pom {
                         url.set("https://www.github.com/square/invert")
+                        name = "Invert"
+                        description = "Inverted view of your Gradle Project"
                         licenses {
                             license {
                                 name.set("The Apache Software License, Version 2.0")
