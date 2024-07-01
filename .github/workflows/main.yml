@@ -72,7 +72,6 @@ jobs:
         uses: actions/upload-pages-artifact@v2
         with:
           # Upload the generated pages
-#          path: './examples/build/reports/invert'
           path: './build/static'
 
       - name: Deploy to GitHub Pages
@@ -112,9 +111,8 @@ jobs:
 
 
   publish-release:
-# Temporary to help debug publishing of 0.0.1-dev
-#    needs:
-#      - test-ubuntu
+    needs:
+      - test-ubuntu
     runs-on: ubuntu-latest
     if: github.repository == 'square/invert' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     timeout-minutes: 25
