@@ -37,6 +37,8 @@ jobs:
       - name: Gradle Wrapper Validation
         uses: gradle/actions/wrapper-validation@v3
 
+      - name: Retrieve Version from gradle.properties
+        run: echo "VERSION_NAME=$(cat gradle.properties | grep "^version=" | awk -F'=' '{print $2}')" >> $GITHUB_ENV
 
       - name: Test on Ubuntu
         run: ./gradlew assemble check --no-build-cache --no-daemon --stacktrace
@@ -83,7 +85,7 @@ jobs:
     needs:
       - test-ubuntu
     runs-on: ubuntu-latest
-    if: github.repository == 'square/invert' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.repository == 'square/invert' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && endsWith(env.VERSION_NAME, '-SNAPSHOT')
     timeout-minutes: 25
 
     steps:
@@ -112,11 +114,10 @@ jobs:
 
 
   publish-release:
-# Temporary to help debug publishing of 0.0.1-dev
-#    needs:
-#      - test-ubuntu
+    needs:
+      - test-ubuntu
     runs-on: ubuntu-latest
-    if: github.repository == 'square/invert' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.repository == 'square/invert' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !endsWith(env.VERSION_NAME, '-SNAPSHOT')
     timeout-minutes: 25
 
     steps:
@@ -132,9 +133,6 @@ jobs:
 
       - name: Gradle Wrapper Validation
         uses: gradle/actions/wrapper-validation@v3
-
-      - name: Retrieve Version from gradle.properties
-        run: echo "VERSION_NAME=$(cat gradle.properties | grep "^version=" | awk -F'=' '{print $2}')" >> $GITHUB_ENV
 
       - name: Publish release (main only)
         run: ./gradlew publishToMavenCentral --no-configuration-cache --stacktrace --no-parallel
