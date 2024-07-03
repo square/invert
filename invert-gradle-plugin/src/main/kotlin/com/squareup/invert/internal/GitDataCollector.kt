@@ -11,6 +11,8 @@ import java.io.IOException
  */
 internal object GitDataCollector {
 
+  private const val GIT_EXTENSION = ".git"
+
   fun currentBranch(): GitBranch {
     return exec("git rev-parse --abbrev-ref HEAD").stdOut.lines()[0]
   }
@@ -32,16 +34,19 @@ internal object GitDataCollector {
         it
       }
     }.map {
-      val gitExtension = ".git"
-      if (it.endsWith(gitExtension)) {
-        it.substring(0, it.length - gitExtension.length)
+      if (it.endsWith(GIT_EXTENSION)) {
+        it.substringBeforeLast(GIT_EXTENSION)
       } else {
         it
       }
     }.map {
-      buildString {
-        append("https://")
-        append(it.replace(":", "/"))
+      if (!it.startsWith("https://")) {
+        buildString {
+          append("https://")
+          append(it.replace(":", "/"))
+        }
+      } else {
+        it
       }
     }[0]
   }
