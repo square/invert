@@ -28,10 +28,11 @@ window.externalLoadJavaScriptFile = function (key, callback) {
     let src = invertKeyToUrl(key)
     loadJsFileAsync(src, function () {
         let json = JSON.stringify(window.invert_report[key])
+        // null out global variable since it has been serialized to json
+        window.invert_report[key] = null
         callback(json)
     })
 }
-
 
 // https://github.com/vasturiano/force-graph
 // https://unpkg.com/force-graph
@@ -102,11 +103,11 @@ window.markdownToHtml = function (markdownStr) {
     return marked.parse(markdownStr)
 }
 
-window.callDecodeURIComponent = function(str){
+window.callDecodeURIComponent = function (str) {
     return decodeURIComponent(escape(str))
 }
 
-window.highlightJsHighlightAll = function() {
+window.highlightJsHighlightAll = function () {
     console.log("hljs.highlightAll()")
     hljs.highlightAll();
 }
