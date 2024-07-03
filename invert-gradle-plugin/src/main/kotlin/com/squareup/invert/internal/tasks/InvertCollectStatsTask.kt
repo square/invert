@@ -15,7 +15,11 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.TaskAction
 import java.io.File
 
 /**
@@ -72,70 +76,6 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
                             }
                         }
                     }
-
-//                    val hasImportStatCollectors = this.statCollectors
-//                        ?.filterIsInstance<BooleanStatCollector>() ?: listOf()
-//                    hasImportStatCollectors.forEach { statCollector ->
-//                        val statKey = statCollector.statMetadata.key
-//                        statMetadataMap[statKey] = statCollector.statMetadata
-//                        statCollector.collect(
-//                            kotlinSourceFiles
-//                        )?.let {
-//                            collectedStats[statKey] = it
-//                        }
-//                    }
-//
-//
-//                    val hasImportStatCollectors = this.statCollectors
-//                        ?.filterIsInstance<BooleanStatCollector>() ?: listOf()
-//                    hasImportStatCollectors.forEach { statCollector ->
-//                        val statKey = statCollector.statMetadata.key
-//                        statMetadataMap[statKey] = statCollector.statMetadata
-//                        statCollector.collect(
-//                            kotlinSourceFiles
-//                        )?.let {
-//                            collectedStats[statKey] = it
-//                        }
-//                    }
-//                    val diStatCollectors = this.statCollectors
-//                        ?.filterIsInstance<ProvidesAndInjectsStatCollector>() ?: listOf()
-//                    diStatCollectors.forEach { statCollector ->
-//                        val statKey = statCollector.statMetadata.key
-//                        statMetadataMap[statKey] = statCollector.statMetadata
-//                        statCollector.collect(
-//                            rootProjectFolder = File(rootProjectPath.get()),
-//                            projectPath = projectPath,
-//                            kotlinSourceFiles = kotlinSourceFiles
-//                        )?.let {
-//                            collectedStats[statKey] = it
-//                        }
-//                    }
-//                    val genericStatCollectors = this.statCollectors
-//                        ?.filterIsInstance<GenericStatCollector>() ?: listOf()
-//                    genericStatCollectors.forEach { statCollector ->
-//                        val statKey = statCollector.statMetadata.key
-//                        statMetadataMap[statKey] = statCollector.statMetadata
-//                        statCollector.collect(
-//                            srcFolder,
-//                            projectPath,
-//                            kotlinSourceFiles
-//                        )?.let {
-//                            collectedStats[statKey] = it
-//                        }
-//                    }
-//                    val classDefinitionCollectors = this.statCollectors
-//                        ?.filterIsInstance<DefinitionsCollector>() ?: listOf()
-//                    classDefinitionCollectors.forEach { statCollector ->
-//                        val statKey = statCollector.statInfo.name
-//                        statMetadataMap[statKey] = statCollector.statInfo
-//                        statCollector.collect(
-//                            srcFolder,
-//                            projectPath,
-//                            kotlinSourceFiles
-//                        )?.let {
-//                            collectedStats[statKey] = it
-//                        }
-//                    }
                 }
 
             InvertJsonReportWriter.writeJsonFile(
