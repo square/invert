@@ -15,13 +15,13 @@ window.loadJsFileAsync = function (url, notifyCompleteCallback) {
     let s = document.createElement('script');
     s.setAttribute('src', url);
     s.onload = function () {
-        notifyCompleteCallback()
+        notifyCompleteCallback();
     };
     document.body.appendChild(s);
 }
 
 window.invertKeyToUrl = function (key) {
-    return "js/" + key + ".js"
+    return "js/" + key + ".js";
 }
 
 window.externalLoadJavaScriptFile = function (key, callback) {
@@ -29,8 +29,8 @@ window.externalLoadJavaScriptFile = function (key, callback) {
     loadJsFileAsync(src, function () {
         let json = JSON.stringify(window.invert_report[key])
         // null out global variable since it has been serialized to json
-        window.invert_report[key] = null
-        callback(json)
+        window.invert_report[key] = null;
+        callback(json);
     })
 }
 
@@ -100,14 +100,13 @@ window.renderChartJs = function (domElementId, graphDataJson, onClick) {
 }
 
 window.markdownToHtml = function (markdownStr) {
-    return marked.parse(markdownStr)
+    return marked.parse(markdownStr);
 }
 
 window.callDecodeURIComponent = function (str) {
-    return decodeURIComponent(escape(str))
+    return decodeURIComponent(escape(str));
 }
 
 window.highlightJsHighlightAll = function () {
-    console.log("hljs.highlightAll()")
     hljs.highlightAll();
 }
