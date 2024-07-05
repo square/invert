@@ -75,7 +75,9 @@ object InvertJsReportUtils {
               0
             }
 
-            else -> throw IllegalArgumentException("Unsupported Type ${statMetadata.statType} with value $stat")
+            else -> {
+              0 // Default Value
+            }
           }
         }
       }.toMap()
