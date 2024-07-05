@@ -18,206 +18,178 @@ import ui.*
 import kotlin.reflect.KClass
 
 object HomeReportPage : InvertReportPage<HomeReportPage.HomeNavRoute> {
-    override val navPage: NavPage = NavPage(
-        pageId = "home",
-        displayName = "Home",
-        navIconSlug = "house",
-        navRouteParser = { HomeNavRoute }
-    )
-    override val navRouteKClass: KClass<HomeNavRoute> = HomeNavRoute::class
+  override val navPage: NavPage = NavPage(
+    pageId = "home",
+    displayName = "Home",
+    navIconSlug = "house",
+    navRouteParser = { HomeNavRoute }
+  )
+  override val navRouteKClass: KClass<HomeNavRoute> = HomeNavRoute::class
 
-    override val composableContent: @Composable (HomeNavRoute) -> Unit = { navRoute ->
-        HomeComposable(navRoute)
-    }
+  override val composableContent: @Composable (HomeNavRoute) -> Unit = { navRoute ->
+    HomeComposable(navRoute)
+  }
 
-    object HomeNavRoute : BaseNavRoute(navPage)
+  object HomeNavRoute : BaseNavRoute(navPage)
 }
 
 
 @Composable
 fun HomeComposable(
-    homeNavRoute: HomeReportPage.HomeNavRoute,
-    reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
-    navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo
+  homeNavRoute: HomeReportPage.HomeNavRoute,
+  reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
+  navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo
 ) {
-    val moduleCount by reportDataRepo.allModules.map { it?.size }.collectAsState(null)
-    val artifactCount by reportDataRepo.allArtifacts.map { it?.size }.collectAsState(null)
-    val ownersCount by reportDataRepo.allOwnerNames.map { it?.size }.collectAsState(null)
-    val pluginIdsCount by reportDataRepo.allPluginIds.map { it?.size }.collectAsState(null)
-    val reportMetadata by reportDataRepo.reportMetadata.collectAsState(null)
+  val moduleCount by reportDataRepo.allModules.map { it?.size }.collectAsState(null)
+  val artifactCount by reportDataRepo.allArtifacts.map { it?.size }.collectAsState(null)
+  val ownersCount by reportDataRepo.allOwnerNames.map { it?.size }.collectAsState(null)
+  val pluginIdsCount by reportDataRepo.allPluginIds.map { it?.size }.collectAsState(null)
+  val reportMetadata by reportDataRepo.reportMetadata.collectAsState(null)
 
-    if (reportMetadata == null) {
-        BootstrapLoadingMessageWithSpinner("Loading Invert Report...")
-        return
-    }
-    val metadata = reportMetadata!!
-    BootstrapJumbotron(
-        centered = false,
-        headerContent = {
-            Text("\uD83D\uDD03 Invert Report")
-            H5 {
-                A(href = metadata.remoteRepoUrl) {
-                    Text(metadata.remoteRepoUrl.substringAfter("//").substringAfter("/"))
-                }
-            }
+  if (reportMetadata == null) {
+    BootstrapLoadingMessageWithSpinner("Loading Invert Report...")
+    return
+  }
+  val metadata = reportMetadata!!
+  BootstrapJumbotron(
+    centered = false,
+    headerContent = {
+      Text("\uD83D\uDD03 Invert Report")
+      H5 {
+        A(href = metadata.remoteRepoUrl) {
+          Text(metadata.remoteRepoUrl.substringAfter("//").substringAfter("/"))
+        }
+      }
+    }) {
+    Div({ classes("text-center") }) {
+      metadata.gitSha?.let { gitSha ->
+        P({
+          classes("fs-6")
         }) {
-        Div({ classes("text-center") }) {
-            metadata.gitSha?.let { gitSha ->
-                P({
-                    classes("fs-6")
-                }) {
-                    metadata.branchName?.let { branchName ->
-                        A(href = "${metadata.remoteRepoUrl}/tree/${branchName}/", { target(ATarget.Blank) }) {
-                            Text(branchName)
-                        }
-                        Text(" branch ")
-                    }
-                    val commitUrl = metadata.remoteRepoUrl + "/commits/" + gitSha
-                    A(href = commitUrl, { target(ATarget.Blank) }) {
-                        Text(gitSha.substring(0, minOf(7, gitSha.length)) )
-                    }
-                }
-                if (metadata.branchName != metadata.currentBranch) {
-                    P({
-                        classes("fs-6 text-warning bg-dark text-center".split(" "))
-                    }) {
-                        Text("Report was not run on ${metadata.branchName}, but on ${metadata.currentBranch} instead with commit ${metadata.currentBranchHash}")
-                    }
-                }
+          metadata.branchName?.let { branchName ->
+            A(href = "${metadata.remoteRepoUrl}/tree/${branchName}/", { target(ATarget.Blank) }) {
+              Text(branchName)
             }
+            Text(" branch ")
+          }
+          val commitUrl = metadata.remoteRepoUrl + "/commits/" + gitSha
+          A(href = commitUrl, { target(ATarget.Blank) }) {
+            Text(gitSha.substring(0, minOf(7, gitSha.length)))
+          }
         }
+        if (metadata.branchName != metadata.currentBranch) {
+          P({
+            classes("fs-6 text-warning bg-dark text-center".split(" "))
+          }) {
+            Text("Report was not run on ${metadata.branchName}, but on ${metadata.currentBranch} instead with commit ${metadata.currentBranchHash}")
+          }
+        }
+      }
     }
+  }
 
-    val statsDataOrig by reportDataRepo.statsData.collectAsState(null)
-    val statTotalsOrig by reportDataRepo.statTotals.collectAsState(null)
-    val moduleToOwnerMapFlowValue by reportDataRepo.moduleToOwnerMap.collectAsState(null)
+  val statsDataOrig by reportDataRepo.statsData.collectAsState(null)
+  val statTotalsOrig by reportDataRepo.statTotals.collectAsState(null)
+  val moduleToOwnerMapFlowValue by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
-    H3 { Text("Stats") }
+  H3 { Text("Stats") }
 
-    if (moduleToOwnerMapFlowValue == null) {
-        BootstrapLoadingSpinner()
-        return
-    }
+  if (moduleToOwnerMapFlowValue == null) {
+    BootstrapLoadingSpinner()
+    return
+  }
 
-    if (statsDataOrig == null || statTotalsOrig == null) {
-        BootstrapLoadingMessageWithSpinner("Loading...")
-        return
-    }
+  if (statsDataOrig == null || statTotalsOrig == null) {
+    BootstrapLoadingMessageWithSpinner("Loading...")
+    return
+  }
 
-    val statTotals = statTotalsOrig!!
-    val statsData = statsDataOrig!!
+  val statTotals = statTotalsOrig!!
+  val statsData = statsDataOrig!!
 
-    val statInfos = statsData.statInfos.values
+  val statInfos = statsData.statInfos.values
 
 
-    BootstrapRow {
-        HomeCountComposable(
-            moduleCount,
-            AllModulesReportPage.navPage
-        ) { navRouteRepo.updateNavRoute(AllModulesNavRoute()) }
+  BootstrapRow {
+    HomeCountComposable(
+      moduleCount,
+      AllModulesReportPage.navPage
+    ) { navRouteRepo.updateNavRoute(AllModulesNavRoute()) }
 
-        HomeCountComposable(
-            artifactCount,
-            ArtifactsReportPage.navPage
-        ) { navRouteRepo.updateNavRoute(ArtifactsNavRoute()) }
+    HomeCountComposable(
+      artifactCount,
+      ArtifactsReportPage.navPage
+    ) { navRouteRepo.updateNavRoute(ArtifactsNavRoute()) }
 
-        HomeCountComposable(
-            pluginIdsCount,
-            GradlePluginsReportPage.navPage
-        ) { navRouteRepo.updateNavRoute(GradlePluginsNavRoute(null)) }
+    HomeCountComposable(
+      pluginIdsCount,
+      GradlePluginsReportPage.navPage
+    ) { navRouteRepo.updateNavRoute(GradlePluginsNavRoute(null)) }
 
-        HomeCountComposable(
-            ownersCount,
-            OwnersReportPage.navPage
-        ) { navRouteRepo.updateNavRoute(OwnersNavRoute) }
+    HomeCountComposable(
+      ownersCount,
+      OwnersReportPage.navPage
+    ) { navRouteRepo.updateNavRoute(OwnersNavRoute) }
 
-        var suppressionCount = 0
-        statTotals.statTotals.entries.forEach { statTotal ->
-            if (statTotal.key.category == null) {
-                BootstrapColumn(3) {
-                    BootstrapJumbotron(
-                        centered = true,
-                        paddingNum = 2,
-                        headerContent = {
-                            Text(statTotal.value.formatDecimalSeparator())
-                        }
-                    ) {
-                        A(href = "#", {
-                            onClick {
-                                navRouteRepo.updateNavRoute(
-                                    StatDetailNavRoute(
-                                        pluginIds = listOf(),
-                                        statKeys = listOf(statTotal.key.key)
-                                    )
-                                )
-                            }
-                        }) {
-                            Small {
-                                Text(statTotal.key.description)
-                            }
-                        }
-                    }
-                }
-            } else if (statTotal.key.category == "suppress_annotation") {
-                suppressionCount += statTotal.value
+    statTotals.statTotals.entries.forEach { statTotal ->
+      BootstrapColumn(3) {
+        BootstrapJumbotron(
+          centered = true,
+          paddingNum = 2,
+          headerContent = {
+            Text(statTotal.value.formatDecimalSeparator())
+          }
+        ) {
+          A(href = "#", {
+            onClick {
+              navRouteRepo.updateNavRoute(
+                StatDetailNavRoute(
+                  pluginIds = listOf(),
+                  statKeys = listOf(statTotal.key.key)
+                )
+              )
             }
-        }
-        if (suppressionCount > 0) {
-            BootstrapColumn(3) {
-                BootstrapJumbotron(
-                    centered = true,
-                    paddingNum = 2,
-                    headerContent = {
-                        Text(suppressionCount.formatDecimalSeparator())
-                    }
-                ) {
-                    A(href = "#", {
-                        onClick {
-                            navRouteRepo.updateNavRoute(
-                                SuppressAnnotationNavRoute()
-                            )
-                        }
-                    }) {
-                        Small {
-                            Text("@Suppress Annotations")
-                        }
-                    }
-                }
+          }) {
+            Small {
+              Text(statTotal.key.description)
             }
+          }
         }
+      }
     }
+  }
 
 
 
-    BootstrapButton("View All",
-        BootstrapButtonType.PRIMARY,
-        onClick = {
-            navRouteRepo.updateNavRoute(
-                AllStatsNavRoute()
-            )
-        }
-    )
+  BootstrapButton("View All",
+    BootstrapButtonType.PRIMARY,
+    onClick = {
+      navRouteRepo.updateNavRoute(
+        AllStatsNavRoute()
+      )
+    }
+  )
 }
 
 @Composable
 fun HomeCountComposable(count: Int?, navItem: NavPage, onClick: () -> Unit) {
-    count?.let { count ->
-        BootstrapColumn(3) {
-            BootstrapJumbotron(
-                centered = true,
-                paddingNum = 2,
-                headerContent = {
-                    Text(count.formatDecimalSeparator())
-                }
-            ) {
-                A(href = "#", {
-                    onClick {
-                        onClick()
-                    }
-                }) {
-                    Small { Text(navItem.displayName) }
-                }
-            }
+  count?.let { count ->
+    BootstrapColumn(3) {
+      BootstrapJumbotron(
+        centered = true,
+        paddingNum = 2,
+        headerContent = {
+          Text(count.formatDecimalSeparator())
         }
+      ) {
+        A(href = "#", {
+          onClick {
+            onClick()
+          }
+        }) {
+          Small { Text(navItem.displayName) }
+        }
+      }
     }
+  }
 }
