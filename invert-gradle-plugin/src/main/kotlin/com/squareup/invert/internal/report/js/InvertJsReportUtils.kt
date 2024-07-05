@@ -5,7 +5,18 @@ import com.squareup.invert.internal.models.CollectedDependenciesForProject
 import com.squareup.invert.internal.models.CollectedOwnershipForProject
 import com.squareup.invert.internal.models.CollectedPluginsForProject
 import com.squareup.invert.internal.models.CollectedStatsForProject
-import com.squareup.invert.models.*
+import com.squareup.invert.models.CollectedStatType.BOOLEAN
+import com.squareup.invert.models.CollectedStatType.CODE_REFERENCES
+import com.squareup.invert.models.CollectedStatType.DI_PROVIDES_AND_INJECTS
+import com.squareup.invert.models.CollectedStatType.NUMERIC
+import com.squareup.invert.models.CollectedStatType.STRING
+import com.squareup.invert.models.ConfigurationName
+import com.squareup.invert.models.DependencyId
+import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.GradlePluginId
+import com.squareup.invert.models.Stat
+import com.squareup.invert.models.StatKey
+import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.ConfigurationsJsReportModel
 import com.squareup.invert.models.js.DependenciesJsReportModel
 import com.squareup.invert.models.js.DirectDependenciesJsReportModel
@@ -37,7 +48,20 @@ object InvertJsReportUtils {
 
   fun computeGlobalStats(allProjectsStatsData: StatsJsReportModel): Map<StatMetadata, Int> {
     val globalStats: Map<StatMetadata, Int> = allProjectsStatsData.statInfos.values
-      .filter { it.statType == CollectedStatType.NUMERIC }
+      .filter {
+        when (it.statType) {
+          BOOLEAN,
+          NUMERIC -> {
+            true
+          }
+
+          STRING,
+          CODE_REFERENCES,
+          DI_PROVIDES_AND_INJECTS -> {
+            false
+          }
+        }
+      }
       .associateWith { statMetadata ->
         val statKey = statMetadata.key
         allProjectsStatsData.statsByModule.values.sumOf {
