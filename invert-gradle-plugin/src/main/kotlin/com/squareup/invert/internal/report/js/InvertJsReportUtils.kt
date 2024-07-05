@@ -5,6 +5,7 @@ import com.squareup.invert.internal.models.CollectedDependenciesForProject
 import com.squareup.invert.internal.models.CollectedOwnershipForProject
 import com.squareup.invert.internal.models.CollectedPluginsForProject
 import com.squareup.invert.internal.models.CollectedStatsForProject
+import com.squareup.invert.models.CollectedStatType
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.GradlePath
@@ -42,6 +43,17 @@ object InvertJsReportUtils {
 
   fun computeGlobalStats(allProjectsStatsData: StatsJsReportModel): Map<StatMetadata, Int> {
     val globalStats: Map<StatMetadata, Int> = allProjectsStatsData.statInfos.values
+      .filter { statInfo ->
+        when (statInfo.statType) {
+          CollectedStatType.BOOLEAN,
+          CollectedStatType.NUMERIC,
+          CollectedStatType.CODE_REFERENCES -> true
+
+          else -> {
+            false
+          }
+        }
+      }
       .associateWith { statMetadata ->
         val statKey = statMetadata.key
         allProjectsStatsData.statsByModule.values.sumOf { statsForModule: Map<StatKey, Stat> ->
