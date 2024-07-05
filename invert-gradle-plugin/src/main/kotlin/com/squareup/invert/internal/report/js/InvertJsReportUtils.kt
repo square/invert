@@ -51,12 +51,12 @@ object InvertJsReportUtils {
       .filter {
         when (it.statType) {
           BOOLEAN,
+          CODE_REFERENCES,
           NUMERIC -> {
             true
           }
 
           STRING,
-          CODE_REFERENCES,
           DI_PROVIDES_AND_INJECTS -> {
             false
           }
@@ -75,7 +75,7 @@ object InvertJsReportUtils {
               0
             }
 
-            else -> 0
+            else -> throw IllegalArgumentException("Unsupported Type ${statMetadata.statType} with value $stat")
           }
         }
       }.toMap()
