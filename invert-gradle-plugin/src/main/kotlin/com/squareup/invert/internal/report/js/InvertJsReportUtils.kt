@@ -68,6 +68,7 @@ object InvertJsReportUtils {
           val stat = it[statKey]
           when (stat) {
             is Stat.NumericStat -> stat.value
+            is Stat.CodeReferencesStat -> stat.value.size
             is Stat.BooleanStat -> if (stat.value) {
               1
             } else {
