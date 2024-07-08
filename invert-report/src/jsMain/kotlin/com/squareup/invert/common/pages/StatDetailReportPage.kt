@@ -212,6 +212,13 @@ fun StatDetailComposable(
                     stat.details
                   }
 
+                  is Stat.CodeReferencesStat -> {
+                    buildString {
+                      stat.value.forEach {
+                        appendLine("* ${it.code}")
+                      }
+                    }
+                  }
                   else -> ""
                 } ?: ""
               }
