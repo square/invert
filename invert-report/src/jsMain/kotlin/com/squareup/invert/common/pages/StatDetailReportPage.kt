@@ -215,7 +215,7 @@ fun StatDetailComposable(
                   is Stat.CodeReferencesStat -> {
                     buildString {
                       stat.value.forEach {
-                        appendLine("* ${it.code}")
+                        appendLine("${it.code}")
                       }
                     }
                   }

@@ -1,5 +1,7 @@
 package com.squareup.invert.internal
 
+import java.io.File
+
 /**
  * Data bundle that includes standard output, error output, and exit code of a process.
  */
@@ -14,8 +16,14 @@ data class TerminalExecRunnerResult(
  *
  * @param [command] shell command split into a list that includes the program and it's arguments.
  */
-fun exec(command: List<String>): TerminalExecRunnerResult {
-  val process = ProcessBuilder(command).start()
+fun exec(command: List<String>, cwd: File? = null): TerminalExecRunnerResult {
+  val process = ProcessBuilder(command)
+    .apply {
+      if (cwd != null) {
+        directory(cwd)
+      }
+    }
+    .start()
 
   val stdout = process
     .inputStream
@@ -44,14 +52,15 @@ fun exec(command: List<String>): TerminalExecRunnerResult {
  *
  * @param [command] shell command as you would enter it in the terminal.
  */
-fun exec(command: String): TerminalExecRunnerResult {
+fun exec(command: String, cwd: File? = null): TerminalExecRunnerResult {
   return exec(
     // https://stackoverflow.com/a/51356605
     // This regex splits strings only outside of double quotes.
-    command.split(" (?=(?:[^\"]*\"[^\"]*\")*[^\"]*\$)".toRegex())
+    command = command.split(" (?=(?:[^\"]*\"[^\"]*\")*[^\"]*\$)".toRegex())
       .map {
         // Strip surrounding double quotes.
         it.trim('"')
-      }
+      },
+    cwd = cwd,
   )
 }

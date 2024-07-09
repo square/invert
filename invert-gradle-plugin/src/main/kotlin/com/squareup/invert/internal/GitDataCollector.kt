@@ -4,17 +4,20 @@ import com.squareup.invert.models.GitBranch
 import com.squareup.invert.models.GitSha
 import org.gradle.api.GradleException
 import org.gradle.api.logging.Logger
+import java.io.File
 import java.io.IOException
 
 /**
  * Executes `git` commands and parses the output.
  */
-internal object GitDataCollector {
+internal class GitDataCollector(private val gitProjectRootDir: File) {
 
-  private const val GIT_EXTENSION = ".git"
+  companion object {
+    private const val GIT_EXTENSION = ".git"
+  }
 
   fun currentBranch(): GitBranch {
-    return exec("git rev-parse --abbrev-ref HEAD").stdOut.lines()[0]
+    return exec("git rev-parse --abbrev-ref HEAD", gitProjectRootDir).stdOut.lines()[0]
   }
 
   /**
@@ -57,7 +60,7 @@ internal object GitDataCollector {
    * org-49461806@github.com:squareup/android-register.git
    */
   fun remoteGitRepoUrl(): String {
-    return exec("git config --get remote.origin.url").stdOut.lines()[0]
+    return exec("git config --get remote.origin.url", gitProjectRootDir).stdOut.lines()[0]
   }
 
   fun gitShaOfBranch(branchName: GitBranch, logger: Logger): GitSha {
@@ -68,7 +71,10 @@ internal object GitDataCollector {
     logger.info("Running: $command")
 
     val lines = try {
-      exec(command).stdOut.lines()
+      exec(
+        command = command,
+        cwd = gitProjectRootDir
+      ).stdOut.lines()
     } catch (e: IOException) {
       e.message?.lines() ?: emptyList()
     }
