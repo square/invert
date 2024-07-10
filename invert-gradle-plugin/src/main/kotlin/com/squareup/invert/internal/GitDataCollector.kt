@@ -14,44 +14,44 @@ internal class GitDataCollector(private val gitProjectRootDir: File) {
 
   companion object {
     private const val GIT_EXTENSION = ".git"
+
+    /**
+     * Takes a remote abc.git URL and attempts to create an https url.
+     *
+     * @param remoteGitRepoUrl Will look like:
+     * org-123@github.com:organization/myrepo.git
+     *
+     * @return https address of Git Project.  For this example the result would be
+     * https://github.com/organization/myrepo
+     */
+    fun remoteRepoGitUrlToHttps(remoteGitRepoUrl: String): String {
+      return listOf(remoteGitRepoUrl).map {
+        if (it.contains("@")) {
+          it.split("@")[1]
+        } else {
+          it
+        }
+      }.map {
+        if (it.endsWith(GIT_EXTENSION)) {
+          it.substringBeforeLast(GIT_EXTENSION)
+        } else {
+          it
+        }
+      }.map {
+        if (!it.startsWith("https://")) {
+          buildString {
+            append("https://")
+            append(it.replace(":", "/"))
+          }
+        } else {
+          it
+        }
+      }[0]
+    }
   }
 
   fun currentBranch(): GitBranch {
     return exec("git rev-parse --abbrev-ref HEAD", gitProjectRootDir).stdOut.lines()[0]
-  }
-
-  /**
-   * Takes a remote abc.git URL and attempts to create an https url.
-   *
-   * @param remoteGitRepoUrl Will look like:
-   * org-123@github.com:organization/myrepo.git
-   *
-   * @return https address of Git Project.  For this example the result would be
-   * https://github.com/organization/myrepo
-   */
-  fun remoteRepoGitUrlToHttps(remoteGitRepoUrl: String): String {
-    return listOf(remoteGitRepoUrl).map {
-      if (it.contains("@")) {
-        it.split("@")[1]
-      } else {
-        it
-      }
-    }.map {
-      if (it.endsWith(GIT_EXTENSION)) {
-        it.substringBeforeLast(GIT_EXTENSION)
-      } else {
-        it
-      }
-    }.map {
-      if (!it.startsWith("https://")) {
-        buildString {
-          append("https://")
-          append(it.replace(":", "/"))
-        }
-      } else {
-        it
-      }
-    }[0]
   }
 
   /**
