@@ -51,7 +51,7 @@ abstract class InvertProjectMetadataTask : DefaultTask() {
 
       val remoteGitRepoUrl = gitDataCollector.remoteGitRepoUrl()
       val remoteRepoUrl = if (remoteGitRepoUrl.endsWith(".git")) {
-        gitDataCollector.remoteRepoGitUrlToHttps(
+        GitDataCollector.remoteRepoGitUrlToHttps(
           remoteGitRepoUrl = remoteGitRepoUrl
         )
       } else {
