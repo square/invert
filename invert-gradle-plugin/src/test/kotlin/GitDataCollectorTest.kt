@@ -1,12 +1,6 @@
 package com.squareup.invert.internal
 
-import com.squareup.invert.internal.exec
-import com.squareup.invert.models.GitBranch
-import com.squareup.invert.models.GitSha
-import org.gradle.api.GradleException
-import org.gradle.api.logging.Logger
 import org.junit.Test
-import java.io.IOException
 import kotlin.test.assertEquals
 
 /**
