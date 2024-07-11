@@ -1,5 +1,6 @@
 package com.squareup.invert.internal
 
+import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.GitBranch
 import com.squareup.invert.models.GitSha
 import org.gradle.api.GradleException
@@ -63,7 +64,7 @@ internal class GitDataCollector(private val gitProjectRootDir: File) {
     return exec("git config --get remote.origin.url", gitProjectRootDir).stdOut.lines()[0]
   }
 
-  fun gitShaOfBranch(branchName: GitBranch, logger: Logger): GitSha {
+  fun gitShaOfBranch(branchName: GitBranch, logger: InvertLogger): GitSha {
     val command = buildString {
       append("git log -n 1 ")
       append(branchName)

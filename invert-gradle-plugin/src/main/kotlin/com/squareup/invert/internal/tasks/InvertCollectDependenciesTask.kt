@@ -8,6 +8,8 @@ import com.squareup.invert.internal.models.CollectedConfigurationsForProject
 import com.squareup.invert.internal.models.CollectedDependenciesForProject
 import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
+import com.squareup.invert.logging.GradleInvertLogger
+import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
 import org.gradle.api.DefaultTask
@@ -78,6 +80,8 @@ internal abstract class InvertCollectDependenciesTask : DefaultTask() {
     @get:OutputFile
     abstract val projectBuildReportConfigurationsFile: RegularFileProperty
 
+    private val invertLogger: InvertLogger by lazy { GradleInvertLogger(logger) }
+
     @TaskAction
     internal fun execute() {
         val computeCollectedFlattenedDependencyData = computeCollectedDependenciesForProject(
@@ -93,14 +97,14 @@ internal abstract class InvertCollectDependenciesTask : DefaultTask() {
             analyzedConfigurationNames = analyzedConfigurationNames.get(),
         )
         InvertJsonReportWriter.writeJsonFile(
-            logger = logger,
+            logger = invertLogger,
             jsonFileKey = InvertPluginFileKey.DEPENDENCIES,
             jsonOutputFile = projectBuildReportDependenciesFile.get().asFile,
             serializer = CollectedDependenciesForProject.serializer(),
             value = computeCollectedFlattenedDependencyData,
         )
         InvertJsonReportWriter.writeJsonFile(
-            logger = logger,
+            logger = invertLogger,
             jsonFileKey = InvertPluginFileKey.CONFIGURATIONS,
             jsonOutputFile = projectBuildReportConfigurationsFile.get().asFile,
             serializer = CollectedConfigurationsForProject.serializer(),

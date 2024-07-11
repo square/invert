@@ -2,17 +2,17 @@ package com.squareup.invert.internal.report.json
 
 import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.models.*
+import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.InvertSerialization.InvertJson
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import com.squareup.invert.models.js.StatsJsReportModel
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
-import org.gradle.api.logging.Logger
 import java.io.File
 
 class InvertJsonReportWriter(
-  val logger: Logger,
+  private val logger: InvertLogger,
   rootBuildReportsDir: File,
 ) {
   private val rootBuildJsonReportsDir = File(rootBuildReportsDir, InvertFileUtils.JSON_FOLDER_NAME)
@@ -78,7 +78,7 @@ class InvertJsonReportWriter(
 
   companion object {
     fun <T> writeJsonFile(
-      logger: Logger,
+      logger: InvertLogger,
       jsonFileKey: InvertPluginFileKey,
       jsonOutputFile: File,
       serializer: KSerializer<T>,

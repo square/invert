@@ -7,6 +7,8 @@ import com.squareup.invert.internal.isRootProject
 import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.internal.report.js.InvertJsReportWriter
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
+import com.squareup.invert.logging.GradleInvertLogger
+import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.GitBranch
 import com.squareup.invert.models.js.JsReportFileKey
 import com.squareup.invert.models.js.MetadataJsReportModel
@@ -30,11 +32,13 @@ import java.util.TimeZone
  */
 abstract class InvertProjectMetadataTask : DefaultTask() {
 
+  private val invertLogger: InvertLogger by lazy { GradleInvertLogger(logger) }
+
   companion object {
     const val TASK_NAME = "invertProjectMetadata"
 
     fun gatherProjectMetadata(
-      logger: Logger,
+      logger: InvertLogger,
       gitProjectDir: File,
       timeZoneId: String = "America/New_York",
       datePatternFormat: String = "MMMM dd, yyyy[ 'at' HH:mm:ss]",
@@ -96,14 +100,14 @@ abstract class InvertProjectMetadataTask : DefaultTask() {
     val reportMetadata = gatherProjectMetadata(
       timeZoneId = timeZoneId,
       datePatternFormat = datePatternFormat,
-      logger = logger,
+      logger = invertLogger,
       repoUrls = this.mavenRepoUrls.get(),
       gitProjectDir = File("."), // TODO Pass in the root of the Git Repo
     )
 
     InvertJsReportWriter
       .writeJsFile(
-        logger = logger,
+        logger = invertLogger,
         fileKey = JsReportFileKey.METADATA,
         jsOutputFile = this.metadataJsFile.get().asFile,
         serializer = MetadataJsReportModel.serializer(),
@@ -112,7 +116,7 @@ abstract class InvertProjectMetadataTask : DefaultTask() {
 
     InvertJsonReportWriter
       .writeJsonFile(
-        logger = logger,
+        logger = invertLogger,
         jsonFileKey = InvertPluginFileKey.METADATA,
         jsonOutputFile = this.metadataJsonFile.get().asFile,
         serializer = MetadataJsReportModel.serializer(),

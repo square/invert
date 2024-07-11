@@ -7,6 +7,8 @@ import com.squareup.invert.internal.InvertFileUtils.addSlashAnd
 import com.squareup.invert.internal.models.CollectedStatsForProject
 import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
+import com.squareup.invert.logging.GradleInvertLogger
+import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
@@ -46,6 +48,8 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
     @get:OutputFile
     abstract val projectBuildReportStatsFile: RegularFileProperty
 
+    private val invertLogger: InvertLogger by lazy { GradleInvertLogger(logger) }
+
     @TaskAction
     internal fun execute() {
         val projectPath = projectPath.get()
@@ -79,7 +83,7 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
                 }
 
             InvertJsonReportWriter.writeJsonFile(
-                logger,
+                invertLogger,
                 InvertPluginFileKey.STATS,
                 this.projectBuildReportStatsFile.get().asFile,
                 CollectedStatsForProject.serializer(),

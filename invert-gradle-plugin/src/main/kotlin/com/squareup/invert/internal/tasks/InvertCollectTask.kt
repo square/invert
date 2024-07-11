@@ -6,6 +6,8 @@ import com.squareup.invert.internal.isRootProject
 import com.squareup.invert.internal.models.CollectedPluginsForProject
 import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
+import com.squareup.invert.logging.GradleInvertLogger
+import com.squareup.invert.logging.InvertLogger
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
@@ -35,11 +37,13 @@ abstract class InvertCollectTask : DefaultTask() {
   @get:Input
   abstract val pluginIds: ListProperty<String>
 
+  private val invertLogger: InvertLogger by lazy { GradleInvertLogger(logger) }
+
   @TaskAction
   internal fun execute() {
     // Write Plugins for Project
     InvertJsonReportWriter.writeJsonFile(
-      logger,
+      invertLogger,
       InvertPluginFileKey.PLUGINS,
       projectBuildReportPluginsFile.get().asFile,
       CollectedPluginsForProject.serializer(),

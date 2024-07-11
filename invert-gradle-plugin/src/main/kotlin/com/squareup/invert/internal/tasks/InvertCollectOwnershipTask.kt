@@ -8,6 +8,8 @@ import com.squareup.invert.internal.isRootProject
 import com.squareup.invert.internal.models.CollectedOwnershipForProject
 import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
+import com.squareup.invert.logging.GradleInvertLogger
+import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.GradlePath
 import com.squareup.invert.models.OwnerInfo
 import org.gradle.api.DefaultTask
@@ -39,6 +41,8 @@ internal abstract class InvertCollectOwnershipTask : DefaultTask() {
   @get:Internal
   abstract var ownershipCollector: InvertOwnershipCollector
 
+  private val invertLogger: InvertLogger by lazy { GradleInvertLogger(logger) }
+
   @TaskAction
   internal fun execute() {
     val collectedOwnerInfo: OwnerInfo? =
@@ -51,7 +55,7 @@ internal abstract class InvertCollectOwnershipTask : DefaultTask() {
       )
 
       InvertJsonReportWriter.writeJsonFile(
-        logger = logger,
+        logger = invertLogger,
         jsonOutputFile = projectOwnershipJsonFile.get().asFile,
         jsonFileKey = InvertPluginFileKey.OWNERS,
         serializer = CollectedOwnershipForProject.serializer(),

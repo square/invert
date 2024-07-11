@@ -8,6 +8,8 @@ import com.squareup.invert.internal.report.js.InvertJsReportUtils
 import com.squareup.invert.internal.report.js.InvertJsReportUtils.computeGlobalStats
 import com.squareup.invert.internal.report.js.InvertJsReportWriter
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
+import com.squareup.invert.logging.GradleInvertLogger
+import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.GradlePath
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
@@ -47,6 +49,7 @@ abstract class InvertTask : DefaultTask() {
     @get:OutputDirectory
     abstract val rootBuildReportsDir: DirectoryProperty
 
+    val invertLogger: InvertLogger by lazy { GradleInvertLogger(logger) }
 
     @TaskAction
     internal fun execute() {
@@ -125,7 +128,7 @@ abstract class InvertTask : DefaultTask() {
                 InvertJsReportUtils.toInvertedDependenciesJsReportModel(collectedDependencies)
 
             assertModuleMatch(
-                logger = logger,
+                logger = invertLogger,
                 modulesList = collectedDependencies.map { it.path },
                 invertedModulesList = invertedDependenciesJsReportModel.getAllModulePaths()
             )
@@ -135,7 +138,7 @@ abstract class InvertTask : DefaultTask() {
             val rootBuildReportsDir = rootBuildReportsDir.get().asFile
 
             // JSON Report
-            InvertJsonReportWriter(logger, rootBuildReportsDir).createInvertJsonReport(
+            InvertJsonReportWriter(invertLogger, rootBuildReportsDir).createInvertJsonReport(
                 allConfigurationsData = collectedConfigurations,
                 allProjectsDependencyData = collectedDependencies,
                 allProjectsStatsData = allProjectsStatsData,
@@ -145,7 +148,7 @@ abstract class InvertTask : DefaultTask() {
             )
 
             // HTML/JS Report
-            InvertJsReportWriter(logger, rootBuildReportsDir).createInvertHtmlReport(
+            InvertJsReportWriter(invertLogger, rootBuildReportsDir).createInvertHtmlReport(
                 allProjectsDependencyData = collectedDependencies,
                 allProjectsStatsData = allProjectsStatsData,
                 directDependencies = directDependenciesJsReportModel,
@@ -178,7 +181,7 @@ abstract class InvertTask : DefaultTask() {
      * be scanned.
      */
     private fun assertModuleMatch(
-        logger: Logger,
+        logger: InvertLogger,
         modulesList: List<GradlePath>,
         invertedModulesList: List<DependencyId>
     ) {
