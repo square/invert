@@ -14,7 +14,7 @@ interface StatCollector : Named {
     fun collect(
         rootProjectFolder: File,
         projectPath: String,
-        kotlinSourceFiles: List<File>,
+        sourceFiles: List<File>,
     ): List<CollectedStat>?
 
 }

@@ -67,7 +67,7 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
                         statCollector.collect(
                             rootProjectFolder = File(rootProjectPath.get()),
                             projectPath = projectPath,
-                            kotlinSourceFiles = kotlinSourceFiles
+                            sourceFiles = kotlinSourceFiles
                         )?.forEach { collectedStat ->
                             val statKey = collectedStat.metadata.key
                             collectedStat.stat?.let { stat ->
