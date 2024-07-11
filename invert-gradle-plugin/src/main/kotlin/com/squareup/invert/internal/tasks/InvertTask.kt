@@ -2,25 +2,15 @@ package com.squareup.invert.internal.tasks
 
 import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.isRootProject
-import com.squareup.invert.internal.models.CollectedConfigurationsForProject
-import com.squareup.invert.internal.models.CollectedDependenciesForProject
-import com.squareup.invert.internal.models.CollectedOwnershipForProject
-import com.squareup.invert.internal.models.CollectedPluginsForProject
-import com.squareup.invert.internal.models.CollectedStatsForProject
-import com.squareup.invert.internal.models.InvertPluginFileKey
-import com.squareup.invert.internal.report.InvertReportFileUtils
-import com.squareup.invert.internal.report.js.InvertJsReportUtils
-import com.squareup.invert.internal.report.js.InvertJsReportUtils.computeGlobalStats
-import com.squareup.invert.internal.report.js.InvertJsReportWriter
-import com.squareup.invert.internal.report.json.InvertJsonReportWriter
+import com.squareup.invert.internal.models.InvertCombinedCollectedData
+import com.squareup.invert.internal.report.GradleProjectAnalysisCombiner
+import com.squareup.invert.internal.report.InvertReportWriter
 import com.squareup.invert.logging.GradleInvertLogger
 import com.squareup.invert.logging.InvertLogger
-import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.GradlePath
-import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.artifacts.repositories.UrlArtifactRepository
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -28,7 +18,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import java.io.File
-
 
 /**
  * This task orchestrates analysis on submodules and the result creates 2 formats:
@@ -50,6 +39,12 @@ abstract class InvertTask : DefaultTask() {
   @get:Input
   abstract val subprojectInvertReportDirs: ListProperty<String>
 
+  @get:Input
+  abstract val timeZoneId: Property<String>
+
+  @get:Input
+  abstract val mavenRepoUrls: ListProperty<String>
+
   @get:OutputDirectory
   abstract val rootBuildReportsDir: DirectoryProperty
 
@@ -57,110 +52,32 @@ abstract class InvertTask : DefaultTask() {
 
   @TaskAction
   internal fun execute() {
+    val timeZoneId = this.timeZoneId.get()
+    val datePatternFormat = "MMMM dd, yyyy[ 'at' HH:mm:ss]"
+    val mavenRepoUrls = this.mavenRepoUrls.get()
     runBlocking {
-      val collectedConfigurations = mutableListOf<CollectedConfigurationsForProject>()
-      val collectedDependencies = mutableListOf<CollectedDependenciesForProject>()
-      val collectedOwners = mutableListOf<CollectedOwnershipForProject>()
-      val collectedStats = mutableListOf<CollectedStatsForProject>()
-      val collectedPlugins = mutableListOf<CollectedPluginsForProject>()
 
-      subprojectInvertReportDirs.get()
-        .map { File(it) }
-        .forEach { subprojectInvertReportDirFile ->
-          if (subprojectInvertReportDirFile.exists()) {
-            File(
-              subprojectInvertReportDirFile,
-              InvertPluginFileKey.DEPENDENCIES.filename
-            ).also { file ->
-              if (file.exists()) {
-                InvertReportFileUtils.buildModuleToFeaturesMap(file)?.let {
-                  collectedDependencies.add(it)
-                }
-              }
-            }
-
-            File(
-              subprojectInvertReportDirFile,
-              InvertPluginFileKey.CONFIGURATIONS.filename
-            ).also { file ->
-              if (file.exists()) {
-                InvertReportFileUtils.readCollectedConfigurationsForAllModules(file)?.let {
-                  collectedConfigurations.add(it)
-                }
-              }
-            }
-
-            File(
-              subprojectInvertReportDirFile,
-              InvertPluginFileKey.STATS.filename
-            ).also { file ->
-              if (file.exists()) {
-                InvertReportFileUtils.readCollectedStatsForAllProjectsFromDisk(file)?.let {
-                  collectedStats.add(it)
-                }
-              }
-            }
-
-            File(
-              subprojectInvertReportDirFile,
-              InvertPluginFileKey.OWNERS.filename
-            ).also { file ->
-              InvertReportFileUtils.readCollectedOwnershipForAllProjectsFromDisk(file)
-                ?.let { collectedOwners.add(it) }
-            }
-
-            File(
-              subprojectInvertReportDirFile,
-              InvertPluginFileKey.PLUGINS.filename
-            ).also { file ->
-              if (file.exists()) {
-                InvertReportFileUtils.readCollectedPluginsForAllModules(file)?.let {
-                  synchronized(collectedPlugins) {
-                    collectedPlugins.add(it)
-                  }
-                }
-              }
-            }
-          }
-        }
-
-      val collectedOwnershipInfo = InvertJsReportUtils.buildModuleToOwnerMap(collectedOwners)
-      val allProjectsStatsData = InvertJsReportUtils.buildModuleToStatsMap(collectedStats)
-      val directDependenciesJsReportModel =
-        InvertJsReportUtils.toDirectDependenciesJsReportModel(collectedDependencies)
-      val invertedDependenciesJsReportModel =
-        InvertJsReportUtils.toInvertedDependenciesJsReportModel(collectedDependencies)
-
-      assertModuleMatch(
+      val reportMetadata = ProjectMetadataCollector.gatherProjectMetadata(
+        timeZoneId = timeZoneId,
+        datePatternFormat = datePatternFormat,
         logger = invertLogger(),
-        modulesList = collectedDependencies.map { it.path },
-        invertedModulesList = invertedDependenciesJsReportModel.getAllModulePaths()
+        repoUrls = mavenRepoUrls,
+        gitProjectDir = File("."), // TODO Pass in the root of the Git Repo
       )
 
-      val globalStats = computeGlobalStats(allProjectsStatsData)
+      val allCollectedData: InvertCombinedCollectedData = GradleProjectAnalysisCombiner
+        .combineAnalysisResults(subprojectInvertReportDirs.get())
 
-      val rootBuildReportsDir = rootBuildReportsDir.get().asFile
-
-      // JSON Report
-      InvertJsonReportWriter(invertLogger(), rootBuildReportsDir).createInvertJsonReport(
-        allConfigurationsData = collectedConfigurations,
-        allProjectsDependencyData = collectedDependencies,
-        allProjectsStatsData = allProjectsStatsData,
-        allPluginsData = collectedPlugins,
-        allOwnersData = collectedOwners,
-        globalStats = globalStats
-      )
-
-      // HTML/JS Report
-      InvertJsReportWriter(invertLogger(), rootBuildReportsDir).createInvertHtmlReport(
-        allProjectsDependencyData = collectedDependencies,
-        allProjectsStatsData = allProjectsStatsData,
-        directDependencies = directDependenciesJsReportModel,
-        invertedDependencies = invertedDependenciesJsReportModel,
-        allPluginsData = collectedPlugins,
-        collectedOwnershipInfo = collectedOwnershipInfo,
-        allProjectsConfigurationsData = collectedConfigurations,
-        globalStatTotals = CollectedStatTotalsJsReportModel(globalStats),
+      InvertReportWriter(
+        invertLogger = invertLogger(),
+        rootBuildReportsDir = rootBuildReportsDir.get().asFile
+      ).writeProjectData(
+        reportMetadata = reportMetadata,
+        collectedOwners = allCollectedData.collectedOwners,
+        collectedStats = allCollectedData.collectedStats,
+        collectedDependencies = allCollectedData.collectedDependencies,
+        collectedConfigurations = allCollectedData.collectedConfigurations,
+        collectedPlugins = allCollectedData.collectedPlugins,
       )
     }
   }
@@ -169,6 +86,9 @@ abstract class InvertTask : DefaultTask() {
     project: Project,
     subprojectInvertReportDirs: List<String>,
   ) {
+    val timeZoneId = "America/New_York"
+    this.timeZoneId.set(timeZoneId)
+
     this.subprojectInvertReportDirs.set(subprojectInvertReportDirs)
     this.forRootProject.set(project.isRootProject())
     this.projectPath.set(project.path)
@@ -177,33 +97,20 @@ abstract class InvertTask : DefaultTask() {
         InvertFileUtils.REPORTS_SLASH_INVERT_PATH
       )
     )
-  }
 
-  /**
-   * This provides a warning to the user to let them know that a module was found as a dependency
-   * but was not scanned itself.  In order to get a full picture of the project, all should
-   * be scanned.
-   */
-  private fun assertModuleMatch(
-    logger: InvertLogger,
-    modulesList: List<GradlePath>,
-    invertedModulesList: List<DependencyId>
-  ) {
-    if (!invertedModulesList.containsAll(modulesList)) {
-      val modulesMap = modulesList.groupBy { it }
-      val invertedModulesMap = invertedModulesList.groupBy { it }
-      val errorString = buildString {
-        appendLine("WARNING: Module Mismatch...")
-        appendLine("The following modules are dependencies, but were not scanned:")
-        var idx = 1
-        invertedModulesMap.keys.sorted().forEach { path ->
-          if (modulesMap[path] == null) {
-            appendLine("${idx++}. $path")
+    this.mavenRepoUrls.set(
+      project.rootProject.buildscript.repositories
+        .plus(project.rootProject.project.repositories)
+        .filterIsInstance<UrlArtifactRepository>()
+        .map { it.url.toURL().toString() }
+        .map {
+          if (it.endsWith("/")) {
+            it.dropLast(1)
+          } else {
+            it
           }
         }
-      }
-
-      logger.warn(errorString)
-    }
+        .distinct()
+    )
   }
 }

@@ -12,6 +12,7 @@ import com.squareup.invert.models.js.DependenciesJsReportModel
 import com.squareup.invert.models.js.DirectDependenciesJsReportModel
 import com.squareup.invert.models.js.HomeJsReportModel
 import com.squareup.invert.models.js.JsReportFileKey
+import com.squareup.invert.models.js.MetadataJsReportModel
 import com.squareup.invert.models.js.OwnershipJsReportModel
 import com.squareup.invert.models.js.PluginsJsReportModel
 import com.squareup.invert.models.js.StatsJsReportModel
@@ -33,6 +34,7 @@ class InvertJsReportWriter(
     allPluginsData: List<CollectedPluginsForProject>,
     collectedOwnershipInfo: OwnershipJsReportModel,
     globalStatTotals: CollectedStatTotalsJsReportModel,
+    reportMetadata: MetadataJsReportModel,
   ) {
     val pluginsReport = InvertJsReportUtils.toCollectedPlugins(allPluginsData)
     val modulesList = allProjectsDependencyData.map { it.path }
@@ -41,6 +43,12 @@ class InvertJsReportWriter(
       modules = modulesList.sorted(),
       artifacts = invertedDependencies.getAllArtifactIds().sorted(),
       plugins = pluginsReport.plugins.keys.toList().sorted()
+    )
+
+    writeJsFileInDir(
+      fileKey = JsReportFileKey.METADATA,
+      serializer = MetadataJsReportModel.serializer(),
+      value = reportMetadata
     )
 
     writeJsFileInDir(
@@ -150,6 +158,9 @@ class InvertJsReportWriter(
       serializer: KSerializer<T>,
       value: T,
     ) = jsOutputFile.apply {
+      if (!parentFile.exists()) {
+        parentFile.mkdirs()
+      }
       writeText(
         invertJsGlobalVariableAssignment(
           fileKey = fileKey,

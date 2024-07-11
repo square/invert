@@ -7,7 +7,6 @@ import com.squareup.invert.internal.tasks.InvertCollectDependenciesTask
 import com.squareup.invert.internal.tasks.InvertCollectOwnershipTask
 import com.squareup.invert.internal.tasks.InvertCollectStatsTask
 import com.squareup.invert.internal.tasks.InvertCollectTask
-import com.squareup.invert.internal.tasks.InvertProjectMetadataTask
 import com.squareup.invert.internal.tasks.InvertTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -32,14 +31,6 @@ class InvertGradlePlugin : Plugin<Project> {
         if (!rootProject.isRootProject()) {
             throw IllegalStateException("Cannot apply $ID to a non-root project")
         }
-        val metadataTask = rootProject.tasks.register(
-            InvertProjectMetadataTask.TASK_NAME,
-            InvertProjectMetadataTask::class.java
-        ) {
-            it.setParams(
-                rootProject = rootProject,
-            )
-        }
 
         val invertCleanTask = registerInvertCleanTask(rootProject)
         rootProject.afterEvaluate { rootProject ->
@@ -59,7 +50,6 @@ class InvertGradlePlugin : Plugin<Project> {
                         ).absolutePath
                     }
                 )
-                reportTask.dependsOn(metadataTask)
             }
 
             subprojectsToRegisterOn.forEach { subproject ->

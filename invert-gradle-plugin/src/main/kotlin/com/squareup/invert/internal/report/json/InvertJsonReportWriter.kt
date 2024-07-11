@@ -10,6 +10,7 @@ import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.InvertSerialization.InvertJson
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
+import com.squareup.invert.models.js.MetadataJsReportModel
 import com.squareup.invert.models.js.StatsJsReportModel
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -27,7 +28,13 @@ class InvertJsonReportWriter(
     allPluginsData: List<CollectedPluginsForProject>,
     allOwnersData: List<CollectedOwnershipForProject>,
     globalStats: Map<StatMetadata, Int>,
+    reportMetadata: MetadataJsReportModel,
   ) {
+    writeJsonFileInDir(
+      jsonFileKey = InvertPluginFileKey.METADATA,
+      serializer = MetadataJsReportModel.serializer(),
+      value = reportMetadata
+    )
     writeJsonFileInDir(
       jsonFileKey = InvertPluginFileKey.PLUGINS,
       serializer = ListSerializer(CollectedPluginsForProject.serializer()),
