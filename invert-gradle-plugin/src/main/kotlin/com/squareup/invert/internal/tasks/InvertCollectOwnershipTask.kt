@@ -41,7 +41,7 @@ internal abstract class InvertCollectOwnershipTask : DefaultTask() {
   @get:Internal
   abstract var ownershipCollector: InvertOwnershipCollector
 
-  private val invertLogger: InvertLogger by lazy { GradleInvertLogger(logger) }
+  private fun invertLogger(): InvertLogger = GradleInvertLogger(logger)
 
   @TaskAction
   internal fun execute() {
@@ -55,7 +55,7 @@ internal abstract class InvertCollectOwnershipTask : DefaultTask() {
       )
 
       InvertJsonReportWriter.writeJsonFile(
-        logger = invertLogger,
+        logger = invertLogger(),
         jsonOutputFile = projectOwnershipJsonFile.get().asFile,
         jsonFileKey = InvertPluginFileKey.OWNERS,
         serializer = CollectedOwnershipForProject.serializer(),

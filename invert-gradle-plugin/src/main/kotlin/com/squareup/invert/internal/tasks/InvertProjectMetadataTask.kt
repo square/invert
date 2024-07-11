@@ -31,7 +31,7 @@ import java.util.TimeZone
  */
 abstract class InvertProjectMetadataTask : DefaultTask() {
 
-  private val invertLogger: InvertLogger by lazy { GradleInvertLogger(logger) }
+  private fun invertLogger(): InvertLogger = GradleInvertLogger(logger)
 
   companion object {
     const val TASK_NAME = "invertProjectMetadata"
@@ -99,14 +99,14 @@ abstract class InvertProjectMetadataTask : DefaultTask() {
     val reportMetadata = gatherProjectMetadata(
       timeZoneId = timeZoneId,
       datePatternFormat = datePatternFormat,
-      logger = invertLogger,
+      logger = invertLogger(),
       repoUrls = this.mavenRepoUrls.get(),
       gitProjectDir = File("."), // TODO Pass in the root of the Git Repo
     )
 
     InvertJsReportWriter
       .writeJsFile(
-        logger = invertLogger,
+        logger = invertLogger(),
         fileKey = JsReportFileKey.METADATA,
         jsOutputFile = this.metadataJsFile.get().asFile,
         serializer = MetadataJsReportModel.serializer(),
@@ -115,7 +115,7 @@ abstract class InvertProjectMetadataTask : DefaultTask() {
 
     InvertJsonReportWriter
       .writeJsonFile(
-        logger = invertLogger,
+        logger = invertLogger(),
         jsonFileKey = InvertPluginFileKey.METADATA,
         jsonOutputFile = this.metadataJsonFile.get().asFile,
         serializer = MetadataJsReportModel.serializer(),

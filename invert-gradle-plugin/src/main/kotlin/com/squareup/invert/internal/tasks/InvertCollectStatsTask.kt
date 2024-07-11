@@ -48,7 +48,7 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
     @get:OutputFile
     abstract val projectBuildReportStatsFile: RegularFileProperty
 
-    private val invertLogger: InvertLogger by lazy { GradleInvertLogger(logger) }
+    private fun invertLogger(): InvertLogger = GradleInvertLogger(logger)
 
     @TaskAction
     internal fun execute() {
@@ -83,7 +83,7 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
                 }
 
             InvertJsonReportWriter.writeJsonFile(
-                invertLogger,
+                invertLogger(),
                 InvertPluginFileKey.STATS,
                 this.projectBuildReportStatsFile.get().asFile,
                 CollectedStatsForProject.serializer(),

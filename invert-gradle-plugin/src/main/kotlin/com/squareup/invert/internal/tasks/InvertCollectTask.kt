@@ -37,13 +37,13 @@ abstract class InvertCollectTask : DefaultTask() {
   @get:Input
   abstract val pluginIds: ListProperty<String>
 
-  private val invertLogger: InvertLogger by lazy { GradleInvertLogger(logger) }
+  private fun invertLogger(): InvertLogger = GradleInvertLogger(logger)
 
   @TaskAction
   internal fun execute() {
     // Write Plugins for Project
     InvertJsonReportWriter.writeJsonFile(
-      invertLogger,
+      invertLogger(),
       InvertPluginFileKey.PLUGINS,
       projectBuildReportPluginsFile.get().asFile,
       CollectedPluginsForProject.serializer(),
