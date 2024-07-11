@@ -2,8 +2,8 @@ package com.squareup.invert.models.js
 
 import com.squareup.invert.models.GradlePath
 import com.squareup.invert.models.Stat
-import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.StatKey
+import com.squareup.invert.models.StatMetadata
 import kotlinx.serialization.Serializable
 
 /**

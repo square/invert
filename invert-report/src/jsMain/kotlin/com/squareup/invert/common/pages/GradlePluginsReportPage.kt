@@ -14,7 +14,12 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.models.GradlePluginId
-import ui.*
+import ui.BootstrapClickableList
+import ui.BootstrapColumn
+import ui.BootstrapLoadingSpinner
+import ui.BootstrapRow
+import ui.BootstrapSearchBox
+import ui.TitleRow
 import kotlin.reflect.KClass
 
 data class GradlePluginsNavRoute(

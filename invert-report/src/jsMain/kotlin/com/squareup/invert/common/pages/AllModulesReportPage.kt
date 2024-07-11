@@ -16,7 +16,12 @@ import com.squareup.invert.common.pages.AllModulesReportPage.navPage
 import com.squareup.invert.models.GradlePath
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Text
-import ui.*
+import ui.BootstrapAccordion
+import ui.BootstrapLoadingMessageWithSpinner
+import ui.BootstrapSearchBox
+import ui.BootstrapTabData
+import ui.BootstrapTabPane
+import ui.BootstrapTable
 import kotlin.reflect.KClass
 
 

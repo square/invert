@@ -2,7 +2,13 @@ package com.squareup.invert
 
 import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.isRootProject
-import com.squareup.invert.internal.tasks.*
+import com.squareup.invert.internal.tasks.InvertCleanTask
+import com.squareup.invert.internal.tasks.InvertCollectDependenciesTask
+import com.squareup.invert.internal.tasks.InvertCollectOwnershipTask
+import com.squareup.invert.internal.tasks.InvertCollectStatsTask
+import com.squareup.invert.internal.tasks.InvertCollectTask
+import com.squareup.invert.internal.tasks.InvertProjectMetadataTask
+import com.squareup.invert.internal.tasks.InvertTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider

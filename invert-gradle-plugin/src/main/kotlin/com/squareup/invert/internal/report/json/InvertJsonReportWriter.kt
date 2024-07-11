@@ -1,7 +1,11 @@
 package com.squareup.invert.internal.report.json
 
 import com.squareup.invert.internal.InvertFileUtils
-import com.squareup.invert.internal.models.*
+import com.squareup.invert.internal.models.CollectedConfigurationsForProject
+import com.squareup.invert.internal.models.CollectedDependenciesForProject
+import com.squareup.invert.internal.models.CollectedOwnershipForProject
+import com.squareup.invert.internal.models.CollectedPluginsForProject
+import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.InvertSerialization.InvertJson
 import com.squareup.invert.models.StatMetadata

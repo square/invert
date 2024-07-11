@@ -2,7 +2,12 @@ package com.squareup.invert.internal.tasks
 
 import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.isRootProject
-import com.squareup.invert.internal.models.*
+import com.squareup.invert.internal.models.CollectedConfigurationsForProject
+import com.squareup.invert.internal.models.CollectedDependenciesForProject
+import com.squareup.invert.internal.models.CollectedOwnershipForProject
+import com.squareup.invert.internal.models.CollectedPluginsForProject
+import com.squareup.invert.internal.models.CollectedStatsForProject
+import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.internal.report.InvertReportFileUtils
 import com.squareup.invert.internal.report.js.InvertJsReportUtils
 import com.squareup.invert.internal.report.js.InvertJsReportUtils.computeGlobalStats
@@ -17,7 +22,6 @@ import kotlinx.coroutines.runBlocking
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.logging.Logger
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input

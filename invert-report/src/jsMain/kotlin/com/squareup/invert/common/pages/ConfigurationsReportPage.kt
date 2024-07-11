@@ -12,7 +12,12 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import kotlinx.browser.window
-import ui.*
+import ui.BootstrapClickableList
+import ui.BootstrapColumn
+import ui.BootstrapLoadingMessageWithSpinner
+import ui.BootstrapRow
+import ui.BootstrapTable
+import ui.TitleRow
 import kotlin.reflect.KClass
 
 object ConfigurationsNavRoute : BaseNavRoute(ConfigurationsReportPage.navPage)

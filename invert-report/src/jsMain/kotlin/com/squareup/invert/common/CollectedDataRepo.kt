@@ -1,6 +1,15 @@
 package com.squareup.invert.common
 
-import com.squareup.invert.models.js.*
+import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
+import com.squareup.invert.models.js.ConfigurationsJsReportModel
+import com.squareup.invert.models.js.DependenciesJsReportModel
+import com.squareup.invert.models.js.DirectDependenciesJsReportModel
+import com.squareup.invert.models.js.HomeJsReportModel
+import com.squareup.invert.models.js.JsReportFileKey
+import com.squareup.invert.models.js.MetadataJsReportModel
+import com.squareup.invert.models.js.OwnershipJsReportModel
+import com.squareup.invert.models.js.PluginsJsReportModel
+import com.squareup.invert.models.js.StatsJsReportModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

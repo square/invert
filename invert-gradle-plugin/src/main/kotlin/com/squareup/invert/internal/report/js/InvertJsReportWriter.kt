@@ -16,7 +16,6 @@ import com.squareup.invert.models.js.OwnershipJsReportModel
 import com.squareup.invert.models.js.PluginsJsReportModel
 import com.squareup.invert.models.js.StatsJsReportModel
 import kotlinx.serialization.KSerializer
-import org.gradle.api.logging.Logger
 import java.io.File
 
 class InvertJsReportWriter(

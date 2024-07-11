@@ -13,7 +13,12 @@ import com.squareup.invert.common.charts.ChartsJs
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import ui.*
+import ui.BootstrapColumn
+import ui.BootstrapLoadingMessageWithSpinner
+import ui.BootstrapRow
+import ui.BootstrapSearchBox
+import ui.BootstrapTable
+import ui.TitleRow
 import kotlin.reflect.KClass
 
 data class ArtifactsNavRoute(

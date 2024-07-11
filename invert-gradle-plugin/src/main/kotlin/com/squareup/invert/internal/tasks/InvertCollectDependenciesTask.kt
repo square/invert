@@ -1,13 +1,17 @@
 package com.squareup.invert.internal.tasks
 
 import com.squareup.invert.InvertExtension
-import com.squareup.invert.internal.*
 import com.squareup.invert.internal.InvertDependencyCollectors.computeCollectedDependenciesForProject
+import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.InvertFileUtils.addSlashAnd
+import com.squareup.invert.internal.getResolvedComponentResult
+import com.squareup.invert.internal.isRootProject
 import com.squareup.invert.internal.models.CollectedConfigurationsForProject
 import com.squareup.invert.internal.models.CollectedDependenciesForProject
 import com.squareup.invert.internal.models.InvertPluginFileKey
+import com.squareup.invert.internal.projectConfigurations
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
+import com.squareup.invert.internal.toTransitiveDeps
 import com.squareup.invert.logging.GradleInvertLogger
 import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.ConfigurationName

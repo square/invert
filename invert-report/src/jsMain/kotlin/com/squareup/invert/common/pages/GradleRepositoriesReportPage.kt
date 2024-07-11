@@ -10,7 +10,12 @@ import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import org.jetbrains.compose.web.dom.*
+import org.jetbrains.compose.web.dom.A
+import org.jetbrains.compose.web.dom.Br
+import org.jetbrains.compose.web.dom.H4
+import org.jetbrains.compose.web.dom.Li
+import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.dom.Ul
 import ui.BootstrapLoadingSpinner
 import kotlin.reflect.KClass
 

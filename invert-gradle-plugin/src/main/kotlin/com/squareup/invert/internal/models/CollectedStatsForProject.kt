@@ -1,8 +1,8 @@
 package com.squareup.invert.internal.models
 
 import com.squareup.invert.models.Stat
-import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.StatKey
+import com.squareup.invert.models.StatMetadata
 import kotlinx.serialization.Serializable
 
 /**

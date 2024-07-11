@@ -13,14 +13,25 @@ import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.ModuleDetailNavRoute.Companion.parser
-import com.squareup.invert.models.*
+import com.squareup.invert.models.ConfigurationName
+import com.squareup.invert.models.DependencyId
+import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.OwnerName
+import com.squareup.invert.models.Stat
+import com.squareup.invert.models.StatKey
+import com.squareup.invert.models.StatMetadata
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import org.jetbrains.compose.web.dom.Br
 import org.jetbrains.compose.web.dom.H2
 import org.jetbrains.compose.web.dom.Text
-import ui.*
+import ui.AppLink
+import ui.BootstrapClickableList
+import ui.BootstrapLoadingMessageWithSpinner
+import ui.BootstrapTabData
+import ui.BootstrapTabPane
+import ui.BootstrapTable
 import kotlin.reflect.KClass
 
 data class ModuleDetailNavRoute(

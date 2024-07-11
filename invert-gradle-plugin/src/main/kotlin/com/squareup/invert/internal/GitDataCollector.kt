@@ -4,7 +4,6 @@ import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.GitBranch
 import com.squareup.invert.models.GitSha
 import org.gradle.api.GradleException
-import org.gradle.api.logging.Logger
 import java.io.File
 import java.io.IOException
 

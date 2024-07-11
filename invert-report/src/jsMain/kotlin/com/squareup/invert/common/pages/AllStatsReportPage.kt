@@ -16,7 +16,14 @@ import com.squareup.invert.models.CollectedStatType
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Text
-import ui.*
+import ui.BootstrapButton
+import ui.BootstrapButtonType
+import ui.BootstrapClickableList
+import ui.BootstrapColumn
+import ui.BootstrapJumbotron
+import ui.BootstrapLoadingMessageWithSpinner
+import ui.BootstrapLoadingSpinner
+import ui.BootstrapRow
 import kotlin.reflect.KClass
 
 

@@ -13,8 +13,20 @@ import com.squareup.invert.common.utils.FormattingUtils.formatDecimalSeparator
 import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.target
-import org.jetbrains.compose.web.dom.*
-import ui.*
+import org.jetbrains.compose.web.dom.A
+import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.H3
+import org.jetbrains.compose.web.dom.H5
+import org.jetbrains.compose.web.dom.P
+import org.jetbrains.compose.web.dom.Small
+import org.jetbrains.compose.web.dom.Text
+import ui.BootstrapButton
+import ui.BootstrapButtonType
+import ui.BootstrapColumn
+import ui.BootstrapJumbotron
+import ui.BootstrapLoadingMessageWithSpinner
+import ui.BootstrapLoadingSpinner
+import ui.BootstrapRow
 import kotlin.reflect.KClass
 
 object HomeReportPage : InvertReportPage<HomeReportPage.HomeNavRoute> {

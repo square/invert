@@ -1,6 +1,10 @@
 package com.squareup.invert.internal.report
 
-import com.squareup.invert.internal.models.*
+import com.squareup.invert.internal.models.CollectedConfigurationsForProject
+import com.squareup.invert.internal.models.CollectedDependenciesForProject
+import com.squareup.invert.internal.models.CollectedOwnershipForProject
+import com.squareup.invert.internal.models.CollectedPluginsForProject
+import com.squareup.invert.internal.models.CollectedStatsForProject
 import com.squareup.invert.models.InvertSerialization.InvertJson
 import java.io.File
 

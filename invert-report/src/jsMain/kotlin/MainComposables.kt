@@ -5,7 +5,6 @@ import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteManager
 import com.squareup.invert.common.navigation.NavRouteRepo
-import com.squareup.invert.common.pages.HomeReportPage
 import history.JavaScriptNavigationAndHistory
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope

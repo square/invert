@@ -14,7 +14,11 @@ import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.GradlePath
-import org.jetbrains.compose.web.dom.*
+import org.jetbrains.compose.web.dom.Br
+import org.jetbrains.compose.web.dom.H1
+import org.jetbrains.compose.web.dom.H3
+import org.jetbrains.compose.web.dom.H4
+import org.jetbrains.compose.web.dom.Text
 import ui.BoostrapExpandingCard
 import ui.BootstrapAccordion
 import ui.BootstrapLoadingSpinner

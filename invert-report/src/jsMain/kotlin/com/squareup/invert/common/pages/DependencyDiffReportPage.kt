@@ -15,8 +15,19 @@ import com.squareup.invert.common.pages.DependencyDiffNavRoute.Companion.parser
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.GradlePath
-import org.jetbrains.compose.web.dom.*
-import ui.*
+import org.jetbrains.compose.web.dom.Br
+import org.jetbrains.compose.web.dom.Datalist
+import org.jetbrains.compose.web.dom.H1
+import org.jetbrains.compose.web.dom.H3
+import org.jetbrains.compose.web.dom.Option
+import org.jetbrains.compose.web.dom.P
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
+import ui.BootstrapButton
+import ui.BootstrapColumn
+import ui.BootstrapRow
+import ui.BootstrapSearchBox
+import ui.BootstrapSettingsCheckbox
 import kotlin.reflect.KClass
 
 

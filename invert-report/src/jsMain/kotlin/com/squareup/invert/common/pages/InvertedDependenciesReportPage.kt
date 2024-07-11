@@ -1,7 +1,12 @@
 package com.squareup.invert.common.pages
 
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.squareup.invert.common.DependencyGraph
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ReportDataRepo
@@ -14,8 +19,29 @@ import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.GradlePath
 import com.squareup.invert.models.GradlePluginId
 import kotlinx.browser.window
-import org.jetbrains.compose.web.dom.*
-import ui.*
+import org.jetbrains.compose.web.dom.Br
+import org.jetbrains.compose.web.dom.Button
+import org.jetbrains.compose.web.dom.H1
+import org.jetbrains.compose.web.dom.H5
+import org.jetbrains.compose.web.dom.Hr
+import org.jetbrains.compose.web.dom.P
+import org.jetbrains.compose.web.dom.Text
+import ui.BoostrapExpandingCard
+import ui.BootstrapAccordion
+import ui.BootstrapButton
+import ui.BootstrapColumn
+import ui.BootstrapIcon
+import ui.BootstrapJumbotron
+import ui.BootstrapLoadingMessageWithSpinner
+import ui.BootstrapRow
+import ui.BootstrapSearchBox
+import ui.BootstrapSettingsCheckbox
+import ui.BootstrapTabData
+import ui.BootstrapTabPane
+import ui.BootstrapTable
+import ui.GenericList
+import ui.MarkdownText
+import ui.TitleRow
 import kotlin.reflect.KClass
 
 

@@ -8,7 +8,6 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavPage.NavItem
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
-import com.squareup.invert.common.pages.AllStatsNavRoute
 import com.squareup.invert.common.pages.AllStatsReportPage
 import com.squareup.invert.common.pages.StatDetailNavRoute
 import com.squareup.invert.models.StatMetadata
