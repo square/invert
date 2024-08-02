@@ -14,7 +14,9 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.StatDetailNavRoute.Companion.parser
 import com.squareup.invert.models.CollectedStatType
+import com.squareup.invert.models.GradlePath
 import com.squareup.invert.models.GradlePluginId
+import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
@@ -25,7 +27,6 @@ import org.jetbrains.compose.web.dom.Text
 import ui.BootstrapLoadingMessageWithSpinner
 import ui.BootstrapLoadingSpinner
 import ui.BootstrapSearchBox
-import ui.BootstrapSettingsCheckbox
 import ui.BootstrapTabData
 import ui.BootstrapTabPane
 import ui.BootstrapTable
@@ -99,7 +100,7 @@ fun StatDetailComposable(
   val allPluginIds by reportDataRepo.allPluginIds.collectAsState(null)
   val statsData by reportDataRepo.statsData.collectAsState(null)
   val allModulesOrig by reportDataRepo.allModules.collectAsState(null)
-  val moduleToOwnerMapFlowValue by reportDataRepo.moduleToOwnerMap.collectAsState(null)
+  val moduleToOwnerMapFlowValue: Map<GradlePath, OwnerName>? by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
   val metadata by reportDataRepo.reportMetadata.collectAsState(null)
 
@@ -114,27 +115,6 @@ fun StatDetailComposable(
   }
 
   val query = statsNavRoute.moduleQuery
-
-
-  val filterTab = BootstrapTabData("Filters") {
-    H3 { Text("All Plugin Types") }
-    allPluginIds?.forEach { pluginId ->
-      BootstrapSettingsCheckbox(
-        labelText = pluginId,
-        initialIsChecked = statsNavRoute.pluginIds.contains(pluginId),
-      ) { checked ->
-        navRouteRepo.updateNavRoute(
-          navRoute = statsNavRoute.copy(
-            pluginIds = if (checked) {
-              statsNavRoute.pluginIds.plus(pluginId)
-            } else {
-              statsNavRoute.pluginIds.minus(pluginId)
-            }
-          )
-        )
-      }
-    }
-  }
 
   if (allModulesOrig == null) {
     return
@@ -166,63 +146,53 @@ fun StatDetailComposable(
         val statInfo = statsData?.statInfos?.get(statKey)
         statInfo?.let { statMetadata: StatMetadata ->
           if (SUPPORTED_TYPES.contains(statMetadata.statType)) {
+            val value = allModules.map { gradlePath ->
+              val statsDataForModule: Map<StatKey, Stat>? = statsData?.statsByModule?.get(gradlePath)
+              val stat = statsDataForModule?.get(statKey)
+              when (stat) {
+                is Stat.BooleanStat -> {
+                  stat.value.toString()
+                }
+
+                is Stat.StringStat -> {
+                  stat.value
+                }
+
+                is Stat.NumericStat -> {
+                  stat.value.toString()
+                }
+
+                is Stat.CodeReferencesStat -> {
+                  if (metadata != null) {
+                    stat.value.toMarkdown(metadata!!)
+                  } else {
+                    stat.value.toString()
+                  }
+                }
+
+                else -> ""
+              }
+            }
             add(
               allModules.map { gradlePath ->
-                val statsDataForModule: Map<StatKey, Stat>? = statsData?.statsByModule?.get(gradlePath)
-                val stat = statsDataForModule?.get(statKey)
-                when (stat) {
-                  is Stat.BooleanStat -> {
-                    stat.value.toString()
-                  }
-
-                  is Stat.StringStat -> {
-                    stat.value
-                  }
-
-                  is Stat.NumericStat -> {
-                    stat.value.toString()
-                  }
-
-                  is Stat.CodeReferencesStat -> {
-                    if (metadata != null) {
-                      stat.value.toMarkdown(metadata!!)
-                    } else {
-                      stat.value.toString()
-                    }
-                  }
-
-                  else -> ""
+                val statsForModule = statsData?.statsByModule?.get(gradlePath)?.get(statKey)
+                if (statsForModule != null) {
+                  val owner = moduleToOwnerMapFlowValue?.get(gradlePath) ?: ""
+                  owner
+                } else {
+                  ""
                 }
               }
             )
+            add(value)
             add(
               allModules.map { gradlePath ->
                 val statsDataForModule: Map<StatKey, Stat>? = statsData?.statsByModule?.get(gradlePath)
                 val stat = statsDataForModule?.get(statKey)
-                when (stat) {
-                  is Stat.BooleanStat -> {
-                    stat.details
-                  }
-
-                  is Stat.StringStat -> {
-                    stat.details
-                  }
-
-                  is Stat.NumericStat -> {
-                    stat.details
-                  }
-
-                  is Stat.CodeReferencesStat -> {
-                    buildString {
-                      stat.value.forEach {
-                        appendLine("${it.code}")
-                      }
-                    }
-                  }
-                  else -> ""
-                } ?: ""
+                statToDetailsString(stat)
               }
             )
+
           }
         }
       }
@@ -233,6 +203,9 @@ fun StatDetailComposable(
         statKeys.forEach {
           val thisStatType = statsData?.statInfos?.get(it)
           if (SUPPORTED_TYPES.contains(thisStatType?.statType)) {
+            if (!moduleToOwnerMapFlowValue.isNullOrEmpty()) {
+              add("Owner")
+            }
             val description = statsData?.statInfos?.get(it)?.description ?: it
             add(description)
             add("$description Details")
@@ -278,8 +251,32 @@ fun StatDetailComposable(
   BootstrapTabPane(
     listOf(
       resultsTab,
-      filterTab,
     )
   )
 
 }
+
+fun statToDetailsString(stat: Stat?): String = when (stat) {
+  is Stat.BooleanStat -> {
+    stat.details
+  }
+
+  is Stat.StringStat -> {
+    stat.details
+  }
+
+  is Stat.NumericStat -> {
+    stat.details
+  }
+
+  is Stat.CodeReferencesStat -> {
+    buildString {
+      stat.value.forEach {
+        appendLine("${it.code}")
+      }
+    }
+  }
+
+  else -> ""
+} ?: ""
+
