@@ -43,7 +43,7 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
   abstract var statCollectors: List<StatCollector>?
 
   @get:InputFiles
-  abstract val projectMainSrcDirectory: DirectoryProperty
+  abstract val projectSrcDirectory: DirectoryProperty
 
   @get:OutputFile
   abstract val projectBuildReportStatsFile: RegularFileProperty
@@ -55,10 +55,9 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
     val projectPath = projectGradlePath.get()
 
     // Only select files from main source (we don't want stats from tests).
-    val mainSrcFolder = projectMainSrcDirectory.get().asFile
-    val srcFolder = mainSrcFolder.parentFile.parentFile
-    if (mainSrcFolder.exists()) {
-      val sourceFiles = mainSrcFolder
+    val srcFolder = projectSrcDirectory.get().asFile.parentFile
+    if (srcFolder.exists()) {
+      val sourceFiles = srcFolder
         .walkTopDown()
         .filter { it.isFile }
         .toList()
@@ -103,8 +102,8 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
     val projectGradlePath = project.path
     this.projectGradlePath.set(projectGradlePath)
     this.rootProjectPath.set(project.rootProject.layout.projectDirectory.asFile.absolutePath)
-    this.projectMainSrcDirectory.set(
-      File(project.layout.projectDirectory.asFile.path + "/src/main")
+    this.projectSrcDirectory.set(
+      File(project.layout.projectDirectory.asFile.path + "/src")
     )
 
     projectBuildReportStatsFile.set(
