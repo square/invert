@@ -8,6 +8,7 @@ import com.squareup.invert.common.pages.AllStatsReportPage
 import com.squareup.invert.common.pages.AnnotationProcessorsReportPage
 import com.squareup.invert.common.pages.ArtifactDetailReportPage
 import com.squareup.invert.common.pages.ArtifactsReportPage
+import com.squareup.invert.common.pages.CodeReferencesReportPage
 import com.squareup.invert.common.pages.ConfigurationDetailReportPage
 import com.squareup.invert.common.pages.ConfigurationsReportPage
 import com.squareup.invert.common.pages.DependencyDiffReportPage
@@ -96,6 +97,7 @@ class InvertReport(
             ArtifactDetailReportPage,
             ArtifactsReportPage,
             AnnotationProcessorsReportPage,
+            CodeReferencesReportPage,
             ConfigurationDetailReportPage,
             ConfigurationsReportPage,
             DependencyInjectionReportPage,

@@ -7,6 +7,7 @@ import com.squareup.invert.common.pages.AnnotationProcessorsReportPage
 import com.squareup.invert.common.pages.ArtifactDetailNavRoute
 import com.squareup.invert.common.pages.ArtifactsNavRoute
 import com.squareup.invert.common.pages.ArtifactsReportPage
+import com.squareup.invert.common.pages.CodeReferencesReportPage
 import com.squareup.invert.common.pages.ConfigurationDetailNavRoute
 import com.squareup.invert.common.pages.ConfigurationsNavRoute
 import com.squareup.invert.common.pages.DependencyDiffReportPage
@@ -82,6 +83,7 @@ class NavPage(
                             }
                         ),
                         AllStatsNavRoute().navPage.toNavItem(),
+                        CodeReferencesReportPage.navPage.toNavItem(),
                     )
                 ),
                 NavPageGroup(

@@ -71,9 +71,23 @@ fun Collection<Stat.CodeReferencesStat.CodeReference>.toMarkdown(projectMetadata
   val codeReferences = this
   return buildString {
     codeReferences.forEach { codeReference ->
-      val urlToFile =
-        "${projectMetadata.httpsUrlForCommit()}/${codeReference.filePath}#L${codeReference.startLine}-L${codeReference.endLine}"
-      appendLine("* <a href='$urlToFile' target='_blank'>${codeReference.filePath}:${codeReference.startLine}</a>")
+      appendLine("* ${codeReference.toHrefLink(projectMetadata)}")
+    }
+  }
+}
+
+fun Stat.CodeReferencesStat.CodeReference.toHrefLink(
+  projectMetadata: MetadataJsReportModel,
+  openInNewTab: Boolean = true
+): String {
+  val codeReference = this
+  return buildString {
+    val urlToFile =
+      "${projectMetadata.httpsUrlForCommit()}/${codeReference.filePath}#L${codeReference.startLine}-L${codeReference.endLine}"
+    if (openInNewTab) {
+      appendLine("<a href='$urlToFile' target='_blank'>${codeReference.filePath}:${codeReference.startLine}</a>")
+    } else {
+      appendLine("[${codeReference.filePath}:${codeReference.startLine}]($urlToFile)")
     }
   }
 }
