@@ -15,6 +15,6 @@ class InvertProjectData(
 
 val InvertProjectData.projectSrcDir get() = File(projectDir, "src")
 val InvertProjectData.sourceFiles
-  get() = projectSrcDir.walkTopDown().filter { file -> file.isFile.also { println(file.absolutePath) } }
+  get() = projectSrcDir.walkTopDown().filter { file -> file.isFile }
 
 fun File.relativePath(rootProjectDir: File): String = this.absolutePath.replace(rootProjectDir.absolutePath, "").drop(1)
