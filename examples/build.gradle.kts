@@ -1,28 +1,28 @@
 buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        google()
-        gradlePluginPortal()
-        maven { url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content") }
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    google()
+    gradlePluginPortal()
+    maven { url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content") }
 //        maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") } // SNAPSHOT Versions
-    }
-    dependencies {
-        val invertVersion = "0.0.2-dev00-SNAPSHOT"
-        classpath("com.squareup.invert:invert-gradle-plugin:$invertVersion")
+  }
+  dependencies {
+    val invertVersion = "0.0.2-dev00-SNAPSHOT"
+    classpath("com.squareup.invert:invert-gradle-plugin:$invertVersion")
 //        classpath("com.squareup.invert:collectors-anvil-dagger:$invertVersion")
 //        classpath("com.squareup.invert:collectors-kotlin-java-loc:$invertVersion")
 //        classpath("com.squareup.invert:owners-github-codeowners:$invertVersion")
-    }
+  }
 }
 
 allprojects {
-    repositories {
-        mavenCentral()
-        google()
-        gradlePluginPortal()
-        maven { url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content") }
-    }
+  repositories {
+    mavenCentral()
+    google()
+    gradlePluginPortal()
+    maven { url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content") }
+  }
 }
 
 plugins {

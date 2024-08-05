@@ -1,7 +1,6 @@
 package com.squareup.invert
 
 import org.gradle.api.Named
-import java.io.File
 
 
 /**
@@ -11,10 +10,8 @@ import java.io.File
  */
 interface StatCollector : Named {
 
-    fun collect(
-        rootProjectFolder: File,
-        projectPath: String,
-        sourceFiles: List<File>,
-    ): List<CollectedStat>?
+  fun collect(
+    invertProjectData: InvertProjectData,
+  ): List<CollectedStat>?
 
 }

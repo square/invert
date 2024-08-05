@@ -1,6 +1,7 @@
 package com.squareup.invert.internal.tasks
 
 import com.squareup.invert.InvertExtension
+import com.squareup.invert.InvertProjectData
 import com.squareup.invert.StatCollector
 import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.InvertFileUtils.addSlashAnd
@@ -54,23 +55,18 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
   internal fun execute() {
     val projectPath = projectGradlePath.get()
 
-    // Only select files from main source (we don't want stats from tests).
-    val srcFolder = projectSrcDirectory.get().asFile.parentFile
-    if (srcFolder.exists()) {
-      val sourceFiles = srcFolder
-        .walkTopDown()
-        .filter { it.isFile }
-        .toList()
-
+    val projectDir = projectSrcDirectory.get().asFile.parentFile
+    if (projectDir.exists()) {
       val statMetadataMap = mutableMapOf<StatKey, StatMetadata>()
-
-      val collectedStats: Map<StatKey, Stat> =
-        mutableMapOf<StatKey, Stat>().also { collectedStats ->
+      val collectedStats: Map<StatKey, Stat> = mutableMapOf<StatKey, Stat>()
+        .also { collectedStats ->
           this.statCollectors?.forEach { statCollector ->
             statCollector.collect(
-              rootProjectFolder = File(rootProjectPath.get()),
-              projectPath = projectPath,
-              sourceFiles = sourceFiles
+              InvertProjectData(
+                rootProjectDir = File(rootProjectPath.get()),
+                projectPath = projectPath,
+                projectDir = projectDir,
+              )
             )?.forEach { collectedStat ->
               val statKey = collectedStat.metadata.key
               collectedStat.stat?.let { stat ->
