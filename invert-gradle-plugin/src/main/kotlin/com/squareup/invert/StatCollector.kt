@@ -10,8 +10,17 @@ import org.gradle.api.Named
  */
 interface StatCollector : Named {
 
+  /**
+   * Collect [CollectedStat]s for a specific project.
+   */
   fun collect(
     invertProjectData: InvertProjectData,
-  ): List<CollectedStat>?
+  ): List<CollectedStat>? = null
 
+  /**
+   * Compute [CollectedStat]s with the context of all collected information.
+   */
+  fun aggregate(
+    invertAllCollectedDataRepo: InvertAllCollectedDataRepo,
+  ): CollectedStatsAggregate = CollectedStatsAggregate(mapOf(), listOf())
 }

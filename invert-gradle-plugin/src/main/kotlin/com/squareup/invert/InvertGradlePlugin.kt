@@ -43,6 +43,7 @@ class InvertGradlePlugin : Plugin<Project> {
             ) { reportTask ->
                 reportTask.setParams(
                     project = rootProject,
+                    extension = project.getInvertExtension(),
                     subprojectInvertReportDirs = subprojectsToRegisterOn.map {
                         File(
                             it.layout.buildDirectory.get().asFile,

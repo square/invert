@@ -1,5 +1,8 @@
 package com.squareup.invert.internal.tasks
 
+import com.squareup.invert.InvertExtension
+import com.squareup.invert.StatCollector
+import com.squareup.invert.internal.CollectedStatAggregator
 import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.isRootProject
 import com.squareup.invert.internal.models.InvertCombinedCollectedData
@@ -15,6 +18,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import java.io.File
@@ -32,6 +36,9 @@ abstract class InvertTask : DefaultTask() {
 
   @get:Input
   abstract val forRootProject: Property<Boolean>
+
+  @get:Internal
+  abstract var statCollectors: List<StatCollector>?
 
   @get:Input
   abstract val projectPath: Property<String>
@@ -65,8 +72,14 @@ abstract class InvertTask : DefaultTask() {
         gitProjectDir = File("."), // TODO Pass in the root of the Git Repo
       )
 
-      val allCollectedData: InvertCombinedCollectedData = GradleProjectAnalysisCombiner
+      val allCollectedDataOrig: InvertCombinedCollectedData = GradleProjectAnalysisCombiner
         .combineAnalysisResults(subprojectInvertReportDirs.get())
+
+      val allCollectedData = CollectedStatAggregator.aggregate(
+        allCollectedData = allCollectedDataOrig,
+        reportMetadata = reportMetadata,
+        statCollectors = statCollectors
+      )
 
       InvertReportWriter(
         invertLogger = invertLogger(),
@@ -84,6 +97,7 @@ abstract class InvertTask : DefaultTask() {
 
   fun setParams(
     project: Project,
+    extension: InvertExtension,
     subprojectInvertReportDirs: List<String>,
   ) {
     val timeZoneId = "America/New_York"
@@ -97,6 +111,8 @@ abstract class InvertTask : DefaultTask() {
         InvertFileUtils.REPORTS_SLASH_INVERT_PATH
       )
     )
+
+    this.statCollectors = extension.getStatCollectors().toList()
 
     this.mavenRepoUrls.set(
       project.rootProject.buildscript.repositories
