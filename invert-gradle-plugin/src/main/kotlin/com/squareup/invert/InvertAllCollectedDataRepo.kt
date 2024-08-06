@@ -14,7 +14,6 @@ class InvertAllCollectedDataRepo(
 ) {
 
   val httpsRemoteRepoUrlForCommit: String = "${projectMetadata.remoteRepoUrl}/blob/${projectMetadata.gitSha}"
-
   val projectPaths: Set<GradlePath> by lazy {
     mutableSetOf<String>().apply {
       allCollectedData.apply {
