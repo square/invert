@@ -8,7 +8,7 @@ buildscript {
 //        maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") } // SNAPSHOT Versions
   }
   dependencies {
-    val invertVersion = "0.0.2-dev"
+    val invertVersion = "0.0.3-dev-SNAPSHOT"
     classpath("com.squareup.invert:invert-gradle-plugin:$invertVersion")
 //        classpath("com.squareup.invert:collectors-anvil-dagger:$invertVersion")
 //        classpath("com.squareup.invert:collectors-kotlin-java-loc:$invertVersion")
