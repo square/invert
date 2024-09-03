@@ -13,6 +13,7 @@ object InvertSerialization {
     allowStructuredMapKeys = true
     ignoreUnknownKeys = true
     serializersModule = SerializersModule {
+      // Stat
       polymorphic(
         baseClass = Stat::class,
         actualClass = Stat.BooleanStat::class,
