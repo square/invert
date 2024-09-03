@@ -35,7 +35,7 @@ class InvertInitScriptPlugin : Plugin<Gradle> {
                     }
 
                     dependencies {
-                        val invertVersion = "0.0.2-dev00-SNAPSHOT"
+                        val invertVersion = "0.0.2-dev"
                         classpath("com.squareup.invert:invert-gradle-plugin:$invertVersion")
                     }
                 }
