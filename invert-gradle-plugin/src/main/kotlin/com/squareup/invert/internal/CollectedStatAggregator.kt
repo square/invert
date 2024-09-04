@@ -6,11 +6,20 @@ import com.squareup.invert.ReportOutputConfig
 import com.squareup.invert.StatCollector
 import com.squareup.invert.internal.models.CollectedStatsForProject
 import com.squareup.invert.internal.models.InvertCombinedCollectedData
+import com.squareup.invert.models.InvertSerialization.InvertJson
 import com.squareup.invert.models.Stat
+import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.MetadataJsReportModel
+import kotlinx.serialization.Serializable
 import java.io.File
+
+@Serializable
+data class AggregatedCodeReferences(
+  val metadata: StatMetadata,
+  val values: List<Stat.CodeReferencesStat.CodeReference>,
+)
 
 object CollectedStatAggregator {
 
@@ -33,6 +42,33 @@ object CollectedStatAggregator {
           allCollectedData = allCollectedData
         ),
       )
+      val allStatInfos = allCollectedData.collectedStats.flatMap { it.statInfos.values }.toSet()
+      allStatInfos.forEach { statInfo ->
+        if (statInfo.dataType == StatDataType.CODE_REFERENCES) {
+          val allCodeReferencesForStat = mutableListOf<Stat.CodeReferencesStat.CodeReference>()
+          allCollectedData.collectedStats.forEach { collectedStat ->
+            val collectedStats = collectedStat.stats[statInfo.key]
+            if (collectedStats is Stat.CodeReferencesStat?) {
+              collectedStats?.value?.let {
+                allCodeReferencesForStat.addAll(it)
+              }
+            }
+          }
+          if (allCodeReferencesForStat.isNotEmpty()) {
+            InvertFileUtils.outputFile(
+              File(reportOutputConfig.invertReportDirectory, "json"),
+              "code_references_${statInfo.key}.json"
+            ).writeText(
+              InvertJson.encodeToString(
+                AggregatedCodeReferences.serializer(), AggregatedCodeReferences(
+                  metadata = statInfo,
+                  values = allCodeReferencesForStat
+                )
+              )
+            )
+          }
+        }
+      }
       result?.projectStats?.entries?.forEach { (gradlePath, stats) ->
         val curr: CollectedStatsForProject = statMap[gradlePath] ?: CollectedStatsForProject(
           path = gradlePath,
