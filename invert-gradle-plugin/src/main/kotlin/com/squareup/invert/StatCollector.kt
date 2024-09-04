@@ -1,6 +1,7 @@
 package com.squareup.invert
 
 import org.gradle.api.Named
+import java.io.File
 
 
 /**
@@ -21,6 +22,7 @@ interface StatCollector : Named {
    * Compute [CollectedStat]s with the context of all collected information.
    */
   fun aggregate(
+    reportOutputConfig: ReportOutputConfig,
     invertAllCollectedDataRepo: InvertAllCollectedDataRepo,
-  ): CollectedStatsAggregate = CollectedStatsAggregate(mapOf(), listOf())
+  ): CollectedStatsAggregate? = CollectedStatsAggregate(mapOf(), listOf())
 }

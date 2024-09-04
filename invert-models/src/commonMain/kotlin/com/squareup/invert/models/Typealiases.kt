@@ -8,3 +8,4 @@ typealias OwnerName = String
 typealias GitSha = String
 typealias GitBranch = String
 typealias StatKey = String
+typealias ExtraKey = String

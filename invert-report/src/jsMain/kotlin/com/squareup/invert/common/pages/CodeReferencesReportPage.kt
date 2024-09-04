@@ -5,12 +5,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.squareup.invert.common.DependencyGraph
 import com.squareup.invert.common.InvertReportPage
+import com.squareup.invert.common.ModuleOwnerAndCodeReference
 import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.CodeReferencesNavRoute.Companion.parser
-import com.squareup.invert.models.CollectedStatType
+import com.squareup.invert.models.StatDataType
+import com.squareup.invert.models.ExtraKey
 import com.squareup.invert.models.GradlePath
 import com.squareup.invert.models.OwnerName
 import org.jetbrains.compose.web.dom.H1
@@ -103,32 +105,42 @@ fun CodeReferencesComposable(
       return
     }
     StatTiles(statTotalsOrig!!.statTotals
-      .filter { it.key.statType == CollectedStatType.CODE_REFERENCES }) { statKey ->
+      .filter { it.key.dataType == StatDataType.CODE_REFERENCES }) { statKey ->
       navRouteRepo.updateNavRoute(
         CodeReferencesNavRoute(statKey)
       )
     }
   } else {
-    val statsForKey by reportDataRepo.statsForKey(statKey).collectAsState(null)
+
+    val statsForKey: MutableList<ModuleOwnerAndCodeReference>? by reportDataRepo.statsForKey(statKey)
+      .collectAsState(null)
     if (statsForKey == null) {
       BootstrapLoadingMessageWithSpinner("Loading Stats for $statKey")
       return
     }
 
+    val extraKeys = mutableSetOf<ExtraKey>()
+    statsForKey!!.forEach { moduleOwnerAndCodeReference ->
+      moduleOwnerAndCodeReference.codeReference.extras.forEach {
+        extraKeys.add(it.key)
+      }
+    }
+
     BootstrapTable(
-      headers = listOf("Module", "Owner", "File", "Code"),
+      headers = listOf("Module", "Owner", "File", "Code") + extraKeys,
       rows = statsForKey!!.map {
+        val listOfExtraValues: List<String> = extraKeys.map { key -> it.codeReference.extras[key] ?: "" }
         listOf(
           it.module,
           it.owner,
           it.codeReference.toHrefLink(projectMetadata!!, false),
           it.codeReference.code ?: ""
-        )
+        ) + listOfExtraValues
       },
       maxResultsLimitConstant = Int.MAX_VALUE,
       sortAscending = true,
       sortByColumn = 2,
-      types = listOf(String::class, String::class, String::class, String::class)
+      types = listOf(String::class, String::class, String::class, String::class) + extraKeys.map { String::class }
     )
   }
 }

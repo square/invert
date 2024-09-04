@@ -13,7 +13,7 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.StatDetailNavRoute.Companion.parser
-import com.squareup.invert.models.CollectedStatType
+import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.GradlePath
 import com.squareup.invert.models.GradlePluginId
 import com.squareup.invert.models.OwnerName
@@ -149,17 +149,17 @@ fun StatDetailComposable(
   }
 
   val SUPPORTED_TYPES = listOf(
-    CollectedStatType.STRING,
-    CollectedStatType.BOOLEAN,
-    CollectedStatType.NUMERIC,
-    CollectedStatType.CODE_REFERENCES
+    StatDataType.STRING,
+    StatDataType.BOOLEAN,
+    StatDataType.NUMERIC,
+    StatDataType.CODE_REFERENCES
   )
   val resultsTab = BootstrapTabData("Results") {
     val statsColumns = mutableListOf<List<String>>().apply {
       statKeys.forEach { statKey ->
         val statInfo = statsData?.statInfos?.get(statKey)
         statInfo?.let { statMetadata: StatMetadata ->
-          if (SUPPORTED_TYPES.contains(statMetadata.statType)) {
+          if (SUPPORTED_TYPES.contains(statMetadata.dataType)) {
             val value = allModules.map { gradlePath ->
               val statsDataForModule: Map<StatKey, Stat>? = statsData?.statsByModule?.get(gradlePath)
               val stat = statsDataForModule?.get(statKey)
@@ -215,14 +215,14 @@ fun StatDetailComposable(
     val headers = mutableListOf("Module")
       .apply {
         statKeys.forEach {
-          val thisStatType = statsData?.statInfos?.get(it)
-          if (SUPPORTED_TYPES.contains(thisStatType?.statType)) {
+          val thisStatMetadata = statsData?.statInfos?.get(it)
+          if (SUPPORTED_TYPES.contains(thisStatMetadata?.dataType)) {
             if (!moduleToOwnerMapFlowValue.isNullOrEmpty()) {
               add("Owner")
             }
-            val description = statsData?.statInfos?.get(it)?.description ?: it
-            add(description)
-            add("$description Details")
+            val statDescription = statsData?.statInfos?.get(it)?.description ?: it
+            add(statDescription)
+            add("$statDescription Details")
           }
         }
       }

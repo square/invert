@@ -1,6 +1,7 @@
 package com.squareup.invert.internal.tasks
 
 import com.squareup.invert.InvertExtension
+import com.squareup.invert.ReportOutputConfig
 import com.squareup.invert.StatCollector
 import com.squareup.invert.internal.CollectedStatAggregator
 import com.squareup.invert.internal.InvertFileUtils
@@ -63,6 +64,7 @@ abstract class InvertTask : DefaultTask() {
     val datePatternFormat = "MMMM dd, yyyy[ 'at' HH:mm:ss]"
     val mavenRepoUrls = this.mavenRepoUrls.get()
     runBlocking {
+      val invertReportDir = rootBuildReportsDir.get().asFile
 
       val reportMetadata = ProjectMetadataCollector.gatherProjectMetadata(
         timeZoneId = timeZoneId,
@@ -78,12 +80,15 @@ abstract class InvertTask : DefaultTask() {
       val allCollectedData = CollectedStatAggregator.aggregate(
         allCollectedData = allCollectedDataOrig,
         reportMetadata = reportMetadata,
-        statCollectors = statCollectors
+        statCollectors = statCollectors,
+        reportOutputConfig = ReportOutputConfig(
+          invertReportDirectory = invertReportDir,
+        )
       )
 
       InvertReportWriter(
         invertLogger = invertLogger(),
-        rootBuildReportsDir = rootBuildReportsDir.get().asFile
+        rootBuildReportsDir = invertReportDir,
       ).writeProjectData(
         reportMetadata = reportMetadata,
         collectedOwners = allCollectedData.collectedOwners,

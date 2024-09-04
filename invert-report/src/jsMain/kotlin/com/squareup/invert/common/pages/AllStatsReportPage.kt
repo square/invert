@@ -12,7 +12,7 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.AllStatsReportPage.navPage
 import com.squareup.invert.common.utils.FormattingUtils.formatDecimalSeparator
-import com.squareup.invert.models.CollectedStatType
+import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import org.jetbrains.compose.web.dom.A
@@ -30,15 +30,14 @@ import kotlin.reflect.KClass
 
 
 data class AllStatsNavRoute(
-  val statType: CollectedStatType? = null
+  val statType: StatDataType? = null
 ) : BaseNavRoute(
   navPage
 ) {
   override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
     .also { params ->
-      statType?.name?.let {
-        params[STAT_TYPE_PARAM] =
-          it
+      statType?.let {
+        params[STAT_TYPE_PARAM] = statType.name
       }
     }
 
@@ -48,7 +47,8 @@ data class AllStatsNavRoute(
 
     fun parser(params: Map<String, String?>): AllStatsNavRoute {
       val statTypeParam = params[STAT_TYPE_PARAM]
-      val statType = CollectedStatType.entries.firstOrNull { it.name == statTypeParam }
+
+      val statType = StatDataType.fromString(statTypeParam)
       return AllStatsNavRoute(
         statType = statType,
       )

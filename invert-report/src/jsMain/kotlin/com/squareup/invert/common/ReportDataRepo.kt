@@ -113,12 +113,9 @@ class ReportDataRepo(
     }
 
 
-  fun diProvides(diKey: DiKey): Flow<List<DiProvidesAndInjectsItem.Provides>> =
-    diProvides().mapLatest { providesList ->
-      providesList.filter { it.key == diKey }
-    }
-
-//    fun providesFor(diInjectsItem: DiProvidesAndInjectsItem.Injects) {}
+  fun diProvides(diKey: DiKey): Flow<List<DiProvidesAndInjectsItem.Provides>> = diProvides().mapLatest { providesList ->
+    providesList.filter { it.key == diKey }
+  }
 
   val statInfos: Flow<Collection<StatMetadata>?> = collectedDataRepo.statsData.mapLatest { it?.statInfos?.values }
 
@@ -238,7 +235,8 @@ class ReportDataRepo(
                   ModuleOwnerAndCodeReference(
                     codeReference = codeReference,
                     module = moduleName,
-                    owner = ownerName
+                    owner = ownerName,
+                    metadata = statsJsReportModel.statInfos[statKey]!!
                   )
                 )
               }
@@ -269,5 +267,6 @@ class ReportDataRepo(
 data class ModuleOwnerAndCodeReference(
   val module: GradlePath,
   val owner: OwnerName,
-  val codeReference: Stat.CodeReferencesStat.CodeReference
+  val codeReference: Stat.CodeReferencesStat.CodeReference,
+  val metadata: StatMetadata,
 )

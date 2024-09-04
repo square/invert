@@ -2,6 +2,7 @@ package com.squareup.invert.internal
 
 import com.squareup.invert.CollectedStatsAggregate
 import com.squareup.invert.InvertAllCollectedDataRepo
+import com.squareup.invert.ReportOutputConfig
 import com.squareup.invert.StatCollector
 import com.squareup.invert.internal.models.CollectedStatsForProject
 import com.squareup.invert.internal.models.InvertCombinedCollectedData
@@ -9,6 +10,7 @@ import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.MetadataJsReportModel
+import java.io.File
 
 object CollectedStatAggregator {
 
@@ -17,19 +19,21 @@ object CollectedStatAggregator {
    */
   fun aggregate(
     allCollectedData: InvertCombinedCollectedData,
+    reportOutputConfig: ReportOutputConfig,
     reportMetadata: MetadataJsReportModel,
     statCollectors: List<StatCollector>?
   ): InvertCombinedCollectedData {
     val statMap: MutableMap<String, CollectedStatsForProject> =
       allCollectedData.collectedStats.associateBy { it.path }.toMutableMap()
     statCollectors?.forEach { statCollector: StatCollector ->
-      val result: CollectedStatsAggregate = statCollector.aggregate(
-        InvertAllCollectedDataRepo(
+      val result: CollectedStatsAggregate? = statCollector.aggregate(
+        reportOutputConfig = reportOutputConfig,
+        invertAllCollectedDataRepo = InvertAllCollectedDataRepo(
           projectMetadata = reportMetadata,
           allCollectedData = allCollectedData
-        )
+        ),
       )
-      result.projectStats.entries.forEach { (gradlePath, stats) ->
+      result?.projectStats?.entries?.forEach { (gradlePath, stats) ->
         val curr: CollectedStatsForProject = statMap[gradlePath] ?: CollectedStatsForProject(
           path = gradlePath,
           statInfos = emptyMap(),
