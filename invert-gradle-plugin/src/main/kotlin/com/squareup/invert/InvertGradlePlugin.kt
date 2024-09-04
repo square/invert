@@ -32,7 +32,7 @@ class InvertGradlePlugin : Plugin<Project> {
             throw IllegalStateException("Cannot apply $ID to a non-root project")
         }
 
-        val invertCleanTask = registerInvertCleanTask(rootProject)
+        val rootInvertCleanTask = registerInvertCleanTask(rootProject)
         rootProject.afterEvaluate { rootProject ->
             val subprojectsToRegisterOn = rootProject.subprojects
                 .filter { shouldRegisterOnSubproject(it, extension) }
@@ -51,12 +51,18 @@ class InvertGradlePlugin : Plugin<Project> {
                         ).absolutePath
                     }
                 )
+                reportTask.mustRunAfter(rootInvertCleanTask)
             }
 
             subprojectsToRegisterOn.forEach { subproject ->
                 // Without evaluationDependsOn, subproject won't be configured to access the dependency graph.
                 rootProject.evaluationDependsOn(subproject.path)
-                registerOnSubproject(subproject, rootInvertTask, invertCleanTask, extension)
+                registerOnSubproject(
+                    subproject = subproject,
+                    rootInvertTaskProvider = rootInvertTask,
+                    rootInvertCleanTaskProvider = rootInvertCleanTask,
+                    extension = extension
+                )
             }
         }
     }
