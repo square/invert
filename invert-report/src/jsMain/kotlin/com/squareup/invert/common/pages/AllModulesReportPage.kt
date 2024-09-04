@@ -13,7 +13,7 @@ import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.AllModulesReportPage.navPage
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Text
 import ui.BootstrapAccordion
@@ -112,7 +112,7 @@ fun ModulesComposable(
 
 
 @Composable
-fun ModulesByNameComposable(allModules: List<String>?, moduleClicked: (GradlePath) -> Unit) {
+fun ModulesByNameComposable(allModules: List<String>?, moduleClicked: (ModulePath) -> Unit) {
     ModuleListComposable(allModules) { cellValues ->
         moduleClicked(cellValues[0])
     }

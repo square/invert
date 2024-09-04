@@ -1,6 +1,6 @@
 package com.squareup.invert
 
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import java.io.File
 
 /**
@@ -8,6 +8,6 @@ import java.io.File
  */
 class InvertAllCollectedData(
   val rootProjectDir: File,
-  val projectPath: GradlePath,
+  val projectPath: ModulePath,
   val projectDir: File,
 )

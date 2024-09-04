@@ -96,7 +96,7 @@ internal abstract class InvertCollectDependenciesTask : DefaultTask() {
                 .toTransitiveDeps(),
         )
         val collectedConfigurations = CollectedConfigurationsForProject(
-            path = projectPath.get(),
+            modulePath = projectPath.get(),
             allConfigurationNames = allConfigurationNames.get(),
             analyzedConfigurationNames = analyzedConfigurationNames.get(),
         )

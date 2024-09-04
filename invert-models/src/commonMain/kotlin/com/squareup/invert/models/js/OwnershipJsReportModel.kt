@@ -1,6 +1,6 @@
 package com.squareup.invert.models.js
 
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerInfo
 import com.squareup.invert.models.OwnerName
 import kotlinx.serialization.Serializable
@@ -11,5 +11,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class OwnershipJsReportModel(
   val teams: Map<OwnerName, OwnerInfo>,
-  val modules: Map<GradlePath, OwnerName>
+  val modules: Map<ModulePath, OwnerName>
 )

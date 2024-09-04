@@ -2,7 +2,7 @@ package com.squareup.invert.models.js
 
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import kotlinx.serialization.Serializable
 
 /**
@@ -12,11 +12,11 @@ import kotlinx.serialization.Serializable
 data class DependenciesJsReportModel(
   val invertedDependencies: Map<
     DependencyId,
-    Map<GradlePath, List<ConfigurationName>>
+    Map<ModulePath, List<ConfigurationName>>
     >
 ) {
 
-  fun getAllModulePaths(): List<GradlePath> {
+  fun getAllModulePaths(): List<ModulePath> {
     return invertedDependencies.keys.filter { it.startsWith(":") }.sorted()
   }
 

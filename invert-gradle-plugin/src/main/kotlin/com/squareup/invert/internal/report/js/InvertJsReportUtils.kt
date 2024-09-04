@@ -8,7 +8,7 @@ import com.squareup.invert.internal.models.CollectedStatsForProject
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.GradlePluginId
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatKey
@@ -88,7 +88,7 @@ object InvertJsReportUtils {
       }
       .associateBy { it.key }
 
-    val statData = mutableMapOf<GradlePath, Map<StatKey, Stat>>()
+    val statData = mutableMapOf<ModulePath, Map<StatKey, Stat>>()
     collectedStats.forEach { collectedStatForProject: CollectedStatsForProject ->
       statData[collectedStatForProject.path] = collectedStatForProject.stats
     }
@@ -104,7 +104,7 @@ object InvertJsReportUtils {
    */
   fun toCollectedPlugins(allPlugins: List<CollectedPluginsForProject>): PluginsJsReportModel {
     return PluginsJsReportModel(
-      plugins = mutableMapOf<GradlePluginId, MutableList<GradlePath>>()
+      plugins = mutableMapOf<GradlePluginId, MutableList<ModulePath>>()
         .also { resultingDepIdToModuleUsageInfo ->
           allPlugins.forEach { collectedDataFromModule ->
             collectedDataFromModule.plugins.forEach { pluginId ->
@@ -114,7 +114,7 @@ object InvertJsReportUtils {
             }
           }
         },
-      modules = mutableMapOf<GradlePath, List<GradlePluginId>>()
+      modules = mutableMapOf<ModulePath, List<GradlePluginId>>()
         .also { map ->
           allPlugins.forEach { collectedDataFromModule ->
             collectedDataFromModule.plugins.onEach {
@@ -132,12 +132,12 @@ object InvertJsReportUtils {
     collectedDependenciesForProjects: List<CollectedDependenciesForProject>
   ): DependenciesJsReportModel {
     return DependenciesJsReportModel(
-      mutableMapOf<DependencyId, MutableMap<GradlePath, MutableList<ConfigurationName>>>()
+      mutableMapOf<DependencyId, MutableMap<ModulePath, MutableList<ConfigurationName>>>()
         .also { resultingDepIdToModuleUsageInfo ->
           collectedDependenciesForProjects.forEach { collectedDataFromModule ->
             val collectedDataFromModuleGradlePath = collectedDataFromModule.path
             collectedDataFromModule.dependencies.forEach { (dependencyId, usedInConfigurationNames) ->
-              val currDataForDepName: MutableMap<GradlePath, MutableList<ConfigurationName>> =
+              val currDataForDepName: MutableMap<ModulePath, MutableList<ConfigurationName>> =
                 resultingDepIdToModuleUsageInfo[dependencyId] ?: mutableMapOf()
               val currConfigsForPath: MutableList<ConfigurationName> =
                 currDataForDepName[collectedDataFromModuleGradlePath] ?: mutableListOf()
@@ -154,20 +154,20 @@ object InvertJsReportUtils {
     allProjectsConfigurationsData: List<CollectedConfigurationsForProject>
   ): ConfigurationsJsReportModel {
     val allConfigurationNames = mutableSetOf<String>()
-    val moduleToAllConfigurationNames = mutableMapOf<GradlePath, Set<ConfigurationName>>()
-    val moduleToAnalyzedConfigurationNames = mutableMapOf<GradlePath, Set<ConfigurationName>>()
-    val analyzedConfigurationNameToModules = mutableMapOf<ConfigurationName, MutableSet<GradlePath>>()
+    val moduleToAllConfigurationNames = mutableMapOf<ModulePath, Set<ConfigurationName>>()
+    val moduleToAnalyzedConfigurationNames = mutableMapOf<ModulePath, Set<ConfigurationName>>()
+    val analyzedConfigurationNameToModules = mutableMapOf<ConfigurationName, MutableSet<ModulePath>>()
 
     allProjectsConfigurationsData.forEach { projectConfigurationsData ->
       allConfigurationNames.addAll(projectConfigurationsData.allConfigurationNames)
-      moduleToAllConfigurationNames[projectConfigurationsData.path] =
+      moduleToAllConfigurationNames[projectConfigurationsData.modulePath] =
         projectConfigurationsData.allConfigurationNames
-      moduleToAnalyzedConfigurationNames[projectConfigurationsData.path] =
+      moduleToAnalyzedConfigurationNames[projectConfigurationsData.modulePath] =
         projectConfigurationsData.analyzedConfigurationNames
       projectConfigurationsData.analyzedConfigurationNames.forEach { analyzedConfigurationName ->
         val modules =
           analyzedConfigurationNameToModules[analyzedConfigurationName] ?: mutableSetOf()
-        modules.add(projectConfigurationsData.path)
+        modules.add(projectConfigurationsData.modulePath)
         analyzedConfigurationNameToModules[analyzedConfigurationName] = modules
       }
     }

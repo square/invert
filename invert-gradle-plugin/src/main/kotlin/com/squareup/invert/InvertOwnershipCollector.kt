@@ -1,6 +1,6 @@
 package com.squareup.invert
 
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerInfo
 
 /**
@@ -9,6 +9,6 @@ import com.squareup.invert.models.OwnerInfo
 interface InvertOwnershipCollector {
   fun collect(
     rootProjectDir: String,
-    gradlePath: GradlePath
+    modulePath: ModulePath
   ): OwnerInfo?
 }

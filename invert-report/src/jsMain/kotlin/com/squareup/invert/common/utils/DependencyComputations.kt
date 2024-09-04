@@ -2,7 +2,7 @@ package com.squareup.invert.common.utils
 
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.GradlePluginId
 import com.squareup.invert.models.js.DependenciesJsReportModel
 import com.squareup.invert.models.js.PluginsJsReportModel
@@ -14,22 +14,22 @@ import com.squareup.invert.models.js.PluginsJsReportModel
 object DependencyComputations {
 
   internal data class PathAndConfigurations(
-    val path: GradlePath,
+    val path: ModulePath,
     val configurations: List<ConfigurationName>
   )
 
   internal fun computePluginIdToGradlePathsMatchingQuery(
-    matchingQueryModulesList: List<GradlePath>,
+    matchingQueryModulesList: List<ModulePath>,
     pluginGroupByFilter: List<GradlePluginId>,
     configurations: List<ConfigurationName>,
-    invertedDeps: Map<DependencyId, Map<GradlePath, List<ConfigurationName>>>?,
+    invertedDeps: Map<DependencyId, Map<ModulePath, List<ConfigurationName>>>?,
     collectedPlugins: PluginsJsReportModel?
-  ): Map<GradlePluginId, Map<GradlePath, Map<GradlePath, List<PathAndConfigurations>>>> =
+  ): Map<GradlePluginId, Map<ModulePath, Map<ModulePath, List<PathAndConfigurations>>>> =
     mutableMapOf<
         GradlePluginId,
-        MutableMap<GradlePath, MutableMap<GradlePath, MutableList<PathAndConfigurations>>>
+        MutableMap<ModulePath, MutableMap<ModulePath, MutableList<PathAndConfigurations>>>
         >().also { resultMap ->
-      matchingQueryModulesList.forEach { moduleMatchingQuery: GradlePath ->
+      matchingQueryModulesList.forEach { moduleMatchingQuery: ModulePath ->
         val modulesThatReferenceThisDependencyId = invertedDeps?.get(moduleMatchingQuery) ?: mapOf()
         modulesThatReferenceThisDependencyId.forEach { (appGradlePath, configurationNamesForThisDependency) ->
           val pluginsAppliedToApp = collectedPlugins?.modules?.get(appGradlePath) ?: listOf()
@@ -64,16 +64,16 @@ object DependencyComputations {
    * Determine the Configuration -> List<DependencyId> Map for a Gradle Module
    */
   fun dependenciesOf(
-    gradlePath: GradlePath?,
+    modulePath: ModulePath?,
     combinedReport: DependenciesJsReportModel?
   ): Map<ConfigurationName, List<DependencyId>> =
     mutableMapOf<ConfigurationName, MutableList<DependencyId>>()
       .also { configurationToDepsMap ->
-        if (gradlePath != null) {
+        if (modulePath != null) {
           combinedReport
             ?.invertedDependencies
             ?.forEach { (dependencyId, moduleToConfigurationNames) ->
-              val configurationNamesForModule = moduleToConfigurationNames[gradlePath]
+              val configurationNamesForModule = moduleToConfigurationNames[modulePath]
               configurationNamesForModule?.forEach { configurationName: ConfigurationName ->
                 val dependenciesForConfiguration =
                   configurationToDepsMap[configurationName] ?: mutableListOf()

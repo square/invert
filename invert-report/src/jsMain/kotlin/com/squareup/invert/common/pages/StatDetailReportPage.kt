@@ -14,7 +14,7 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.StatDetailNavRoute.Companion.parser
 import com.squareup.invert.models.StatDataType
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.GradlePluginId
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
@@ -114,7 +114,7 @@ fun StatDetailComposable(
   val allPluginIds by reportDataRepo.allPluginIds.collectAsState(null)
   val statsData by reportDataRepo.statsData.collectAsState(null)
   val allModulesOrig by reportDataRepo.allModules.collectAsState(null)
-  val moduleToOwnerMapFlowValue: Map<GradlePath, OwnerName>? by reportDataRepo.moduleToOwnerMap.collectAsState(null)
+  val moduleToOwnerMapFlowValue: Map<ModulePath, OwnerName>? by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
   val metadata by reportDataRepo.reportMetadata.collectAsState(null)
 

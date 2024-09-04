@@ -14,7 +14,7 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.SuppressAnnotationNavRoute.Companion.parser
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatKey
 import org.jetbrains.compose.web.dom.H3
@@ -71,7 +71,7 @@ object SuppressAnnotationReportPage : InvertReportPage<SuppressAnnotationNavRout
 }
 
 data class SuppressTypeByModule(
-    val gradlePath: GradlePath,
+    val modulePath: ModulePath,
     val suppressType: String,
     val count: Int,
     val statKey: StatKey,
@@ -100,7 +100,7 @@ fun SuppressAnnotationComposable(
                 if ((stat is Stat.NumericStat) && statMetadataForStatKey?.category == "suppress_annotation") {
                     this.add(
                         SuppressTypeByModule(
-                            gradlePath = modulePath,
+                            modulePath = modulePath,
                             suppressType = statMetadataForStatKey.description,
                             count = stat.value,
                             statKey = statMetadataForStatKey.key
@@ -120,8 +120,8 @@ fun SuppressAnnotationComposable(
         }
         .sortedByDescending { it.second }
 
-    val gradlePathToTotalCount: Map<GradlePath, Int> = listOfSuppressTypeByModule
-        .groupBy { it.gradlePath }
+    val modulePathToTotalCount: Map<ModulePath, Int> = listOfSuppressTypeByModule
+        .groupBy { it.modulePath }
         .map { (gradlePath, suppressTypeByModule) -> gradlePath to suppressTypeByModule.sumOf { it.count } }
         .toMap()
 
@@ -211,7 +211,7 @@ fun SuppressAnnotationComposable(
                 BootstrapColumn(6) {
                     BootstrapTable(
                         headers = listOf("Module", "Total @Suppress Count"),
-                        rows = gradlePathToTotalCount.map {
+                        rows = modulePathToTotalCount.map {
                             listOf(it.key, it.value.toString())
                         },
                         types = listOf(String::class, Int::class),

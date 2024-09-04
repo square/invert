@@ -10,7 +10,7 @@ import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
 import com.squareup.invert.logging.GradleInvertLogger
 import com.squareup.invert.logging.InvertLogger
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerInfo
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -33,7 +33,7 @@ internal abstract class InvertCollectOwnershipTask : DefaultTask() {
   abstract val rootProjectDir: Property<String>
 
   @get:Input
-  abstract val targetModule: Property<GradlePath>
+  abstract val targetModule: Property<ModulePath>
 
   @get:OutputFile
   abstract val projectOwnershipJsonFile: RegularFileProperty
