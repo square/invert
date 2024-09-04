@@ -6,9 +6,11 @@ import com.squareup.invert.ReportOutputConfig
 import com.squareup.invert.StatCollector
 import com.squareup.invert.internal.models.CollectedStatsForProject
 import com.squareup.invert.internal.models.InvertCombinedCollectedData
-import com.squareup.invert.models.InvertSerialization.InvertJson
+import com.squareup.invert.internal.report.json.InvertJsonReportWriter
+import com.squareup.invert.models.ExtraDataType
+import com.squareup.invert.models.ExtraMetadata
+import com.squareup.invert.models.GradlePath
 import com.squareup.invert.models.Stat
-import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.MetadataJsReportModel
@@ -23,58 +25,91 @@ data class AggregatedCodeReferences(
 
 object CollectedStatAggregator {
 
+  private val PROJECT_EXTRA_METADATA = ExtraMetadata(
+    key = "project",
+    type = ExtraDataType.STRING,
+    description = "Project"
+  )
+
+  private fun exportFullListOfCodeReferences(
+    reportOutputConfig: ReportOutputConfig,
+    origAllCollectedData: InvertCombinedCollectedData
+  ) {
+    val allStatMetadatas = origAllCollectedData.collectedStats.flatMap { it.statInfos.values }.distinct()
+
+    allStatMetadatas.forEach { statMetadata: StatMetadata ->
+      val statKey = statMetadata.key
+      val allCodeReferencesForStatWithProjectPathExtra = mutableListOf<Stat.CodeReferencesStat.CodeReference>()
+      // Create Code References Export after Aggregation
+      origAllCollectedData.collectedStats.forEach { collectedStatsForProject: CollectedStatsForProject ->
+        collectedStatsForProject.stats[statKey]?.takeIf { it is Stat.CodeReferencesStat }?.let { stat ->
+          val collectedCodeReferenceStat = stat as Stat.CodeReferencesStat
+
+          val codeReferences = collectedCodeReferenceStat.value
+          if (codeReferences.isNotEmpty()) {
+            synchronized(allCodeReferencesForStatWithProjectPathExtra) {
+              allCodeReferencesForStatWithProjectPathExtra.addAll(
+                collectedCodeReferenceStat.value.map { codeReference: Stat.CodeReferencesStat.CodeReference ->
+                  // Adding addition "extra" field named "project"
+                  codeReference.copy(
+                    extras = codeReference.extras.plus(PROJECT_EXTRA_METADATA.key to collectedStatsForProject.path)
+                  )
+                }
+              )
+            }
+          }
+        }
+      }
+
+      InvertJsonReportWriter.writeJsonFile(
+        description = "All CodeReferences for ${statMetadata.key}",
+        jsonOutputFile = InvertFileUtils.outputFile(
+          File(reportOutputConfig.invertReportDirectory, "json"),
+          "code_references_${statMetadata.key}.json"
+        ),
+        serializer = AggregatedCodeReferences.serializer(),
+        value = AggregatedCodeReferences(
+          metadata = statMetadata.copy(extras = statMetadata.extras.plus(PROJECT_EXTRA_METADATA)),
+          values = allCodeReferencesForStatWithProjectPathExtra
+        )
+      )
+    }
+  }
+
   /**
    * This gives the opportunity for [StatCollector]s to run a final time with the context of the entire project.
    */
   fun aggregate(
-    allCollectedData: InvertCombinedCollectedData,
+    origAllCollectedData: InvertCombinedCollectedData,
     reportOutputConfig: ReportOutputConfig,
     reportMetadata: MetadataJsReportModel,
-    statCollectors: List<StatCollector>?
+    statCollectorsForAggregation: List<StatCollector>?
   ): InvertCombinedCollectedData {
-    val statMap: MutableMap<String, CollectedStatsForProject> =
-      allCollectedData.collectedStats.associateBy { it.path }.toMutableMap()
-    statCollectors?.forEach { statCollector: StatCollector ->
-      val result: CollectedStatsAggregate? = statCollector.aggregate(
+    val projectPathToCollectedStatsForProject: MutableMap<GradlePath, CollectedStatsForProject> =
+      origAllCollectedData.collectedStats
+        .associateBy { it.path }
+        .toMutableMap()
+    statCollectorsForAggregation?.forEach { statCollectorForAggregation: StatCollector ->
+      val aggregationResult: CollectedStatsAggregate? = statCollectorForAggregation.aggregate(
         reportOutputConfig = reportOutputConfig,
         invertAllCollectedDataRepo = InvertAllCollectedDataRepo(
           projectMetadata = reportMetadata,
-          allCollectedData = allCollectedData
+          allCollectedData = origAllCollectedData
         ),
       )
-      val allStatInfos = allCollectedData.collectedStats.flatMap { it.statInfos.values }.toSet()
-      allStatInfos.forEach { statInfo ->
-        if (statInfo.dataType == StatDataType.CODE_REFERENCES) {
-          val allCodeReferencesForStat = mutableListOf<Stat.CodeReferencesStat.CodeReference>()
-          allCollectedData.collectedStats.forEach { collectedStat ->
-            val collectedStats = collectedStat.stats[statInfo.key]
-            if (collectedStats is Stat.CodeReferencesStat?) {
-              collectedStats?.value?.let {
-                allCodeReferencesForStat.addAll(it)
-              }
-            }
-          }
-          if (allCodeReferencesForStat.isNotEmpty()) {
-            InvertFileUtils.outputFile(
-              File(reportOutputConfig.invertReportDirectory, "json"),
-              "code_references_${statInfo.key}.json"
-            ).writeText(
-              InvertJson.encodeToString(
-                AggregatedCodeReferences.serializer(), AggregatedCodeReferences(
-                  metadata = statInfo,
-                  values = allCodeReferencesForStat
-                )
-              )
-            )
-          }
-        }
-      }
-      result?.projectStats?.entries?.forEach { (gradlePath, stats) ->
-        val curr: CollectedStatsForProject = statMap[gradlePath] ?: CollectedStatsForProject(
-          path = gradlePath,
-          statInfos = emptyMap(),
-          stats = emptyMap()
-        )
+
+      exportFullListOfCodeReferences(
+        reportOutputConfig = reportOutputConfig,
+        origAllCollectedData = origAllCollectedData
+      )
+
+      aggregationResult?.aggregatedStatsByProject?.entries?.forEach { (projectPath, stats) ->
+        val curr: CollectedStatsForProject =
+          projectPathToCollectedStatsForProject[projectPath] ?: CollectedStatsForProject(
+            path = projectPath,
+            statInfos = emptyMap(),
+            stats = emptyMap()
+          )
 
         val newStatInfos: MutableMap<StatKey, StatMetadata> = curr.statInfos.toMutableMap()
         val newStats: MutableMap<StatKey, Stat> = curr.stats.toMutableMap()
@@ -84,15 +119,17 @@ object CollectedStatAggregator {
             newStatInfos[collectedStat.metadata.key] = collectedStat.metadata
           }
         }
-        statMap[gradlePath] = curr.copy(
-          path = curr.path,
-          statInfos = newStatInfos,
-          stats = newStats,
-        )
+        synchronized(projectPathToCollectedStatsForProject) {
+          projectPathToCollectedStatsForProject[projectPath] = curr.copy(
+            path = curr.path,
+            statInfos = newStatInfos,
+            stats = newStats,
+          )
+        }
       }
     }
-    return allCollectedData.copy(
-      collectedStats = statMap.values.toList()
+    return origAllCollectedData.copy(
+      collectedStats = projectPathToCollectedStatsForProject.values.toList()
     )
   }
 }
