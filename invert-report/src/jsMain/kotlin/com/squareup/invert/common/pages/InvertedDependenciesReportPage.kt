@@ -16,7 +16,7 @@ import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.InvertedDependenciesNavRoute.Companion.parser
 import com.squareup.invert.common.utils.DependencyComputations
 import com.squareup.invert.models.ConfigurationName
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.GradlePluginId
 import kotlinx.browser.window
 import org.jetbrains.compose.web.dom.Br
@@ -288,7 +288,7 @@ fun RightColumn(
     reportDataRepo: ReportDataRepo,
     invertedDependenciesNavRoute: InvertedDependenciesNavRoute
 ) {
-    val pluginIdToAllAppsMap: Map<GradlePluginId, List<GradlePath>>? by reportDataRepo.pluginIdToAllModulesMap.collectAsState(
+    val pluginIdToAllAppsMap: Map<GradlePluginId, List<ModulePath>>? by reportDataRepo.pluginIdToAllModulesMap.collectAsState(
         null
     )
     val invertedDeps by reportDataRepo.allInvertedDependencies.collectAsState(null)
@@ -304,7 +304,7 @@ fun RightColumn(
 
     val limit = 10
     pluginIdToGradlePathsMatchingQuery
-        .forEach { (pluginId: GradlePluginId, matchingModules: Map<GradlePath, Map<GradlePath, List<DependencyComputations.PathAndConfigurations>>>) ->
+        .forEach { (pluginId: GradlePluginId, matchingModules: Map<ModulePath, Map<ModulePath, List<DependencyComputations.PathAndConfigurations>>>) ->
             val totalCount = pluginIdToAllAppsMap?.get(pluginId)?.size ?: 0
             val matchingCount = pluginIdToGradlePathsMatchingQuery[pluginId]?.size ?: 0
 
@@ -344,7 +344,7 @@ fun RightColumn(
                         )
                     )
                 matchingModulePathsLimited
-                    .forEach { matchingModulePath: GradlePath ->
+                    .forEach { matchingModulePath: ModulePath ->
                         BootstrapAccordion({
                             val accordionSubHeaderText = "$displayIndex $matchingModulePath"
                             Text(accordionSubHeaderText)

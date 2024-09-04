@@ -1,6 +1,6 @@
 package com.squareup.invert.internal.models
 
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.GradlePluginId
 import kotlinx.serialization.Serializable
 
@@ -9,6 +9,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class CollectedPluginsForProject(
-  val path: GradlePath,
+  val path: ModulePath,
   val plugins: List<GradlePluginId>,
 )

@@ -14,7 +14,7 @@ import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.models.ConfigurationName
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.mapLatest
 import org.jetbrains.compose.web.dom.H1
@@ -71,7 +71,7 @@ fun ConfigurationDetailComposable(
 
     val modulesUsingConfiguration by collectedDataRepo.configurations.mapLatest {
 
-        val list = mutableListOf<GradlePath>()
+        val list = mutableListOf<ModulePath>()
 
         it?.moduleToAllConfigurationNames?.entries?.forEach { (moduleName, allConfigurationNames) ->
             if (allConfigurationNames.contains(configurationName)) {

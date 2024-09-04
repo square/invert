@@ -6,7 +6,7 @@ import com.squareup.invert.internal.models.CollectedOwnershipForProject
 import com.squareup.invert.internal.models.CollectedPluginsForProject
 import com.squareup.invert.internal.models.CollectedStatsForProject
 import com.squareup.invert.internal.models.InvertCombinedCollectedData
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerInfo
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.js.MetadataJsReportModel
@@ -23,11 +23,11 @@ class InvertAllCollectedDataRepo(
 
   val mavenRepoUrls = projectMetadata.mavenRepoUrls
 
-  val projectPaths: Set<GradlePath> by lazy {
+  val projectPaths: Set<ModulePath> by lazy {
     mutableSetOf<String>().apply {
       allCollectedData.apply {
         collectedDependencies.forEach { add(it.path) }
-        collectedConfigurations.forEach { add(it.path) }
+        collectedConfigurations.forEach { add(it.modulePath) }
         collectedOwners.forEach { add(it.path) }
         collectedStats.forEach { add(it.path) }
         collectedPlugins.forEach { add(it.path) }
@@ -35,34 +35,34 @@ class InvertAllCollectedDataRepo(
     }
   }
 
-  fun getProject(gradlePath: GradlePath): AllCollectedDataForProject? {
+  fun getProject(modulePath: ModulePath): AllCollectedDataForProject? {
     return AllCollectedDataForProject(
-      collectedDependencies = allCollectedData.collectedDependencies.firstOrNull { it.path == gradlePath }
+      collectedDependencies = allCollectedData.collectedDependencies.firstOrNull { it.path == modulePath }
         ?: CollectedDependenciesForProject(
-          path = gradlePath,
+          path = modulePath,
           emptyMap(),
           emptyMap()
         ),
-      collectedConfigurations = allCollectedData.collectedConfigurations.firstOrNull { it.path == gradlePath }
+      collectedConfigurations = allCollectedData.collectedConfigurations.firstOrNull { it.modulePath == modulePath }
         ?: CollectedConfigurationsForProject(
-          path = gradlePath,
+          modulePath = modulePath,
           emptySet(),
           emptySet()
         ),
-      collectedOwners = allCollectedData.collectedOwners.firstOrNull { it.path == gradlePath }
+      collectedOwners = allCollectedData.collectedOwners.firstOrNull { it.path == modulePath }
         ?: CollectedOwnershipForProject(
-          path = gradlePath,
+          path = modulePath,
           ownerInfo = OwnerInfo("None"),
         ),
-      collectedStats = allCollectedData.collectedStats.firstOrNull { it.path == gradlePath }
+      collectedStats = allCollectedData.collectedStats.firstOrNull { it.path == modulePath }
         ?: CollectedStatsForProject(
-          path = gradlePath,
+          path = modulePath,
           emptyMap(),
           emptyMap()
         ),
-      collectedPlugins = allCollectedData.collectedPlugins.firstOrNull { it.path == gradlePath }
+      collectedPlugins = allCollectedData.collectedPlugins.firstOrNull { it.path == modulePath }
         ?: CollectedPluginsForProject(
-          path = gradlePath,
+          path = modulePath,
           emptyList()
         ),
     )

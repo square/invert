@@ -14,7 +14,7 @@ import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.DependencyDiffNavRoute.Companion.parser
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import org.jetbrains.compose.web.dom.Br
 import org.jetbrains.compose.web.dom.Datalist
 import org.jetbrains.compose.web.dom.H1
@@ -32,8 +32,8 @@ import kotlin.reflect.KClass
 
 
 data class DependencyDiffNavRoute(
-    val moduleA: GradlePath? = null,
-    val moduleB: GradlePath? = null,
+    val moduleA: ModulePath? = null,
+    val moduleB: ModulePath? = null,
     val configurationA: ConfigurationName? = null,
     val configurationB: ConfigurationName? = null,
     val includeArtifacts: Boolean = false,

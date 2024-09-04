@@ -15,7 +15,7 @@ import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.ModuleDetailNavRoute.Companion.parser
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatKey
@@ -35,7 +35,7 @@ import ui.BootstrapTable
 import kotlin.reflect.KClass
 
 data class ModuleDetailNavRoute(
-    val path: GradlePath,
+    val path: ModulePath,
     val configurationName: ConfigurationName? = null,
 ) : BaseNavRoute(ModuleDetailReportPage.navPage) {
     override fun toSearchParams() = toParamsWithOnlyPageId(this)

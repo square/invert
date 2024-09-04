@@ -9,7 +9,7 @@ import com.squareup.invert.internal.models.InvertCombinedCollectedData
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
 import com.squareup.invert.models.ExtraDataType
 import com.squareup.invert.models.ExtraMetadata
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
@@ -25,10 +25,10 @@ data class AggregatedCodeReferences(
 
 object CollectedStatAggregator {
 
-  private val PROJECT_EXTRA_METADATA = ExtraMetadata(
-    key = "project",
+  private val MODULE_EXTRA_METADATA = ExtraMetadata(
+    key = "module_path",
     type = ExtraDataType.STRING,
-    description = "Project"
+    description = "Module Path"
   )
 
   private fun exportFullListOfCodeReferences(
@@ -52,7 +52,7 @@ object CollectedStatAggregator {
                 collectedCodeReferenceStat.value.map { codeReference: Stat.CodeReferencesStat.CodeReference ->
                   // Adding addition "extra" field named "project"
                   codeReference.copy(
-                    extras = codeReference.extras.plus(PROJECT_EXTRA_METADATA.key to collectedStatsForProject.path)
+                    extras = codeReference.extras.plus(MODULE_EXTRA_METADATA.key to collectedStatsForProject.path)
                   )
                 }
               )
@@ -69,7 +69,7 @@ object CollectedStatAggregator {
         ),
         serializer = AggregatedCodeReferences.serializer(),
         value = AggregatedCodeReferences(
-          metadata = statMetadata.copy(extras = statMetadata.extras.plus(PROJECT_EXTRA_METADATA)),
+          metadata = statMetadata.copy(extras = statMetadata.extras.plus(MODULE_EXTRA_METADATA)),
           values = allCodeReferencesForStatWithProjectPathExtra
         )
       )
@@ -85,7 +85,7 @@ object CollectedStatAggregator {
     reportMetadata: MetadataJsReportModel,
     statCollectorsForAggregation: List<StatCollector>?
   ): InvertCombinedCollectedData {
-    val projectPathToCollectedStatsForProject: MutableMap<GradlePath, CollectedStatsForProject> =
+    val projectPathToCollectedStatsForProject: MutableMap<ModulePath, CollectedStatsForProject> =
       origAllCollectedData.collectedStats
         .associateBy { it.path }
         .toMutableMap()

@@ -1,6 +1,6 @@
 package com.squareup.invert.internal.models
 import com.squareup.invert.models.ConfigurationName
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import kotlinx.serialization.Serializable
 
 /**
@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class CollectedConfigurationsForProject(
-  val path: GradlePath,
+  val modulePath: ModulePath,
   /** All Available Configurations */
   val allConfigurationNames: Set<ConfigurationName>,
   /** Configurations that were analyzed */

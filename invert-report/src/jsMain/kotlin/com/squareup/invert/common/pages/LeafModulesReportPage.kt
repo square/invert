@@ -13,7 +13,7 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.H6
 import org.jetbrains.compose.web.dom.Text
@@ -48,7 +48,7 @@ fun LeafModulesComposable(
     navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
 
-    val moduleToDependenciesMap: Map<GradlePath, Map<ConfigurationName, Set<DependencyId>>>? by reportDataRepo.allDirectDependencies.collectAsState(
+    val moduleToDependenciesMap: Map<ModulePath, Map<ConfigurationName, Set<DependencyId>>>? by reportDataRepo.allDirectDependencies.collectAsState(
         null
     )
 

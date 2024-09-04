@@ -11,7 +11,7 @@ import com.squareup.invert.internal.report.js.InvertJsReportWriter
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
 import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import com.squareup.invert.models.js.MetadataJsReportModel
 import java.io.File
@@ -75,7 +75,7 @@ class InvertReportWriter(
    */
   private fun assertModuleMatch(
     logger: InvertLogger,
-    modulesList: List<GradlePath>,
+    modulesList: List<ModulePath>,
     invertedModulesList: List<DependencyId>
   ) {
     if (!invertedModulesList.containsAll(modulesList)) {

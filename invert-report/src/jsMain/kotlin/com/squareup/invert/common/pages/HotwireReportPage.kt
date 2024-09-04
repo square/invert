@@ -13,7 +13,7 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import highlightJsHighlightAll
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +36,7 @@ import kotlin.reflect.KClass
 
 
 data class HotwireNavRoute(
-    val path: GradlePath? = null,
+    val path: ModulePath? = null,
 ) : BaseNavRoute(HotwireReportPage.navPage) {
     override fun toSearchParams() = toParamsWithOnlyPageId(this)
         .also { map ->
@@ -85,13 +85,13 @@ object HotwireReportPage : InvertReportPage<HotwireNavRoute> {
 @OptIn(ExperimentalCoroutinesApi::class)
 class HotwireRepo(
     private val reportDataRepo: ReportDataRepo,
-    private val requestedModules: List<GradlePath>
+    private val requestedModules: List<ModulePath>
 ) {
 
     val code = MutableStateFlow("")
     private val requiredModules = MutableStateFlow(requestedModules.distinct())
     private val requiredInjectsByModule =
-        MutableStateFlow<Map<GradlePath, List<DiProvidesAndInjectsItem.Injects>>>(mapOf())
+        MutableStateFlow<Map<ModulePath, List<DiProvidesAndInjectsItem.Injects>>>(mapOf())
 
     init {
         CoroutineScope(Dispatchers.Default).launch {
@@ -134,7 +134,7 @@ fun HotwireComposable(
     navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
     collectRepo: CollectedDataRepo = DependencyGraph.collectedDataRepo,
 ) {
-    val allModules: List<GradlePath>? by reportDataRepo.allModules.collectAsState(null)
+    val allModules: List<ModulePath>? by reportDataRepo.allModules.collectAsState(null)
 
     if (allModules == null) {
         BootstrapLoadingMessageWithSpinner()

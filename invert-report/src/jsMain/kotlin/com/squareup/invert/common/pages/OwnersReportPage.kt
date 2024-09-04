@@ -13,7 +13,7 @@ import com.squareup.invert.common.charts.ChartsJs
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Text
@@ -49,7 +49,7 @@ fun OwnersComposable(
         Text("Owners (Using GitHub CODEOWNERS)")
     }
 
-    val ownersCollected: Map<OwnerName, List<GradlePath>>? by reportDataRepo.ownerNameToModulesMap.collectAsState(null)
+    val ownersCollected: Map<OwnerName, List<ModulePath>>? by reportDataRepo.ownerNameToModulesMap.collectAsState(null)
 
     if (ownersCollected == null) {
         BootstrapLoadingSpinner()

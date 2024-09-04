@@ -14,7 +14,7 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import org.jetbrains.compose.web.dom.Br
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.P
@@ -59,7 +59,7 @@ fun UnusedModulesComposable(
     navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
 
-    val moduleToInvertedDependenciesMapOrig: Map<DependencyId, Map<GradlePath, List<ConfigurationName>>>? by reportDataRepo.allInvertedDependencies.collectAsState(
+    val moduleToInvertedDependenciesMapOrig: Map<DependencyId, Map<ModulePath, List<ConfigurationName>>>? by reportDataRepo.allInvertedDependencies.collectAsState(
         null
     )
 
@@ -72,7 +72,7 @@ fun UnusedModulesComposable(
             null
         )
 
-    val allModulesOrig: List<GradlePath>? by reportDataRepo.allModules.collectAsState(
+    val allModulesOrig: List<ModulePath>? by reportDataRepo.allModules.collectAsState(
         null
     )
 

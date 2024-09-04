@@ -6,7 +6,7 @@ import com.squareup.invert.common.pages.InvertedDependenciesNavRoute
 import com.squareup.invert.common.utils.DependencyComputations
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.GradlePluginId
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
@@ -34,7 +34,7 @@ class ReportDataRepo(
   val reportMetadata: Flow<MetadataJsReportModel?> = collectedDataRepo.reportMetadata
 
 
-  val allModules: Flow<List<GradlePath>?> = collectedDataRepo.home
+  val allModules: Flow<List<ModulePath>?> = collectedDataRepo.home
     .mapLatest {
       computeMeasureDuration("allModules") {
         it?.modules?.sorted()
@@ -47,7 +47,7 @@ class ReportDataRepo(
     statsData.mapLatest { statsData: StatsJsReportModel? ->
       val STAT_KEY = "DiProvidesAndInjects"
       val diRowDataRows = mutableListOf<DiProvidesAndInjectsItem>()
-      val statsByModule: Map<GradlePath, Map<StatKey, Stat>>? = statsData?.statsByModule
+      val statsByModule: Map<ModulePath, Map<StatKey, Stat>>? = statsData?.statsByModule
       statsByModule?.forEach { (moduleGradlePath, statsDataForModule) ->
         val stat = statsDataForModule[STAT_KEY]
         if (stat is Stat.DiProvidesAndInjectsStat) {
@@ -91,19 +91,19 @@ class ReportDataRepo(
 
 
   fun diProvidesAndInjects(
-    moduleGradlePaths: List<GradlePath>? = null,
+    moduleModulePaths: List<ModulePath>? = null,
   ): Flow<List<DiProvidesAndInjectsItem>> =
     diProvidesAndInjects.mapLatest { diProvidesAndInjects: List<DiProvidesAndInjectsItem> ->
       diProvidesAndInjects.filter {
         when (it) {
-          is DiProvidesAndInjectsItem.Injects -> moduleGradlePaths?.contains(it.module) ?: true
-          is DiProvidesAndInjectsItem.Provides -> moduleGradlePaths?.contains(it.module) ?: true
+          is DiProvidesAndInjectsItem.Injects -> moduleModulePaths?.contains(it.module) ?: true
+          is DiProvidesAndInjectsItem.Provides -> moduleModulePaths?.contains(it.module) ?: true
         }
       }
     }
 
-  fun diInjects(moduleGradlePaths: List<GradlePath>): Flow<List<DiProvidesAndInjectsItem.Injects>> =
-    diProvidesAndInjects(moduleGradlePaths).mapLatest {
+  fun diInjects(moduleModulePaths: List<ModulePath>): Flow<List<DiProvidesAndInjectsItem.Injects>> =
+    diProvidesAndInjects(moduleModulePaths).mapLatest {
       it.filterIsInstance<DiProvidesAndInjectsItem.Injects>().sortedBy { it.type }
     }
 
@@ -123,7 +123,7 @@ class ReportDataRepo(
 
   val collectedPluginInfoReport: Flow<PluginsJsReportModel?> = collectedDataRepo.collectedPluginInfoReport
 
-  val moduleToOwnerMap: Flow<Map<GradlePath, OwnerName>?> = collectedDataRepo.ownersInfo.mapLatest {
+  val moduleToOwnerMap: Flow<Map<ModulePath, OwnerName>?> = collectedDataRepo.ownersInfo.mapLatest {
     it?.modules
   }
 
@@ -132,7 +132,7 @@ class ReportDataRepo(
     .mapLatest { it.moduleQuery }
     .distinctUntilChanged()
 
-  val allInvertedDependencies: Flow<Map<DependencyId, Map<GradlePath, List<ConfigurationName>>>?> =
+  val allInvertedDependencies: Flow<Map<DependencyId, Map<ModulePath, List<ConfigurationName>>>?> =
     collectedDataRepo.combinedReportData
       .mapLatest { it?.invertedDependencies }
 
@@ -142,7 +142,7 @@ class ReportDataRepo(
       .map { it?.keys }
 
 
-  val allPlugins: Flow<Map<GradlePath, List<GradlePluginId>>?> =
+  val allPlugins: Flow<Map<ModulePath, List<GradlePluginId>>?> =
     collectedPluginInfoReport.mapLatest { it?.modules }
 
   val allModulesMatchingQuery = moduleQuery.combine(allModules) { query, allModules ->
@@ -155,7 +155,7 @@ class ReportDataRepo(
     }
   }
 
-  val allDirectDependencies: Flow<Map<GradlePath, Map<ConfigurationName, Set<DependencyId>>>?> =
+  val allDirectDependencies: Flow<Map<ModulePath, Map<ConfigurationName, Set<DependencyId>>>?> =
     collectedDataRepo.directDependenciesData.mapLatest {
       it?.directDependencies
     }
@@ -173,7 +173,7 @@ class ReportDataRepo(
     it?.allConfigurationNames
   }
 
-  val pluginIdToAllModulesMap: Flow<Map<GradlePluginId, List<GradlePath>>?> =
+  val pluginIdToAllModulesMap: Flow<Map<GradlePluginId, List<ModulePath>>?> =
     collectedDataRepo.collectedPluginInfoReport
       .mapLatest {
         computeMeasureDuration("pluginIdToAllModulesMap") {
@@ -188,11 +188,11 @@ class ReportDataRepo(
       }
     }
 
-  val ownerNameToModulesMap: Flow<Map<OwnerName, List<GradlePath>>?> = collectedDataRepo.ownersInfo
+  val ownerNameToModulesMap: Flow<Map<OwnerName, List<ModulePath>>?> = collectedDataRepo.ownersInfo
     .mapLatest { ownersInfo ->
       computeMeasureDuration("ownerToModulesMap") {
         ownersInfo?.modules?.entries
-          ?.groupBy { entry: Map.Entry<GradlePath, OwnerName> -> entry.value }
+          ?.groupBy { entry: Map.Entry<ModulePath, OwnerName> -> entry.value }
           ?.mapValues { entry -> entry.value.map { it.key } }
       }
     }
@@ -204,8 +204,8 @@ class ReportDataRepo(
       }
     }
 
-  fun moduleTransitivelyUsedBy(path: GradlePath): Flow<Map<GradlePath, List<ConfigurationName>>?> =
-    allInvertedDependencies.mapLatest { allInvertedDependenciesMap: Map<DependencyId, Map<GradlePath, List<ConfigurationName>>>? ->
+  fun moduleTransitivelyUsedBy(path: ModulePath): Flow<Map<ModulePath, List<ConfigurationName>>?> =
+    allInvertedDependencies.mapLatest { allInvertedDependenciesMap: Map<DependencyId, Map<ModulePath, List<ConfigurationName>>>? ->
       if (allInvertedDependenciesMap != null) {
         allInvertedDependenciesMap[path] ?: mapOf()
       } else {
@@ -214,9 +214,9 @@ class ReportDataRepo(
     }
 
 
-  fun directDependenciesOf(gradlePath: GradlePath?): Flow<Map<ConfigurationName, Set<DependencyId>>?> =
+  fun directDependenciesOf(modulePath: ModulePath?): Flow<Map<ConfigurationName, Set<DependencyId>>?> =
     collectedDataRepo.directDependenciesData.mapLatest { directDependenciesData ->
-      directDependenciesData?.directDependencies?.get(gradlePath)
+      directDependenciesData?.directDependencies?.get(modulePath)
     }
 
   fun statsForKey(statKey: StatKey): Flow<MutableList<ModuleOwnerAndCodeReference>> =
@@ -247,11 +247,11 @@ class ReportDataRepo(
       allForKey
     }
 
-  fun dependenciesOf(gradlePath: GradlePath?): Flow<Map<ConfigurationName, List<DependencyId>>?> =
+  fun dependenciesOf(modulePath: ModulePath?): Flow<Map<ConfigurationName, List<DependencyId>>?> =
     collectedDataRepo.combinedReportData.mapLatest { combinedReport ->
       if (combinedReport != null) {
         DependencyComputations.dependenciesOf(
-          gradlePath = gradlePath,
+          modulePath = modulePath,
           combinedReport = combinedReport
         )
       } else {
@@ -265,7 +265,7 @@ class ReportDataRepo(
 }
 
 data class ModuleOwnerAndCodeReference(
-  val module: GradlePath,
+  val module: ModulePath,
   val owner: OwnerName,
   val codeReference: Stat.CodeReferencesStat.CodeReference,
   val metadata: StatMetadata,

@@ -1,7 +1,7 @@
 package com.squareup.invert.models.js
 
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.GradlePluginId
 import kotlinx.serialization.Serializable
 
@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class HomeJsReportModel(
-  val modules: List<GradlePath>,
+  val modules: List<ModulePath>,
   val artifacts: List<DependencyId>,
   val plugins: List<GradlePluginId>,
 )

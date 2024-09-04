@@ -13,7 +13,7 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import org.jetbrains.compose.web.dom.Br
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.H3
@@ -60,8 +60,8 @@ fun AnnotationProcessorsComposable(
     val configNameToAnnotationProcessorMap = mutableMapOf<ConfigurationName, MutableSet<DependencyId>>()
 
 
-    val configurationNameToDependencyIdAndGradlePaths =
-        mutableMapOf<ConfigurationName, MutableMap<DependencyId, MutableSet<GradlePath>>>()
+    val configurationNameToDependencyIdAndModulePaths =
+        mutableMapOf<ConfigurationName, MutableMap<DependencyId, MutableSet<ModulePath>>>()
 
     val annotationProcessorConfigs = setOf("kapt", "ksp", "annotationProcessor")
 
@@ -74,9 +74,9 @@ fun AnnotationProcessorsComposable(
 
                 // -----
                 dependencyIds.forEach { dependencyId ->
-                    val currOne = configurationNameToDependencyIdAndGradlePaths[configName] ?: mutableMapOf()
+                    val currOne = configurationNameToDependencyIdAndModulePaths[configName] ?: mutableMapOf()
                     currOne[dependencyId] = (currOne[dependencyId] ?: mutableSetOf()).apply { add(gradlePath) }
-                    configurationNameToDependencyIdAndGradlePaths[configName] = currOne
+                    configurationNameToDependencyIdAndModulePaths[configName] = currOne
                 }
             }
     }
@@ -85,14 +85,14 @@ fun AnnotationProcessorsComposable(
         Text("Annotation Processors")
     }
 
-    if (configurationNameToDependencyIdAndGradlePaths.isEmpty()) {
+    if (configurationNameToDependencyIdAndModulePaths.isEmpty()) {
         H3 {
             Text("None found for 'kapt', 'ksp' or 'annotationProcessor'.")
         }
     }
 
     val expanded = true
-    configurationNameToDependencyIdAndGradlePaths.forEach { (configurationName, dependencyIdPaths) ->
+    configurationNameToDependencyIdAndModulePaths.forEach { (configurationName, dependencyIdPaths) ->
         BoostrapExpandingCard(
             header = {
                 H4 { Text(configurationName) }

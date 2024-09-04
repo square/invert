@@ -2,7 +2,7 @@ package com.squareup.invert.models.js
 
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.GradlePath
+import com.squareup.invert.models.ModulePath
 import kotlinx.serialization.Serializable
 
 /**
@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class DirectDependenciesJsReportModel(
   val directDependencies: Map<
-    GradlePath,
+    ModulePath,
     Map<ConfigurationName, Set<DependencyId>>
     >
 )
