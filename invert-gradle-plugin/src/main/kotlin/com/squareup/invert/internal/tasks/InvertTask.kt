@@ -78,9 +78,9 @@ abstract class InvertTask : DefaultTask() {
         .combineAnalysisResults(subprojectInvertReportDirs.get())
 
       val allCollectedData = CollectedStatAggregator.aggregate(
-        allCollectedData = allCollectedDataOrig,
+        origAllCollectedData = allCollectedDataOrig,
         reportMetadata = reportMetadata,
-        statCollectors = statCollectors,
+        statCollectorsForAggregation = statCollectors,
         reportOutputConfig = ReportOutputConfig(
           invertReportDirectory = invertReportDir,
         )

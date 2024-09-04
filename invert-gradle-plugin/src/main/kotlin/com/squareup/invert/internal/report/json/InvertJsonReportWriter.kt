@@ -7,6 +7,7 @@ import com.squareup.invert.internal.models.CollectedOwnershipForProject
 import com.squareup.invert.internal.models.CollectedPluginsForProject
 import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.logging.InvertLogger
+import com.squareup.invert.logging.SystemOutInvertLogger
 import com.squareup.invert.models.InvertSerialization.InvertJson
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
@@ -102,6 +103,22 @@ class InvertJsonReportWriter(
         )
       )
       logger.lifecycle("Writing JSON ${jsonFileKey.description} to file://$canonicalPath")
+    }
+
+    fun <T> writeJsonFile(
+      description: String,
+      jsonOutputFile: File,
+      serializer: KSerializer<T>,
+      value: T,
+      logger: InvertLogger = SystemOutInvertLogger,
+    ) = jsonOutputFile.apply {
+      writeText(
+        InvertJson.encodeToString(
+          serializer = serializer,
+          value = value
+        )
+      )
+      logger.lifecycle("Writing JSON ${description} to file://$canonicalPath")
     }
   }
 }
