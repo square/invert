@@ -23,12 +23,16 @@ data class AggregatedCodeReferences(
   val values: List<Stat.CodeReferencesStat.CodeReference>,
 )
 
+/**
+ * Utilities to compute aggregate stats with [StatCollector]s that can access data
+ * from all modules via a [InvertAllCollectedDataRepo].
+ */
 object CollectedStatAggregator {
 
   private val MODULE_EXTRA_METADATA = ExtraMetadata(
-    key = "module_path",
+    key = "module",
     type = ExtraDataType.STRING,
-    description = "Module Path"
+    description = "Module"
   )
 
   private fun exportFullListOfCodeReferences(
@@ -60,19 +64,20 @@ object CollectedStatAggregator {
           }
         }
       }
-
-      InvertJsonReportWriter.writeJsonFile(
-        description = "All CodeReferences for ${statMetadata.key}",
-        jsonOutputFile = InvertFileUtils.outputFile(
-          File(reportOutputConfig.invertReportDirectory, "json"),
-          "code_references_${statMetadata.key}.json"
-        ),
-        serializer = AggregatedCodeReferences.serializer(),
-        value = AggregatedCodeReferences(
-          metadata = statMetadata.copy(extras = statMetadata.extras.plus(MODULE_EXTRA_METADATA)),
-          values = allCodeReferencesForStatWithProjectPathExtra
+      if (allCodeReferencesForStatWithProjectPathExtra.isNotEmpty()) {
+        InvertJsonReportWriter.writeJsonFile(
+          description = "All CodeReferences for ${statMetadata.key}",
+          jsonOutputFile = InvertFileUtils.outputFile(
+            File(reportOutputConfig.invertReportDirectory, "json"),
+            "code_references_${statMetadata.key}.json"
+          ),
+          serializer = AggregatedCodeReferences.serializer(),
+          value = AggregatedCodeReferences(
+            metadata = statMetadata.copy(extras = statMetadata.extras.plus(MODULE_EXTRA_METADATA)),
+            values = allCodeReferencesForStatWithProjectPathExtra
+          )
         )
-      )
+      }
     }
   }
 
