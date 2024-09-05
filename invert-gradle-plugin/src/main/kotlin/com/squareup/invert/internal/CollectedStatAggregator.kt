@@ -90,6 +90,14 @@ object CollectedStatAggregator {
     reportMetadata: MetadataJsReportModel,
     statCollectorsForAggregation: List<StatCollector>?
   ): InvertCombinedCollectedData {
+
+    // Exports all Code References to individual JSON files.
+    // TODO Move out of "Aggregate" phase since it doesn't aggregate
+    exportFullListOfCodeReferences(
+      reportOutputConfig = reportOutputConfig,
+      origAllCollectedData = origAllCollectedData
+    )
+
     val projectPathToCollectedStatsForProject: MutableMap<ModulePath, CollectedStatsForProject> =
       origAllCollectedData.collectedStats
         .associateBy { it.path }
@@ -101,11 +109,6 @@ object CollectedStatAggregator {
           projectMetadata = reportMetadata,
           allCollectedData = origAllCollectedData
         ),
-      )
-
-      exportFullListOfCodeReferences(
-        reportOutputConfig = reportOutputConfig,
-        origAllCollectedData = origAllCollectedData
       )
 
       aggregationResult?.aggregatedStatsByProject?.entries?.forEach { (projectPath, stats) ->
