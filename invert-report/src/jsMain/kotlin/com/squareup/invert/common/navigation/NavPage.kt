@@ -82,17 +82,17 @@ class NavPage(
                                 it is OwnerDetailNavRoute || it is OwnersNavRoute
                             }
                         ),
+                        AllModulesReportPage.navPage.toNavItem().copy(
+                            matchesCurrentNavRoute = {
+                                it is ModuleDetailNavRoute || it is AllModulesNavRoute
+                            }
+                        ),
                         AllStatsNavRoute().navPage.toNavItem(),
                         CodeReferencesReportPage.navPage.toNavItem(),
                     )
                 ),
                 NavPageGroup(
                     "Gradle", setOf(
-                        AllModulesReportPage.navPage.toNavItem().copy(
-                            matchesCurrentNavRoute = {
-                                it is ModuleDetailNavRoute || it is AllModulesNavRoute
-                            }
-                        ),
                         GradlePluginsReportPage.navPage.toNavItem().copy(
                             matchesCurrentNavRoute = {
                                 it is GradlePluginsNavRoute || it is PluginDetailNavRoute
