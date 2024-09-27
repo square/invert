@@ -2,6 +2,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.squareup.invert.common.ReportDataRepo
+import com.squareup.invert.common.navigation.NavGroupsRepo
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteManager
 import com.squareup.invert.common.navigation.NavRouteRepo
@@ -25,11 +26,12 @@ fun invertComposeMain(
     routeManager: NavRouteManager,
     navRouteRepo: NavRouteRepo,
     reportDataRepo: ReportDataRepo,
+    navGroupsRepo: NavGroupsRepo,
 ) {
     setupNavigation(routeManager, navRouteRepo)
 
     renderComposable(rootElementId = "navigation") {
-        LeftNavigationComposable(initialRoute, navRouteRepo, reportDataRepo)
+        LeftNavigationComposable(initialRoute, navRouteRepo, reportDataRepo, navGroupsRepo)
     }
 
     renderComposable(rootElementId = "main_content") {

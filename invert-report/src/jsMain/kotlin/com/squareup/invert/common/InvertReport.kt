@@ -1,5 +1,7 @@
 package com.squareup.invert.common
 
+import com.squareup.invert.common.navigation.NavGroupsRepo
+import com.squareup.invert.common.navigation.NavPageGroup
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteManager
 import com.squareup.invert.common.navigation.NavRouteRepo
@@ -36,6 +38,7 @@ import navigation.RemoteJsLoadingProgress
 
 class InvertReport(
     customReportPages: List<InvertReportPage<out NavRoute>> = emptyList(),
+    customNavGroups: Set<NavPageGroup> = emptySet(),
 ) {
     private val routeManager = NavRouteManager()
 
@@ -67,6 +70,8 @@ class InvertReport(
         },
     )
 
+    val navGroupsRepo = NavGroupsRepo(customNavGroups)
+
     val reportDataRepo = ReportDataRepo(
         navRoute = navRouteRepo.navRoute,
         collectedDataRepo = collectedDataRepo,
@@ -78,6 +83,7 @@ class InvertReport(
             routeManager = routeManager,
             navRouteRepo = navRouteRepo,
             reportDataRepo = reportDataRepo,
+            navGroupsRepo = navGroupsRepo,
         )
     }
 

@@ -33,7 +33,6 @@ class ReportDataRepo(
 
   val reportMetadata: Flow<MetadataJsReportModel?> = collectedDataRepo.reportMetadata
 
-
   val allModules: Flow<List<ModulePath>?> = collectedDataRepo.home
     .mapLatest {
       computeMeasureDuration("allModules") {

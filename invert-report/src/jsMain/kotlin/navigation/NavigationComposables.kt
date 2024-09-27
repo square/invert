@@ -4,8 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.squareup.invert.common.ReportDataRepo
+import com.squareup.invert.common.navigation.DefaultNavItems
+import com.squareup.invert.common.navigation.NavGroupsRepo
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavPage.NavItem
+import com.squareup.invert.common.navigation.NavPageGroup
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.pages.AllStatsReportPage
@@ -26,23 +29,18 @@ import org.jetbrains.compose.web.dom.Ul
 import ui.BootstrapIcon
 import kotlin.random.Random
 
-data class CustomNavItem(
-  val text: String,
-  val iconSlug: String,
-  val navRoute: NavRoute
-)
-
 @Composable
 fun LeftNavigationComposable(
   initialRoute: NavRoute,
   navRouteRepo: NavRouteRepo,
   reportDataRepo: ReportDataRepo,
+  navGroupsRepo: NavGroupsRepo,
 ) {
   val currentNavRoute by navRouteRepo.navRoute.collectAsState(initialRoute)
   val metadataOrig by reportDataRepo.reportMetadata.collectAsState(null)
   val statTotals: CollectedStatTotalsJsReportModel? by reportDataRepo.statTotals.collectAsState(null)
 
-  val otherNavGroups: List<NavPage.NavPageGroup> = if (statTotals != null) {
+  val otherNavGroups: List<NavPageGroup> = if (statTotals != null) {
     statTotals!!.statTotals.entries
       .groupBy { a: Map.Entry<StatMetadata, Int> -> a.key.category }
       .mapNotNull { categoryToEntries: Map.Entry<String?, List<Map.Entry<StatMetadata, Int>>> ->
@@ -63,7 +61,7 @@ fun LeftNavigationComposable(
               navIconSlug = "record"
             )
           }.toSet()
-          NavPage.NavPageGroup(
+          NavPageGroup(
             groupTitle = groupTitle,
             navItems = navItems
           )
@@ -75,8 +73,9 @@ fun LeftNavigationComposable(
 
   Ul({ classes("list-unstyled", "ps-0") }) {
     val random = Random(0)
-    NavPage.ROOT_NAV_ITEMS.plus(otherNavGroups)
-      .forEach { navPageGroup: NavPage.NavPageGroup ->
+    val navGroups by navGroupsRepo.navGroups.collectAsState(setOf())
+    navGroups.plus(otherNavGroups)
+      .forEach { navPageGroup: NavPageGroup ->
         val collapseId = "nav-group-id-" + random.nextInt()
         Li({ classes("mb-1") }) {
           Button({
