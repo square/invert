@@ -53,12 +53,6 @@ class NavGroupsRepo(additionalGroups: Set<NavPageGroup>) {
 }
 
 object DefaultNavItems {
-  private fun NavPage.toNavItem(): NavItem {
-    return NavItem(
-      itemTitle = this.displayName,
-      navPage = this,
-    )
-  }
 
   private fun gitHubContentNavItem(title: String, destinationNavRoute: NavRoute): NavItem {
     return NavItem(
@@ -146,4 +140,11 @@ object DefaultNavItems {
         )
       )
     )
+}
+
+fun NavPage.toNavItem(): NavItem {
+  return NavItem(
+    itemTitle = this.displayName,
+    navPage = this,
+  )
 }

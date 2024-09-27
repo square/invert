@@ -5,6 +5,7 @@ import com.squareup.invert.common.navigation.NavPageGroup
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteManager
 import com.squareup.invert.common.navigation.NavRouteRepo
+import com.squareup.invert.common.navigation.toNavItem
 import com.squareup.invert.common.pages.AllModulesReportPage
 import com.squareup.invert.common.pages.AllStatsReportPage
 import com.squareup.invert.common.pages.AnnotationProcessorsReportPage
@@ -37,93 +38,98 @@ import kotlinx.coroutines.Dispatchers
 import navigation.RemoteJsLoadingProgress
 
 class InvertReport(
-    customReportPages: List<InvertReportPage<out NavRoute>> = emptyList(),
-    customNavGroups: Set<NavPageGroup> = emptySet(),
+  customReportPages: List<InvertReportPage<out NavRoute>> = emptyList(),
+  customNavGroups: Set<NavPageGroup> = emptySet(),
 ) {
-    private val routeManager = NavRouteManager()
+  private val routeManager = NavRouteManager()
 
-    init {
-        val allReportPages = DEFAULT_REPORT_PAGES + customReportPages
-        allReportPages.forEach { reportPage ->
-            routeManager.registerParser(reportPage.navPage)
+  init {
+    val allReportPages = DEFAULT_REPORT_PAGES + customReportPages
+    allReportPages.forEach { reportPage ->
+      routeManager.registerParser(reportPage.navPage)
+    }
+    allReportPages.forEach { reportPage ->
+      routeManager.registerRoute(
+        clazz = reportPage.navRouteKClass,
+        content = {
+          reportPage.composableContentWithRouteCast(it)
         }
-        allReportPages.forEach { reportPage ->
-            routeManager.registerRoute(
-                clazz = reportPage.navRouteKClass,
-                content = {
-                    reportPage.composableContentWithRouteCast(it)
-                }
-            )
-        }
+      )
     }
+  }
 
-    private val initialRoute: NavRoute = routeManager.parseUrlToRoute(window.location.toString())
+  private val initialRoute: NavRoute = routeManager.parseUrlToRoute(window.location.toString())
 
-    val navRouteRepo = NavRouteRepo(initialRoute)
+  val navRouteRepo = NavRouteRepo(initialRoute)
 
-    val collectedDataRepo = CollectedDataRepo(
-        coroutineDispatcher = Dispatchers.Default,
-        loadFileData = { jsFileKey, reportRepoData ->
-            RemoteJsLoadingProgress.loadJavaScriptFile(jsFileKey) { json ->
-                RemoteJsLoadingProgress.handleLoadedJsFile(reportRepoData, jsFileKey, json)
-            }
-        },
+  val collectedDataRepo = CollectedDataRepo(
+    coroutineDispatcher = Dispatchers.Default,
+    loadFileData = { jsFileKey, reportRepoData ->
+      RemoteJsLoadingProgress.loadJavaScriptFile(jsFileKey) { json ->
+        RemoteJsLoadingProgress.handleLoadedJsFile(reportRepoData, jsFileKey, json)
+      }
+    },
+  )
+
+  val navGroupsRepo = NavGroupsRepo(
+    customNavGroups + NavPageGroup(
+      groupTitle = "Other",
+      navItems = customReportPages.map { it.navPage.toNavItem() }.toSet(),
     )
+  )
 
-    val navGroupsRepo = NavGroupsRepo(customNavGroups)
+  val reportDataRepo = ReportDataRepo(
+    navRoute = navRouteRepo.navRoute,
+    collectedDataRepo = collectedDataRepo,
+  )
 
-    val reportDataRepo = ReportDataRepo(
-        navRoute = navRouteRepo.navRoute,
-        collectedDataRepo = collectedDataRepo,
+  init {
+    invertComposeMain(
+      initialRoute = initialRoute,
+      routeManager = routeManager,
+      navRouteRepo = navRouteRepo,
+      reportDataRepo = reportDataRepo,
+      navGroupsRepo = navGroupsRepo,
     )
+  }
 
-    init {
-        invertComposeMain(
-            initialRoute = initialRoute,
-            routeManager = routeManager,
-            navRouteRepo = navRouteRepo,
-            reportDataRepo = reportDataRepo,
-            navGroupsRepo = navGroupsRepo,
-        )
-    }
+  init {
+    // REALLY HACKY Static DI Graph
+    DependencyGraph.initialize(
+      collectedDataRepo = collectedDataRepo,
+      navRouteRepo = navRouteRepo,
+      reportDataRepo = reportDataRepo,
+    )
+  }
 
-    init {
-        // REALLY HACKY Static DI Graph
-        DependencyGraph.initialize(
-            collectedDataRepo = collectedDataRepo,
-            navRouteRepo = navRouteRepo,
-            reportDataRepo = reportDataRepo,
-        )
-    }
-
-    companion object {
-        private val DEFAULT_REPORT_PAGES = listOf<InvertReportPage<*>>(
-            AllModulesReportPage,
-            AllStatsReportPage,
-            ArtifactDetailReportPage,
-            ArtifactsReportPage,
-            AnnotationProcessorsReportPage,
-            CodeReferencesReportPage,
-            ConfigurationDetailReportPage,
-            ConfigurationsReportPage,
-            DependencyInjectionReportPage,
-            DependencyDiffReportPage,
-            ModuleDependencyGraphReportPage,
-            HomeReportPage,
-            HotwireReportPage,
-            KotlinCompilerPluginsReportPage,
-            LeafModulesReportPage,
-            ModuleDetailReportPage,
-            InvertedDependenciesReportPage,
-            OwnerDetailReportPage,
-            OwnersReportPage,
-            PluginDetailReportPage,
-            GradlePluginsReportPage,
-            StatDetailReportPage,
-            UnusedModulesReportPage,
-            SuppressAnnotationReportPage,
-            GitHubMarkdownReportPage,
-            GradleRepositoriesReportPage,
-        )
-    }
+  companion object {
+    private val DEFAULT_REPORT_PAGES = listOf<InvertReportPage<*>>(
+      AllModulesReportPage,
+      AllStatsReportPage,
+      ArtifactDetailReportPage,
+      ArtifactsReportPage,
+      AnnotationProcessorsReportPage,
+      CodeReferencesReportPage,
+      ConfigurationDetailReportPage,
+      ConfigurationsReportPage,
+      DependencyInjectionReportPage,
+      DependencyDiffReportPage,
+      ModuleDependencyGraphReportPage,
+      HomeReportPage,
+      HotwireReportPage,
+      KotlinCompilerPluginsReportPage,
+      LeafModulesReportPage,
+      ModuleDetailReportPage,
+      InvertedDependenciesReportPage,
+      OwnerDetailReportPage,
+      OwnersReportPage,
+      PluginDetailReportPage,
+      GradlePluginsReportPage,
+      StatDetailReportPage,
+      UnusedModulesReportPage,
+      SuppressAnnotationReportPage,
+      GitHubMarkdownReportPage,
+      GradleRepositoriesReportPage,
+    )
+  }
 }
