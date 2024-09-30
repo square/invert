@@ -1,5 +1,6 @@
 package com.squareup.invert.common.pages
 
+import PagingConstants
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -11,10 +12,10 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.CodeReferencesNavRoute.Companion.parser
-import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.ExtraKey
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
+import com.squareup.invert.models.StatDataType
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Text
 import ui.BootstrapLoadingMessageWithSpinner
@@ -137,7 +138,7 @@ fun CodeReferencesComposable(
           it.codeReference.code ?: ""
         ) + listOfExtraValues
       },
-      maxResultsLimitConstant = Int.MAX_VALUE,
+      maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
       sortAscending = true,
       sortByColumn = 2,
       types = listOf(String::class, String::class, String::class, String::class) + extraKeys.map { String::class }
