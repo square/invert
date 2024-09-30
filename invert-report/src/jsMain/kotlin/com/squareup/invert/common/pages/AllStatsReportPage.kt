@@ -59,7 +59,7 @@ data class AllStatsNavRoute(
 object AllStatsReportPage : InvertReportPage<AllStatsNavRoute> {
   override val navPage: NavPage = NavPage(
     pageId = "stats",
-    displayName = "Stats",
+    displayName = "Counts",
     navIconSlug = "pie-chart",
     navRouteParser = { AllStatsNavRoute.parser(it) }
   )

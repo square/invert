@@ -73,8 +73,10 @@ class InvertReport(
 
   val navGroupsRepo = NavGroupsRepo(
     customNavGroups + NavPageGroup(
-      groupTitle = "Other",
-      navItems = customReportPages.map { it.navPage.toNavItem() }.toSet(),
+      groupTitle = "Custom Pages",
+      navItems = customReportPages.filter { it.showInNav }
+        .map { it.navPage.toNavItem() }
+        .toSet(),
     )
   )
 

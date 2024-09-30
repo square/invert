@@ -15,6 +15,8 @@ interface InvertReportPage<T : NavRoute> {
 
     val navPage: NavPage
 
+    val showInNav: Boolean get() = true
+
     val navRouteKClass: KClass<T>
 
     val composableContent: @Composable (T) -> Unit

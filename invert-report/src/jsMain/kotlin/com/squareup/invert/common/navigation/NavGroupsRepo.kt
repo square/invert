@@ -79,8 +79,12 @@ object DefaultNavItems {
               it is ModuleDetailNavRoute || it is AllModulesNavRoute
             }
           ),
-          AllStatsNavRoute().navPage.toNavItem(),
+        )
+      ),
+      NavPageGroup(
+        "Collected Stats", setOf(
           CodeReferencesReportPage.navPage.toNavItem(),
+          AllStatsNavRoute().navPage.toNavItem(),
         )
       ),
       NavPageGroup(

@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.squareup.invert.common.ReportDataRepo
-import com.squareup.invert.common.navigation.DefaultNavItems
 import com.squareup.invert.common.navigation.NavGroupsRepo
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavPage.NavItem

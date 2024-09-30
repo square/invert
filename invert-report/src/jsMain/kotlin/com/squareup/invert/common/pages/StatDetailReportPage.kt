@@ -13,14 +13,15 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.StatDetailNavRoute.Companion.parser
-import com.squareup.invert.models.StatDataType
-import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.GradlePluginId
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
+import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.MetadataJsReportModel
+import kotlinx.browser.window
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.Text
@@ -118,14 +119,28 @@ fun StatDetailComposable(
 
   val metadata by reportDataRepo.reportMetadata.collectAsState(null)
 
-  val statKeys = statsNavRoute.statKeys.ifEmpty {
+  val statKeys: List<String> = statsNavRoute.statKeys.ifEmpty {
     statsData?.statInfos?.map { it.key } ?: listOf()
   }
-  H1 { Text("Stats") }
 
-  if (moduleToOwnerMapFlowValue == null || metadata == null) {
+  if (moduleToOwnerMapFlowValue == null || metadata == null || statsData == null) {
     BootstrapLoadingSpinner()
     return
+  }
+
+
+  val statKey = statKeys.first()
+
+  val statInfo = statsData?.statInfos?.get(statKey) ?: run {
+    window.alert("Invalid stat key: $statKeys")
+    return
+  }
+
+
+  H1 {
+    Text(buildString {
+      append(statInfo.description)
+    })
   }
 
   val query = statsNavRoute.moduleQuery
