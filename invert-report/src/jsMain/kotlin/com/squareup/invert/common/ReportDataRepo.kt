@@ -203,6 +203,17 @@ class ReportDataRepo(
       }
     }
 
+
+  fun moduleDirectlyUsedBy(path: ModulePath): Flow<Map<ModulePath, List<ConfigurationName>>?> =
+    collectedDataRepo.directDependenciesData.mapLatest { directDependenciesData ->
+      val directDependencies = directDependenciesData?.directDependencies
+      directDependencies?.entries?.filter { (modulePath, configurationToDependencyIds) ->
+        configurationToDependencyIds.any { it.value.contains(path) }
+      }?.associate { (modulePath, configurationToDependencyIds) ->
+        modulePath to configurationToDependencyIds.keys.toList()
+      }
+    }
+
   fun moduleTransitivelyUsedBy(path: ModulePath): Flow<Map<ModulePath, List<ConfigurationName>>?> =
     allInvertedDependencies.mapLatest { allInvertedDependenciesMap: Map<DependencyId, Map<ModulePath, List<ConfigurationName>>>? ->
       if (allInvertedDependenciesMap != null) {
@@ -214,8 +225,8 @@ class ReportDataRepo(
 
 
   fun directDependenciesOf(modulePath: ModulePath?): Flow<Map<ConfigurationName, Set<DependencyId>>?> =
-    collectedDataRepo.directDependenciesData.mapLatest { directDependenciesData ->
-      directDependenciesData?.directDependencies?.get(modulePath)
+    allDirectDependencies.mapLatest { directDependenciesData ->
+      directDependenciesData?.get(modulePath)
     }
 
   fun statsForKey(statKey: StatKey): Flow<MutableList<ModuleOwnerAndCodeReference>> =

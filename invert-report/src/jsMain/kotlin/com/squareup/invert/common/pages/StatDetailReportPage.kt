@@ -158,7 +158,7 @@ fun StatDetailComposable(
 
   BootstrapSearchBox(
     query = query ?: "",
-    placeholderText = "Module Query...",
+    placeholderText = "Module Filter...",
   ) {
     navRouteRepo.updateNavRoute(statsNavRoute.copy(moduleQuery = it))
   }
