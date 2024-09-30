@@ -103,7 +103,7 @@ jobs:
         run: echo "VERSION_NAME=$(cat gradle.properties | grep "^version=" | awk -F'=' '{print $2}')" >> $GITHUB_ENV
 
       - name: Publish Snapshot
-        run: ./gradlew :invert-models:publish :invert-gradle-plugin:publish --no-configuration-cache --stacktrace
+        run: ./gradlew :invert-report:publish :invert-models:publish :invert-gradle-plugin:publish --no-configuration-cache --stacktrace
         if: success() && endsWith(env.VERSION_NAME, '-SNAPSHOT')
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
