@@ -3,6 +3,8 @@ plugins {
     kotlin("plugin.serialization")
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.vanniktech.maven.publish)
 }
 
 kotlin {
@@ -11,13 +13,6 @@ kotlin {
         val pluginResourcesDir =
             rootProject.layout.projectDirectory.file("invert-gradle-plugin/src/main/resources/META-INF").asFile
         browser {
-//            runTask {
-//                mainOutputFileName.set("invert_web.js")
-//            }
-//            webpackTask {
-//                mainOutputFileName.set("invert_web.js")
-//            }
-
             commonWebpackConfig {
                 outputPath = pluginResourcesDir
             }
