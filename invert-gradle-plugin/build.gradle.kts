@@ -34,6 +34,7 @@ tasks.named<Jar>("sourcesJar") {
 }
 
 dependencies {
+    api(gradleApi())
     api(project(":invert-models"))
 
     implementation(libs.kotlinx.serialization.json)
