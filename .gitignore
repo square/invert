@@ -16,7 +16,7 @@ build
 .gradle
 yarn.lock
 invert-report/src/jsMain/resources/js
-af-analysis-report/src/jsMain/resources/js
+android-register-invert-report/src/jsMain/resources/js
 invert-plugin/src/main/resources/META-INF
 
 # Large Compiled Binaries
