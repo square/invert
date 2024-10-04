@@ -4,7 +4,7 @@
 #####
 [versions]
 anvil = "2.5.0-beta07"
-coroutines = "1.8.0-RC"
+coroutines = "1.9.0"
 dagger = "2.48"
 detekt = "1.23.3"
 javax-inject = "1"
