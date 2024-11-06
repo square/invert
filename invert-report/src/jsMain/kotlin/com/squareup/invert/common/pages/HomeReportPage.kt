@@ -9,6 +9,7 @@ import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
+import com.squareup.invert.common.utils.FormattingUtils.dateDisplayStr
 import com.squareup.invert.common.utils.FormattingUtils.formatDecimalSeparator
 import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.web.attributes.ATarget
@@ -88,6 +89,7 @@ fun HomeComposable(
           A(href = commitUrl, { target(ATarget.Blank) }) {
             Text(gitSha.substring(0, minOf(7, gitSha.length)))
           }
+          Text(" on " + metadata.dateDisplayStr())
         }
         if (metadata.branchName != metadata.currentBranch) {
           P({

@@ -24,6 +24,7 @@ kotlin {
                 api(project(":invert-models"))
                 api(libs.kotlinx.serialization.json)
                 api(libs.kotlinx.coroutines.core)
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
                 api("org.jetbrains.kotlinx:kotlinx-html-js:0.9.1")
                 api(compose.html.core)
                 api(compose.runtime)

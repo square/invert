@@ -12,6 +12,7 @@ import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.pages.AllStatsReportPage
 import com.squareup.invert.common.pages.StatDetailNavRoute
+import com.squareup.invert.common.utils.FormattingUtils.dateDisplayStr
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import org.jetbrains.compose.web.attributes.ATarget.Blank
@@ -142,9 +143,7 @@ fun LeftNavigationComposable(
         }
       }
       Br()
-      Text("${metadata.timeStr}")
-      Br()
-      Text("(${metadata.timezoneId})")
+      Text(metadata.dateDisplayStr())
       Br()
       Br()
       Br()
