@@ -20,12 +20,12 @@ import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Text
 import ui.BootstrapButton
 import ui.BootstrapButtonType
-import ui.BootstrapClickableList
 import ui.BootstrapColumn
 import ui.BootstrapJumbotron
 import ui.BootstrapLoadingMessageWithSpinner
 import ui.BootstrapLoadingSpinner
 import ui.BootstrapRow
+import ui.BootstrapTable
 import kotlin.reflect.KClass
 
 
@@ -59,7 +59,7 @@ data class AllStatsNavRoute(
 object AllStatsReportPage : InvertReportPage<AllStatsNavRoute> {
   override val navPage: NavPage = NavPage(
     pageId = "stats",
-    displayName = "Counts",
+    displayName = "All Stats",
     navIconSlug = "pie-chart",
     navRouteParser = { AllStatsNavRoute.parser(it) }
   )
@@ -81,7 +81,7 @@ fun AllStatsComposable(
   val statTotalsOrig by reportDataRepo.statTotals.collectAsState(null)
   val moduleToOwnerMapFlowValue by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
-  H1 { Text("Stats") }
+  H1({classes("text-center")}) { Text("Stat Totals") }
 
   if (moduleToOwnerMapFlowValue == null) {
     BootstrapLoadingSpinner()
@@ -98,13 +98,25 @@ fun AllStatsComposable(
 
   val statInfos = statsData.statInfos.values
 
-  StatTiles(statTotals.statTotals) { statKey ->
-    navRouteRepo.updateNavRoute(
-      StatDetailNavRoute(
-        pluginIds = listOf(),
-        statKeys = listOf(statKey)
-      )
-    )
+  StatDataType.entries.forEach { statDataType: StatDataType ->
+    val statsOfType = statTotals.statTotals.filterKeys { it.dataType == statDataType }
+    if (statsOfType.isNotEmpty()) {
+      H1 { Text("${statDataType.displayName} Stat Counts") }
+      StatTiles(statsOfType) { statKey ->
+        navRouteRepo.updateNavRoute(
+          if (statDataType == StatDataType.CODE_REFERENCES) {
+            CodeReferencesNavRoute(
+              statKey = statKey,
+            )
+          } else {
+            StatDetailNavRoute(
+              pluginIds = listOf(),
+              statKeys = listOf(statKey)
+            )
+          }
+        )
+      }
+    }
   }
 
   BootstrapButton("View All",
@@ -120,14 +132,44 @@ fun AllStatsComposable(
   )
 
   val stats = statsData.statInfos.values
-  BootstrapClickableList("Stat", stats.map { it.key }) { clickedValue ->
-    navRouteRepo.updateNavRoute(
-      StatDetailNavRoute(
-        statKeys = listOf(clickedValue)
-      )
-    )
-  }
 
+  val statTotalsMap = statTotalsOrig?.statTotals
+
+  BootstrapTable(
+    headers = listOf("Key", "Description", "Type", "Category", "Count"),
+    maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
+    rows = stats
+      .filter { it.dataType != StatDataType.STRING && it.dataType != StatDataType.DI_PROVIDES_AND_INJECTS }
+      .map { statMetadata ->
+        mutableListOf<String>(
+          statMetadata.key,
+          statMetadata.description,
+          statMetadata.dataType.name,
+          statMetadata.category
+        ).apply {
+          statTotalsMap?.get(statMetadata)?.let { count ->
+            add(count.toString())
+          }
+        }
+      },
+    onItemClickCallback = { cellValues ->
+      val statKey = cellValues[0]
+      val statDataType = StatDataType.fromString(cellValues[2])
+      navRouteRepo.updateNavRoute(
+        if (statDataType == StatDataType.CODE_REFERENCES) {
+          CodeReferencesNavRoute(
+            statKey = statKey,
+          )
+        } else {
+          StatDetailNavRoute(
+            pluginIds = listOf(),
+            statKeys = listOf(statKey)
+          )
+        }
+      )
+
+    }
+  )
 }
 
 @Composable

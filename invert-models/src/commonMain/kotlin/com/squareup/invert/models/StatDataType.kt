@@ -18,4 +18,12 @@ enum class StatDataType(
     }
   }
 
+  val displayName get() = when(this){
+    BOOLEAN -> "Boolean"
+    NUMERIC -> "Numeric"
+    STRING -> "String"
+    CODE_REFERENCES -> "Code References"
+    DI_PROVIDES_AND_INJECTS -> "DI Provides and Injects"
+  }
+
 }
