@@ -11,6 +11,7 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.utils.FormattingUtils.dateDisplayStr
 import com.squareup.invert.common.utils.FormattingUtils.formatDecimalSeparator
+import com.squareup.invert.models.StatDataType
 import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.target
@@ -157,10 +158,14 @@ fun HomeComposable(
           A(href = "#", {
             onClick {
               navRouteRepo.updateNavRoute(
-                StatDetailNavRoute(
-                  pluginIds = listOf(),
-                  statKeys = listOf(statTotal.key.key)
-                )
+                if (statTotal.key.dataType == StatDataType.CODE_REFERENCES) {
+                  CodeReferencesNavRoute(statKey = statTotal.key.key)
+                } else {
+                  StatDetailNavRoute(
+                    pluginIds = listOf(),
+                    statKeys = listOf(statTotal.key.key)
+                  )
+                }
               )
             }
           }) {
