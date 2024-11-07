@@ -15,12 +15,10 @@ import com.squareup.invert.common.pages.CodeReferencesReportPage
 import com.squareup.invert.common.pages.ConfigurationDetailReportPage
 import com.squareup.invert.common.pages.ConfigurationsReportPage
 import com.squareup.invert.common.pages.DependencyDiffReportPage
-import com.squareup.invert.common.pages.DependencyInjectionReportPage
 import com.squareup.invert.common.pages.GitHubMarkdownReportPage
 import com.squareup.invert.common.pages.GradlePluginsReportPage
 import com.squareup.invert.common.pages.GradleRepositoriesReportPage
 import com.squareup.invert.common.pages.HomeReportPage
-import com.squareup.invert.common.pages.HotwireReportPage
 import com.squareup.invert.common.pages.InvertedDependenciesReportPage
 import com.squareup.invert.common.pages.KotlinCompilerPluginsReportPage
 import com.squareup.invert.common.pages.LeafModulesReportPage
@@ -114,11 +112,9 @@ class InvertReport(
       CodeReferencesReportPage,
       ConfigurationDetailReportPage,
       ConfigurationsReportPage,
-      DependencyInjectionReportPage,
       DependencyDiffReportPage,
       ModuleDependencyGraphReportPage,
       HomeReportPage,
-      HotwireReportPage,
       KotlinCompilerPluginsReportPage,
       LeafModulesReportPage,
       ModuleDetailReportPage,

@@ -5,6 +5,8 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.key
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.navigation.NavPage
+import com.squareup.invert.common.navigation.NavPage.NavItem
+import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.GitHubMarkdownReportPage.navPage
 import com.squareup.invert.common.pages.GithubReadMeNavRoute.Companion.FILE_KEY
@@ -37,6 +39,17 @@ data class GithubReadMeNavRoute(
 }
 
 object GitHubMarkdownReportPage : InvertReportPage<GithubReadMeNavRoute> {
+
+    fun gitHubContentNavItem(title: String, destinationNavRoute: NavRoute): NavItem {
+        return NavItem(
+            navPage = GitHubMarkdownReportPage.navPage,
+            itemTitle = title,
+            navIconSlug = "github",
+            destinationNavRoute = destinationNavRoute,
+            matchesCurrentNavRoute = { it == destinationNavRoute }
+        )
+    }
+
     override val navPage: NavPage = NavPage(
         pageId = "github_readme",
         displayName = "ReadMe on GitHub",

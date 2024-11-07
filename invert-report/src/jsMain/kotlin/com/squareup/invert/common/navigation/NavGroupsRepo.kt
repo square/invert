@@ -12,9 +12,6 @@ import com.squareup.invert.common.pages.CodeReferencesReportPage
 import com.squareup.invert.common.pages.ConfigurationDetailNavRoute
 import com.squareup.invert.common.pages.ConfigurationsNavRoute
 import com.squareup.invert.common.pages.DependencyDiffReportPage
-import com.squareup.invert.common.pages.DependencyInjectionReportPage
-import com.squareup.invert.common.pages.GitHubMarkdownReportPage
-import com.squareup.invert.common.pages.GithubReadMeNavRoute
 import com.squareup.invert.common.pages.GradlePluginsNavRoute
 import com.squareup.invert.common.pages.GradlePluginsReportPage
 import com.squareup.invert.common.pages.GradleRepositoriesReportPage
@@ -53,16 +50,6 @@ class NavGroupsRepo(additionalGroups: Set<NavPageGroup>) {
 }
 
 object DefaultNavItems {
-
-  private fun gitHubContentNavItem(title: String, destinationNavRoute: NavRoute): NavItem {
-    return NavItem(
-      navPage = GitHubMarkdownReportPage.navPage,
-      itemTitle = title,
-      navIconSlug = "github",
-      destinationNavRoute = destinationNavRoute,
-      matchesCurrentNavRoute = { it == destinationNavRoute }
-    )
-  }
 
   val ROOT_NAV_ITEMS
     get() = listOf(
@@ -120,29 +107,10 @@ object DefaultNavItems {
       NavPageGroup(
         "Explore", setOf(
           InvertedDependenciesReportPage.navPage.toNavItem(),
-          DependencyInjectionReportPage.navPage.toNavItem(),
           DependencyDiffReportPage.navPage.toNavItem(),
           ModuleDependencyGraphReportPage.navPage.toNavItem(),
         )
-      ),
-//      NavPageGroup(
-//        "GitHub", setOf(
-//          gitHubContentNavItem(
-//            title = "README.md",
-//            destinationNavRoute = GithubReadMeNavRoute(
-//              "square/okhttp",
-//              "README.md"
-//            )
-//          ),
-//          gitHubContentNavItem(
-//            title = "OkHttp.kt",
-//            destinationNavRoute = GithubReadMeNavRoute(
-//              "square/okhttp",
-//              "okhttp/src/main/kotlin/okhttp3/OkHttp.kt"
-//            )
-//          ),
-//        )
-//      )
+      )
     )
 }
 
