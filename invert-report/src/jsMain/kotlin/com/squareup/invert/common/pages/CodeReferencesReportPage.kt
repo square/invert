@@ -16,6 +16,7 @@ import com.squareup.invert.models.ExtraKey
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.StatDataType
+import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Text
 import ui.BootstrapLoadingMessageWithSpinner
@@ -71,14 +72,30 @@ fun CodeReferencesComposable(
   val allModulesOrig by reportDataRepo.allModules.collectAsState(null)
   val moduleToOwnerMapFlowValue: Map<ModulePath, OwnerName>? by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
+  val statInfosOrig by reportDataRepo.statInfos.collectAsState(null)
+  if (statInfosOrig == null) {
+    BootstrapLoadingMessageWithSpinner("Loading Stats")
+    return
+  }
+
   val metadata by reportDataRepo.reportMetadata.collectAsState(null)
   H1 {
     Text(buildString {
       append("Code References")
       codeReferencesNavRoute.statKey?.let { statKey ->
-        append(" for $statKey")
+        val statInfo = statInfosOrig?.filter { it.key == codeReferencesNavRoute.statKey }?.firstOrNull()
+        append(" for ${statInfo?.description ?: statKey} (${codeReferencesNavRoute.statKey})")
       }
     })
+    codeReferencesNavRoute.statKey?.let { statKey ->
+      A("#", {
+        onClick {
+          navRouteRepo.updateNavRoute(StatDetailNavRoute(statKeys = listOf(statKey)))
+        }
+      }) {
+        Text("View Grouped by Module")
+      }
+    }
   }
 
   if (moduleToOwnerMapFlowValue == null || metadata == null) {

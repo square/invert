@@ -11,8 +11,10 @@ import com.squareup.invert.common.navigation.NavPageGroup
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.pages.AllStatsReportPage
+import com.squareup.invert.common.pages.CodeReferencesNavRoute
 import com.squareup.invert.common.pages.StatDetailNavRoute
 import com.squareup.invert.common.utils.FormattingUtils.dateDisplayStr
+import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import org.jetbrains.compose.web.attributes.ATarget.Blank
@@ -49,14 +51,20 @@ fun LeftNavigationComposable(
         } else {
           val groupTitle = categoryToEntries.key!!.replace("_", " ")
             .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-          val navItems = categoryToEntries.value.map {
+          val navItems = categoryToEntries.value.map { (statMetadata, _) ->
             NavItem(
-              itemTitle = it.key.description,
+              itemTitle = statMetadata.description,
               navPage = AllStatsReportPage.navPage,
-              destinationNavRoute = StatDetailNavRoute(
-                pluginIds = listOf(),
-                statKeys = listOf(it.key.key)
-              ),
+              destinationNavRoute = if (statMetadata.dataType == StatDataType.CODE_REFERENCES) {
+                CodeReferencesNavRoute(
+                  statKey = statMetadata.key
+                )
+              } else {
+                StatDetailNavRoute(
+                  pluginIds = listOf(),
+                  statKeys = listOf(statMetadata.key)
+                )
+              },
               matchesCurrentNavRoute = { false },
               navIconSlug = "record"
             )
@@ -136,7 +144,7 @@ fun LeftNavigationComposable(
         }
       }
       Br()
-      metadata.currentBranchHash?.let { currentBranchHash ->
+      metadata.currentBranchHash.let { currentBranchHash ->
         Text("Commit ")
         A(href = metadata.remoteRepoUrl + "/tree/${currentBranchHash}", attrs = { target(Blank) }) {
           Text(currentBranchHash.substring(0, 7))
