@@ -11,6 +11,7 @@ import com.squareup.invert.common.utils.CsvFileDownloadUtil
 import kotlinx.browser.window
 import org.jetbrains.compose.web.attributes.list
 import org.jetbrains.compose.web.attributes.placeholder
+import org.jetbrains.compose.web.attributes.selected
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.AttrBuilderContext
@@ -515,15 +516,24 @@ fun BootstrapSearchBox(
 fun BootstrapSelectDropdown(
   placeholderText: String,
   options: List<String>,
+  currentValue: String,
   onValueChange: (String?) -> Unit
 ) {
   Select({
     classes(listOf("form-select"))
     attr("aria-label", placeholderText)
+    attr("value", currentValue)
     onChange { event -> onValueChange(event.value) }
   }) {
+    Option(value = "") {
+      Text(placeholderText)
+    }
     options.forEach { optionText ->
-      Option(value = optionText) {
+      Option(value = optionText, {
+        if (optionText == currentValue) {
+          selected()
+        }
+      }) {
         Text(optionText)
       }
     }
