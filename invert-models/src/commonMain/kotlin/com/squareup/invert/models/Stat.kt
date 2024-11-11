@@ -42,8 +42,9 @@ sealed interface Stat {
       val filePath: String,
       val startLine: Int,
       val endLine: Int,
-      val code: String? = null,
       val extras: Map<ExtraKey, String> = emptyMap(),
+      val code: String? = null,
+      val owner: OwnerName? = null,
     )
   }
 

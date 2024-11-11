@@ -150,7 +150,7 @@ fun CodeReferencesComposable(
         val listOfExtraValues: List<String> = extraKeys.map { key -> it.codeReference.extras[key] ?: "" }
         listOf(
           it.module,
-          it.owner,
+          it.codeReference.owner ?: (it.owner + " (Module Owner)"),
           it.codeReference.toHrefLink(projectMetadata!!, false),
           it.codeReference.code ?: ""
         ) + listOfExtraValues
