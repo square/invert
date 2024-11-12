@@ -10,5 +10,5 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class CollectedStatTotalsJsReportModel(
-  val statTotals :Map<StatMetadata, Int>
+  val statTotals: Map<StatMetadata, Int>
 )
