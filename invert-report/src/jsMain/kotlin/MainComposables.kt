@@ -57,13 +57,14 @@ fun invertComposeMain(
 
 @OptIn(DelicateCoroutinesApi::class)
 fun setupNavigation(routeManager: NavRouteManager, navRouteRepo: NavRouteRepo) {
+    val javaScriptNavigationAndHistory = JavaScriptNavigationAndHistory(routeManager, navRouteRepo)
     // Update Route on Every Change
     navRouteRepo.navRoute.onEach {
-        JavaScriptNavigationAndHistory.setUrlFromNavRoute(it)
+        javaScriptNavigationAndHistory.setUrlFromNavRoute(it)
     }.launchIn(GlobalScope)
 
     // Register for Browser Back/Forward Button Events
-    JavaScriptNavigationAndHistory.registerForPopstate(routeManager, navRouteRepo)
+    javaScriptNavigationAndHistory.registerForPopstate()
 }
 
 @Composable

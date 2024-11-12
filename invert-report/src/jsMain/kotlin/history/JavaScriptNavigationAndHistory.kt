@@ -15,14 +15,20 @@ import org.w3c.dom.PopStateEvent
 import org.w3c.dom.url.URL
 import org.w3c.dom.url.URLSearchParams
 
-object JavaScriptNavigationAndHistory {
-  fun URLSearchParams.toMap(): Map<String, String?> {
-    val map = mutableMapOf<String, String?>()
-    keysForObject(this).forEach { map[it] = this.get(it) }
-    return map
+class JavaScriptNavigationAndHistory(
+  private val routeManager: NavRouteManager,
+  private val navRouteRepo: NavRouteRepo
+) {
+
+  companion object {
+    fun URLSearchParams.toMap(): Map<String, String?> {
+      val map = mutableMapOf<String, String?>()
+      keysForObject(this).forEach { map[it] = this.get(it) }
+      return map
+    }
   }
 
-  fun registerForPopstate(routeManager: NavRouteManager, navRouteRepo: NavRouteRepo) {
+  fun registerForPopstate() {
     window.addEventListener("popstate", {
       Log.d("History Event Count: ${window.history.length}")
       if (it is PopStateEvent) {

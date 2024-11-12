@@ -521,14 +521,16 @@ data class BootstrapSelectOption(
 fun BootstrapSelectDropdown(
   placeholderText: String,
   options: List<BootstrapSelectOption>,
-  currentValue: String,
-  onValueChange: (String?) -> Unit
+  currentValue: String?,
+  onValueChange: (BootstrapSelectOption?) -> Unit
 ) {
   Select({
     classes(listOf("form-select"))
     attr("aria-label", placeholderText)
-    attr("value", currentValue)
-    onChange { event -> onValueChange(event.value) }
+    currentValue?.let {
+      attr("value", currentValue)
+    }
+    onChange { event -> onValueChange(options.firstOrNull { event.value == it.value }) }
   }) {
     Option(value = "") {
       Text(placeholderText)

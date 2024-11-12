@@ -40,14 +40,14 @@ object ChartsJs {
     @Serializable
     data class ChartJsDataset(
         val label: String,
-        val data: List<Int>,
+        val data: Collection<Int>,
         val borderWidth: Int = 1,
     )
 
     @Serializable
     data class ChartJsData(
-        val labels: List<String>,
-        val datasets: List<ChartJsDataset>,
+        val labels: Collection<String>,
+        val datasets: Collection<ChartJsDataset>,
     )
 
     @Serializable
@@ -73,7 +73,7 @@ private fun ChartJsComposable(
                 style(LineStyle.Solid)
                 color = Color.black
             }
-            maxHeight(300.px)
+            maxHeight(400.px)
             maxWidth(100.percent)
         }
     })

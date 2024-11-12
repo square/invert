@@ -32,6 +32,7 @@ import kotlin.reflect.KClass
 data class CodeReferencesNavRoute(
   val statKey: String? = null,
   val owner: String? = null,
+  val module: String? = null,
 ) : BaseNavRoute(CodeReferencesReportPage.navPage) {
 
   override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
@@ -42,12 +43,16 @@ data class CodeReferencesNavRoute(
       if (!owner.isNullOrBlank()) {
         params[OWNER_PARAM] = owner
       }
+      if (!module.isNullOrBlank()) {
+        params[MODULE_PARAM] = module
+      }
     }
 
   companion object {
 
     private const val STATKEY_PARAM = "statkey"
     private const val OWNER_PARAM = "owner"
+    private const val MODULE_PARAM = "module"
 
     fun parser(params: Map<String, String?>): CodeReferencesNavRoute {
       val statKey = params[STATKEY_PARAM]
@@ -58,9 +63,17 @@ data class CodeReferencesNavRoute(
           null
         }
       }
+      val module = params[MODULE_PARAM]?.trim()?.let {
+        if (it.isNotBlank()) {
+          it
+        } else {
+          null
+        }
+      }
       return CodeReferencesNavRoute(
         statKey = statKey,
         owner = owner,
+        module = module,
       )
     }
   }
@@ -168,32 +181,76 @@ fun CodeReferencesComposable(
       }
 
     val filteredByOwner: List<ModuleOwnerAndCodeReference> = allCodeReferencesForStat
+      // Filter By Module
+      .filter { moduleOwnerAndCodeReference: ModuleOwnerAndCodeReference ->
+        val moduleFromModule = moduleOwnerAndCodeReference.module
+        val moduleFromNavRoute = codeReferencesNavRoute.module
+        if (!moduleFromNavRoute.isNullOrBlank()) {
+          moduleFromNavRoute == moduleOwnerAndCodeReference.module || moduleFromNavRoute == moduleFromModule
+        } else {
+          true
+        }
+
+      }
+      // Filter by Owner
       .filter { ownerAndCodeReference: ModuleOwnerAndCodeReference ->
-        if (!codeReferencesNavRoute.owner.isNullOrBlank()) {
-          ownerAndCodeReference.codeReference.owner == codeReferencesNavRoute.owner || codeReferencesNavRoute.owner == ownerAndCodeReference.owner
+        val ownerOfModule = ownerAndCodeReference.owner
+        val codeReferenceOwner = ownerAndCodeReference.codeReference.owner
+        val ownerFromNavRoute = codeReferencesNavRoute.owner
+        if (!ownerFromNavRoute.isNullOrBlank()) {
+          ownerFromNavRoute == codeReferenceOwner || ownerFromNavRoute == ownerOfModule
         } else {
           true
         }
       }
 
     val codeReferencesByOwner = allCodeReferencesForStat.groupBy { it.owner }
-    val totalCount = allCodeReferencesForStat.size
+    val totalCodeReferenceCount = allCodeReferencesForStat.size
     BootstrapRow {
-      BootstrapColumn(12) {
+      BootstrapColumn(6) {
         H3 {
           Text("Filter by Owner")
           BootstrapSelectDropdown(
-            placeholderText = "-- All Owners ($totalCount Total) --",
-            currentValue = codeReferencesNavRoute.owner ?: "",
+            placeholderText = "-- All Owners ($totalCodeReferenceCount Total) --",
+            currentValue = codeReferencesNavRoute.owner,
             options = codeReferencesByOwner.map {
               BootstrapSelectOption(
                 value = it.key,
-                displayText = "${it.key} (${it.value.size} of $totalCount)"
+                displayText = "${it.key} (${it.value.size} of $totalCodeReferenceCount)"
               )
             }.sortedBy { it.displayText }
           ) {
             navRouteRepo.updateNavRoute(
-              codeReferencesNavRoute.copy(owner = it)
+              CodeReferencesNavRoute(
+                statKey = statKey,
+                owner = it?.value,
+                module = codeReferencesNavRoute.module,
+              )
+            )
+          }
+        }
+      }
+      val codeReferencesByModule =
+        allCodeReferencesForStat.groupBy { it.module }
+      BootstrapColumn(6) {
+        H3 {
+          Text("Filter by Module")
+          BootstrapSelectDropdown(
+            placeholderText = "-- All Modules --",// (${codeReferencesByModule.size} Total) --",
+            currentValue = codeReferencesNavRoute.module,
+            options = codeReferencesByModule.map {
+              BootstrapSelectOption(
+                value = it.key,
+                displayText = "${it.key}",// (${it.value.size} of $totalCodeReferenceCount)"
+              )
+            }.sortedBy { it.displayText }
+          ) {
+            navRouteRepo.updateNavRoute(
+              CodeReferencesNavRoute(
+                statKey = codeReferencesNavRoute.statKey,
+                owner = codeReferencesNavRoute.owner,
+                module = it?.value
+              )
             )
           }
         }
@@ -207,7 +264,7 @@ fun CodeReferencesComposable(
           val listOfExtraValues: List<String> = extraKeys.map { key -> it.codeReference.extras[key] ?: "" }
           listOf(
             it.module,
-            it.codeReference.owner ?: (it.owner + " (Module Owner)"),
+            it.codeReference.owner ?: (it.owner + " (Owns Module)"),
             it.codeReference.toHrefLink(projectMetadata!!, false),
             it.codeReference.code ?: ""
           ) + listOfExtraValues
