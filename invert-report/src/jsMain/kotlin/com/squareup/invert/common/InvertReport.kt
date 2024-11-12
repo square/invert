@@ -70,12 +70,12 @@ class InvertReport(
   )
 
   val navGroupsRepo = NavGroupsRepo(
-    customNavGroups + NavPageGroup(
+    setOf(NavPageGroup(
       groupTitle = "Custom Pages",
       navItems = customReportPages.filter { it.showInNav }
         .map { it.navPage.toNavItem() }
         .toSet(),
-    )
+    )) + customNavGroups
   )
 
   val reportDataRepo = ReportDataRepo(
