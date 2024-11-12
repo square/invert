@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.web.css.CSSSizeValue
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.border
@@ -62,6 +63,7 @@ object ChartsJs {
 private fun ChartJsComposable(
     graphDomId: String,
     chartData: ChartsJs.ChartJsParam,
+    height: CSSSizeValue<*>,
     onClick: (label: String, value: Int) -> Unit = { _, _ -> }
 ) {
     // Good to go
@@ -73,7 +75,7 @@ private fun ChartJsComposable(
                 style(LineStyle.Solid)
                 color = Color.black
             }
-            maxHeight(400.px)
+            maxHeight(height)
             maxWidth(100.percent)
         }
     })
@@ -95,11 +97,13 @@ private val random = Random(0)
 fun ChartJsChartComposable(
     domId: String = "chart-${random.nextInt().absoluteValue}",
     type: String = "pie",
+    height: CSSSizeValue<*> = 400.px,
     data: ChartsJs.ChartJsData,
     onClick: (String, Int) -> Unit = { _, _ -> }
 ) {
     ChartJsComposable(
         graphDomId = domId,
+        height = height,
         chartData = ChartsJs.ChartJsParam(
             type = type,
             data = data,
