@@ -19,6 +19,7 @@ import com.squareup.invert.models.StatDataType
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.H3
+import org.jetbrains.compose.web.dom.H4
 import org.jetbrains.compose.web.dom.Text
 import ui.BootstrapColumn
 import ui.BootstrapLoadingMessageWithSpinner
@@ -119,6 +120,8 @@ fun CodeReferencesComposable(
         append(" for ${statInfo?.description ?: statKey} (${codeReferencesNavRoute.statKey})")
       }
     })
+  }
+  H4 {
     codeReferencesNavRoute.statKey?.let { statKey ->
       A("#", {
         onClick {
@@ -129,7 +132,6 @@ fun CodeReferencesComposable(
       }
     }
   }
-
 
   if (moduleToOwnerMapFlowValue == null || metadata == null) {
     BootstrapLoadingSpinner()
