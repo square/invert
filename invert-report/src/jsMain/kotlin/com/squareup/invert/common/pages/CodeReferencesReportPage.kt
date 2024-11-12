@@ -18,14 +18,20 @@ import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.StatDataType
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.H1
+import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.Text
+import ui.BootstrapColumn
 import ui.BootstrapLoadingMessageWithSpinner
 import ui.BootstrapLoadingSpinner
+import ui.BootstrapRow
+import ui.BootstrapSelectDropdown
+import ui.BootstrapSelectOption
 import ui.BootstrapTable
 import kotlin.reflect.KClass
 
 data class CodeReferencesNavRoute(
-  val statKey: String? = null
+  val statKey: String? = null,
+  val owner: String? = null,
 ) : BaseNavRoute(CodeReferencesReportPage.navPage) {
 
   override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
@@ -33,16 +39,28 @@ data class CodeReferencesNavRoute(
       statKey?.let {
         params[STATKEY_PARAM] = it
       }
+      if (!owner.isNullOrBlank()) {
+        params[OWNER_PARAM] = owner
+      }
     }
 
   companion object {
 
     private const val STATKEY_PARAM = "statkey"
+    private const val OWNER_PARAM = "owner"
 
     fun parser(params: Map<String, String?>): CodeReferencesNavRoute {
       val statKey = params[STATKEY_PARAM]
+      val owner = params[OWNER_PARAM]?.trim()?.let {
+        if (it.isNotBlank()) {
+          it
+        } else {
+          null
+        }
+      }
       return CodeReferencesNavRoute(
         statKey = statKey,
+        owner = owner,
       )
     }
   }
@@ -70,10 +88,11 @@ fun CodeReferencesComposable(
   navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
   val allModulesOrig by reportDataRepo.allModules.collectAsState(null)
+  val allOwnerNames by reportDataRepo.allOwnerNames.collectAsState(null)
   val moduleToOwnerMapFlowValue: Map<ModulePath, OwnerName>? by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
   val statInfosOrig by reportDataRepo.statInfos.collectAsState(null)
-  if (statInfosOrig == null) {
+  if (statInfosOrig == null || allOwnerNames == null) {
     BootstrapLoadingMessageWithSpinner("Loading Stats")
     return
   }
@@ -97,6 +116,7 @@ fun CodeReferencesComposable(
       }
     }
   }
+
 
   if (moduleToOwnerMapFlowValue == null || metadata == null) {
     BootstrapLoadingSpinner()
@@ -137,24 +157,61 @@ fun CodeReferencesComposable(
       return
     }
 
+    val allCodeReferencesForStat: Set<ModuleOwnerAndCodeReference> = statsForKey!!.toSet()
+
     val extraKeys = mutableSetOf<ExtraKey>()
-    statsForKey!!.forEach { moduleOwnerAndCodeReference ->
-      moduleOwnerAndCodeReference.codeReference.extras.forEach {
-        extraKeys.add(it.key)
+    allCodeReferencesForStat
+      .forEach { moduleOwnerAndCodeReference ->
+        moduleOwnerAndCodeReference.codeReference.extras.forEach {
+          extraKeys.add(it.key)
+        }
+      }
+
+    val filteredByOwner: List<ModuleOwnerAndCodeReference> = allCodeReferencesForStat
+      .filter { ownerAndCodeReference: ModuleOwnerAndCodeReference ->
+        if (!codeReferencesNavRoute.owner.isNullOrBlank()) {
+          ownerAndCodeReference.codeReference.owner == codeReferencesNavRoute.owner || codeReferencesNavRoute.owner == ownerAndCodeReference.owner
+        } else {
+          true
+        }
+      }
+
+    val codeReferencesByOwner = allCodeReferencesForStat.groupBy { it.owner }
+    val totalCount = allCodeReferencesForStat.size
+    BootstrapRow {
+      BootstrapColumn(12) {
+        H3 {
+          Text("Filter by Owner")
+          BootstrapSelectDropdown(
+            placeholderText = "-- All Owners ($totalCount Total) --",
+            currentValue = codeReferencesNavRoute.owner ?: "",
+            options = codeReferencesByOwner.map {
+              BootstrapSelectOption(
+                value = it.key,
+                displayText = "${it.key} (${it.value.size} of $totalCount)"
+              )
+            }.sortedBy { it.displayText }
+          ) {
+            navRouteRepo.updateNavRoute(
+              codeReferencesNavRoute.copy(owner = it)
+            )
+          }
+        }
       }
     }
 
     BootstrapTable(
       headers = listOf("Module", "Owner", "File", "Code") + extraKeys,
-      rows = statsForKey!!.map {
-        val listOfExtraValues: List<String> = extraKeys.map { key -> it.codeReference.extras[key] ?: "" }
-        listOf(
-          it.module,
-          it.codeReference.owner ?: (it.owner + " (Module Owner)"),
-          it.codeReference.toHrefLink(projectMetadata!!, false),
-          it.codeReference.code ?: ""
-        ) + listOfExtraValues
-      },
+      rows = filteredByOwner
+        .map {
+          val listOfExtraValues: List<String> = extraKeys.map { key -> it.codeReference.extras[key] ?: "" }
+          listOf(
+            it.module,
+            it.codeReference.owner ?: (it.owner + " (Module Owner)"),
+            it.codeReference.toHrefLink(projectMetadata!!, false),
+            it.codeReference.code ?: ""
+          ) + listOfExtraValues
+        },
       maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
       sortAscending = true,
       sortByColumn = 2,

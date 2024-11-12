@@ -512,10 +512,15 @@ fun BootstrapSearchBox(
   }
 }
 
+data class BootstrapSelectOption(
+  val value: String,
+  val displayText: String
+)
+
 @Composable
 fun BootstrapSelectDropdown(
   placeholderText: String,
-  options: List<String>,
+  options: List<BootstrapSelectOption>,
   currentValue: String,
   onValueChange: (String?) -> Unit
 ) {
@@ -528,13 +533,13 @@ fun BootstrapSelectDropdown(
     Option(value = "") {
       Text(placeholderText)
     }
-    options.forEach { optionText ->
-      Option(value = optionText, {
-        if (optionText == currentValue) {
+    options.forEach { option ->
+      Option(value = option.value, {
+        if (option.value == currentValue) {
           selected()
         }
       }) {
-        Text(optionText)
+        Text(option.displayText)
       }
     }
   }

@@ -6,8 +6,8 @@ import com.squareup.invert.common.pages.InvertedDependenciesNavRoute
 import com.squareup.invert.common.utils.DependencyComputations
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.GradlePluginId
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatKey
@@ -161,9 +161,7 @@ class ReportDataRepo(
       moduleToOwnerMap.first().also { moduleToOwnerMap ->
         statsJsReportModel?.statsByModule?.map { moduleToStatsMap ->
           moduleToStatsMap.value[statKey]?.let { stat: Stat ->
-            println(stat)
             val moduleName = moduleToStatsMap.key
-            val ownerName = moduleToOwnerMap?.get(moduleName) ?: ""
 
             if (stat is Stat.CodeReferencesStat) {
               stat.value.forEach { codeReference ->
@@ -171,7 +169,7 @@ class ReportDataRepo(
                   ModuleOwnerAndCodeReference(
                     codeReference = codeReference,
                     module = moduleName,
-                    owner = ownerName,
+                    owner = codeReference.owner ?: moduleToOwnerMap?.get(moduleName) ?: "",
                     metadata = statsJsReportModel.statInfos[statKey]!!
                   )
                 )
