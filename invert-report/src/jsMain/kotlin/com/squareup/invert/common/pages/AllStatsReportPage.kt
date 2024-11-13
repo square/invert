@@ -175,7 +175,7 @@ fun AllStatsComposable(
 @Composable
 fun StatTiles(statTotals: Map<StatMetadata, Int>, onClick: (StatKey) -> Unit) {
   BootstrapRow {
-    statTotals.entries.forEach { statTotal ->
+    statTotals.entries.sortedBy { it.key.description }.forEach { statTotal ->
       BootstrapColumn(4) {
         BootstrapJumbotron(
           centered = true,
