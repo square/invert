@@ -9,8 +9,7 @@ enum class StatDataType(
   BOOLEAN(Boolean::class),
   NUMERIC(Long::class),
   STRING(String::class),
-  CODE_REFERENCES(Stat.CodeReferencesStat.CodeReference::class), // EXPLORE (CUSTOM)
-  DI_PROVIDES_AND_INJECTS(Stat.DiProvidesAndInjectsStat::class); // EXPLORE (CUSTOM)
+  CODE_REFERENCES(Stat.CodeReferencesStat.CodeReference::class);
 
   companion object {
     fun fromString(type: String?): StatDataType? {
@@ -23,7 +22,6 @@ enum class StatDataType(
     NUMERIC -> "Numeric"
     STRING -> "String"
     CODE_REFERENCES -> "Code References"
-    DI_PROVIDES_AND_INJECTS -> "DI Provides and Injects"
   }
 
 }

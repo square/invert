@@ -47,44 +47,4 @@ sealed interface Stat {
       val owner: OwnerName? = null,
     )
   }
-
-  @Serializable
-  @SerialName("di_provides_and_injects")
-  data class DiProvidesAndInjectsStat(
-    val value: List<ProvidesAndInjects>,
-    val details: String? = null,
-  ) : Stat {
-    /**
-     * Represents the data in an Anvil ContributesBinding Annotation Usage
-     */
-    @Serializable
-    data class DiContribution(
-      val annotation: String,
-      val scope: String,
-      val boundImplementation: String,
-      val boundType: String,
-      val replaces: List<String>,
-    )
-
-    /**
-     * Represents the data in an Anvil ContributesBinding Annotation Usage
-     */
-    @Serializable
-    data class DiInjection(
-      val type: String,
-      val qualifierAnnotations: List<String>,
-      val startLine: Int,
-      val endLine: Int,
-    )
-
-    @Serializable
-    data class ProvidesAndInjects(
-      val classFqName: String,
-      val contributions: List<DiContribution>,
-      val consumptions: List<DiInjection>,
-      val filePath: String,
-      val startLine: Int,
-      val endLine: Int,
-    )
-  }
 }

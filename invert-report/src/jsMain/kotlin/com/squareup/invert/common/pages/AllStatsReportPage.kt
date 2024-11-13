@@ -139,7 +139,7 @@ fun AllStatsComposable(
     headers = listOf("Key", "Description", "Type", "Category", "Count"),
     maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
     rows = stats
-      .filter { it.dataType != StatDataType.STRING && it.dataType != StatDataType.DI_PROVIDES_AND_INJECTS }
+      .filter { it.dataType != StatDataType.STRING }
       .map { statMetadata ->
         mutableListOf<String>(
           statMetadata.key,
