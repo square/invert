@@ -22,6 +22,7 @@ import com.squareup.invert.common.pages.KotlinCompilerPluginsReportPage
 import com.squareup.invert.common.pages.LeafModulesNavRoute
 import com.squareup.invert.common.pages.ModuleDependencyGraphReportPage
 import com.squareup.invert.common.pages.ModuleDetailNavRoute
+import com.squareup.invert.common.pages.MostTransitiveDependenciesReportPage
 import com.squareup.invert.common.pages.OwnerDetailNavRoute
 import com.squareup.invert.common.pages.OwnersNavRoute
 import com.squareup.invert.common.pages.OwnersReportPage
@@ -104,6 +105,7 @@ object DefaultNavItems {
           LeafModulesNavRoute.navPage.toNavItem(),
           UnusedModulesReportPage.navPage.toNavItem(),
           SuppressAnnotationReportPage.navPage.toNavItem(),
+          MostTransitiveDependenciesReportPage.navPage.toNavItem(),
         )
       ),
       NavPageGroup(
