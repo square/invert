@@ -149,7 +149,7 @@ fun ByOwnerComposable(
     return
   }
 
-  if (true) {
+  if (allOwnerNames.isNullOrEmpty()) {
     H1 {
       Text("No Owners")
     }
