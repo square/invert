@@ -11,7 +11,6 @@ import com.squareup.invert.common.pages.AllStatsReportPage
 import com.squareup.invert.common.pages.AnnotationProcessorsReportPage
 import com.squareup.invert.common.pages.ArtifactDetailReportPage
 import com.squareup.invert.common.pages.ArtifactsReportPage
-import com.squareup.invert.common.pages.OwnerBreakdownReportPage
 import com.squareup.invert.common.pages.CodeReferencesReportPage
 import com.squareup.invert.common.pages.ConfigurationDetailReportPage
 import com.squareup.invert.common.pages.ConfigurationsReportPage
@@ -25,6 +24,7 @@ import com.squareup.invert.common.pages.KotlinCompilerPluginsReportPage
 import com.squareup.invert.common.pages.LeafModulesReportPage
 import com.squareup.invert.common.pages.ModuleDependencyGraphReportPage
 import com.squareup.invert.common.pages.ModuleDetailReportPage
+import com.squareup.invert.common.pages.OwnerBreakdownReportPage
 import com.squareup.invert.common.pages.OwnerDetailReportPage
 import com.squareup.invert.common.pages.OwnersReportPage
 import com.squareup.invert.common.pages.PluginDetailReportPage
@@ -71,12 +71,19 @@ class InvertReport(
   )
 
   val navGroupsRepo = NavGroupsRepo(
-    setOf(NavPageGroup(
-      groupTitle = "Custom Pages",
-      navItems = customReportPages.filter { it.showInNav }
-        .map { it.navPage.toNavItem() }
-        .toSet(),
-    )) + customNavGroups
+    mutableSetOf<NavPageGroup>().apply {
+      if (customReportPages.isNotEmpty()) {
+        add(
+          NavPageGroup(
+            groupTitle = "Custom Pages",
+            navItems = customReportPages.filter { it.showInNav }
+              .map { it.navPage.toNavItem() }
+              .toSet(),
+          )
+        )
+      }
+      addAll(customNavGroups)
+    }
   )
 
   val reportDataRepo = ReportDataRepo(
