@@ -11,6 +11,7 @@ import com.squareup.invert.common.pages.AllStatsReportPage
 import com.squareup.invert.common.pages.AnnotationProcessorsReportPage
 import com.squareup.invert.common.pages.ArtifactDetailReportPage
 import com.squareup.invert.common.pages.ArtifactsReportPage
+import com.squareup.invert.common.pages.OwnerBreakdownReportPage
 import com.squareup.invert.common.pages.CodeReferencesReportPage
 import com.squareup.invert.common.pages.ConfigurationDetailReportPage
 import com.squareup.invert.common.pages.ConfigurationsReportPage
@@ -121,6 +122,7 @@ class InvertReport(
       InvertedDependenciesReportPage,
       OwnerDetailReportPage,
       OwnersReportPage,
+      OwnerBreakdownReportPage,
       PluginDetailReportPage,
       GradlePluginsReportPage,
       StatDetailReportPage,
