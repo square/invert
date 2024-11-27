@@ -3,7 +3,15 @@
 _2024-11-27_
 
 ## Version 0.0.3-dev
-* Lots of changes, will update this after release.
+* Added in the ability to attach "extras" key/value pairs to a `CodeReference`
+* Renamed `gradlePath` -> `modulePath` to be more general.
+* Removed the "Dependency Injection" page that was not generally applicable.
+* Cleaned up "Custom Pages" and now showing them first.
+* Filtering of `CodeReference`s by owner and module.
+* Added a `CodeReference`s report page.
+* Added first version of the "Owner Breakdown" page to show `CodeReference`s tallied by owner.
+
+**Full Changelog**: https://github.com/square/invert/compare/0.0.2-dev...0.0.3-dev
 
 ## Version 0.0.2-dev
 
