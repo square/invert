@@ -96,7 +96,6 @@ fun HomeComposable(
     }
   }
 
-  val statsDataOrig by reportDataRepo.statsData.collectAsState(null)
   val statTotalsOrig by reportDataRepo.statTotals.collectAsState(null)
   val moduleToOwnerMapFlowValue by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
@@ -107,16 +106,12 @@ fun HomeComposable(
     return
   }
 
-  if (statsDataOrig == null || statTotalsOrig == null) {
+  if (statTotalsOrig == null) {
     BootstrapLoadingMessageWithSpinner("Loading...")
     return
   }
 
   val statTotals = statTotalsOrig!!
-  val statsData = statsDataOrig!!
-
-  val statInfos = statsData.statInfos.values
-
 
   BootstrapRow {
     HomeCountComposable(
