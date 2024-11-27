@@ -8,5 +8,6 @@ import javax.inject.Singleton
 @Singleton
 @MergeComponent(AppScope::class)
 interface AppComponent {
+    // TODO make this app better
     fun networking(): NetworkGraph
 }

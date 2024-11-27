@@ -5,6 +5,10 @@ plugins {
     alias(libs.plugins.dokka)
 }
 
+java {
+    withSourcesJar()
+}
+
 dependencies {
     implementation(project(":invert-gradle-plugin"))
 

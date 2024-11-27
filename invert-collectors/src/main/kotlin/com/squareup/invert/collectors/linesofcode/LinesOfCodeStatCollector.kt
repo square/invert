@@ -12,7 +12,7 @@ import java.io.File
 open class LinesOfCodeStatCollector(
   name: String,
   private val fileExtensions: List<String>,
-  keySuffix: String = fileExtensions.joinToString(","),
+  keySuffix: String = fileExtensions.joinToString("_"),
   private val sourcesDirectory: (InvertProjectData) -> File = {
     it.projectSrcDir
   },

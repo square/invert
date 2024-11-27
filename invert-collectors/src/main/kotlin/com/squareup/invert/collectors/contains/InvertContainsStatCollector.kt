@@ -9,7 +9,7 @@ import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatMetadata
 import java.io.File
 
-open class LineContainsStatCollector(
+open class InvertContainsStatCollector(
   private val statKey: String,
   private val statDescription: String,
   private val linePredicate: (String) -> Boolean,
@@ -58,6 +58,6 @@ open class LineContainsStatCollector(
   }
 
   override fun getName(): String {
-    return this::class.java.name
+    return this::class.java.name + "-" + statKey
   }
 }
