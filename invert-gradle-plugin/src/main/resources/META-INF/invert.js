@@ -111,7 +111,11 @@ window.highlightJsHighlightAll = function () {
     hljs.highlightAll();
 }
 
-/** Render a Plotly treemap chart from a list of file paths */
+/**
+ * Render a Plotly treemap chart from a list of file paths
+ *
+ * https://plotly.com/javascript/treemaps/
+ */
 window.renderPlotlyTreeMap = function (domElementId, filePaths, onClick) {
     loadJsFileAsync("https://cdn.plot.ly/plotly-2.35.2.min.js", function (obj) {
         function generateCsvFromPaths(input) {
@@ -192,6 +196,20 @@ window.renderPlotlyTreeMap = function (domElementId, filePaths, onClick) {
         // Render the Plotly chart
         Plotly.newPlot(domElementId, plotlyData, layout, config);
     });
+}
+
+/** Render Line Charts with Chart.js */
+window.renderLineChartJs = function (domElementId, graphDataJson, onClick) {
+    if (window.Chart === undefined) {
+        loadJsFileAsync("https://cdn.jsdelivr.net/npm/chart.js", function (obj) {
+            renderLineChartJs(domElementId, graphDataJson, onClick)
+        });
+    } else {
+        const chartJsData = JSON.parse(graphDataJson)
+        console.log(chartJsData)
+        const ctx = document.getElementById(domElementId).getContext('2d');
+        new Chart(ctx, chartJsData);
+    }
 }
 
 /**
