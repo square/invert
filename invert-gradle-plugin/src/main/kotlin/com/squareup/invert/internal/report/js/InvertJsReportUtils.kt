@@ -6,11 +6,11 @@ import com.squareup.invert.internal.models.CollectedOwnershipForProject
 import com.squareup.invert.internal.models.CollectedPluginsForProject
 import com.squareup.invert.internal.models.CollectedStatsForProject
 import com.squareup.invert.models.ConfigurationName
-import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.GradlePluginId
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.Stat
+import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.ConfigurationsJsReportModel
@@ -18,6 +18,7 @@ import com.squareup.invert.models.js.DependenciesJsReportModel
 import com.squareup.invert.models.js.DirectDependenciesJsReportModel
 import com.squareup.invert.models.js.OwnershipJsReportModel
 import com.squareup.invert.models.js.PluginsJsReportModel
+import com.squareup.invert.models.js.StatTotalAndMetadata
 import com.squareup.invert.models.js.StatsJsReportModel
 
 /**
@@ -41,7 +42,7 @@ object InvertJsReportUtils {
     )
   }
 
-  fun computeGlobalStats(allProjectsStatsData: StatsJsReportModel): Map<StatMetadata, Int> {
+  fun computeGlobalStats(allProjectsStatsData: StatsJsReportModel): Map<StatKey, StatTotalAndMetadata> {
     val globalStats: Map<StatMetadata, Int> = allProjectsStatsData.statInfos.values
       .filter { statInfo ->
         when (statInfo.dataType) {
@@ -54,7 +55,7 @@ object InvertJsReportUtils {
           }
         }
       }
-      .associateWith { statMetadata ->
+      .associateWith { statMetadata: StatMetadata ->
         val statKey = statMetadata.key
         allProjectsStatsData.statsByModule.values.sumOf { statsForModule: Map<StatKey, Stat> ->
           val stat: Stat? = statsForModule[statKey]
@@ -73,7 +74,7 @@ object InvertJsReportUtils {
           }
         }
       }.toMap()
-    return globalStats
+    return globalStats.entries.associate { it.key.key to StatTotalAndMetadata(it.key, it.value) }
   }
 
   /**

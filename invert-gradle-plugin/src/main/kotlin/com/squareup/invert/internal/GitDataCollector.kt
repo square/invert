@@ -63,6 +63,15 @@ internal class GitDataCollector(private val gitProjectRootDir: File) {
     return exec("git config --get remote.origin.url", gitProjectRootDir).stdOut.lines()[0]
   }
 
+  /**
+   *
+   * Example output of the command is:
+   * 1732637664
+   */
+  fun latestCommitTimestamp(): Long {
+    return exec("git log -1 --format=%ct", gitProjectRootDir).stdOut.lines()[0].toLong()
+  }
+
   fun gitShaOfBranch(branchName: GitBranch, logger: InvertLogger): GitSha {
     val command = buildString {
       append("git log -n 1 ")

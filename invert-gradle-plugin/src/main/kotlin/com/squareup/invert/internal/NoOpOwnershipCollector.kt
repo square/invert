@@ -11,5 +11,5 @@ object NoOpOwnershipCollector : InvertOwnershipCollector {
   override fun collect(
     rootProjectDir: String,
     modulePath: ModulePath
-  ): OwnerInfo? = null
+  ): OwnerInfo? = OwnerInfo("None")
 }

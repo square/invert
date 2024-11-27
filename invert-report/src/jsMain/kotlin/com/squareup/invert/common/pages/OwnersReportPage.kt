@@ -46,7 +46,7 @@ fun OwnersComposable(
     navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
     H1 {
-        Text("Owners (Using GitHub CODEOWNERS)")
+        Text("Owners")
     }
 
     val ownersCollected: Map<OwnerName, List<ModulePath>>? by reportDataRepo.ownerNameToModulesMap.collectAsState(null)

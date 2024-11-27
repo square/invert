@@ -10,9 +10,8 @@ buildscript {
   dependencies {
     val invertVersion = "0.0.4-dev-SNAPSHOT"
     classpath("com.squareup.invert:invert-gradle-plugin:$invertVersion")
-//        classpath("com.squareup.invert:collectors-anvil-dagger:$invertVersion")
-//        classpath("com.squareup.invert:collectors-kotlin-java-loc:$invertVersion")
-//        classpath("com.squareup.invert:owners-github-codeowners:$invertVersion")
+    classpath("com.squareup.invert:invert-collectors:$invertVersion")
+    classpath("com.squareup.invert:invert-owners-github:$invertVersion")
   }
 }
 
@@ -26,12 +25,40 @@ allprojects {
 }
 
 plugins {
-    id("com.squareup.invert")
+  id("com.squareup.invert")
 }
 
 invert {
-//    ownershipCollector(com.squareup.invert.GitHubCodeOwnersInvertOwnershipCollector)
-//    addStatCollector(com.squareup.invert.DiProvidesAndInjectsStatCollector())
-//    addStatCollector(com.squareup.invert.suppress.SuppressionsStatCollector())
-//    addStatCollector(com.squareup.invert.LinesOfCodeStatCollector())
+
+  ownershipCollector(com.squareup.invert.owners.GitHubCodeOwnersInvertOwnershipCollector)
+  addStatCollector(
+    com.squareup.invert.collectors.linesofcode.LinesOfCodeStatCollector(
+      name = "Kotlin",
+      fileExtensions = listOf("kt", "kts"),
+    )
+  )
+  addStatCollector(
+    com.squareup.invert.collectors.contains.LineContainsStatCollector(
+      statKey = "wildcard-imports",
+      statDescription = "Wildcard Imports",
+      linePredicate = { it.contains("import") && it.contains("*") },
+      filePredicate = { it.extension == "kt" || it.extension == "kts" },
+    )
+  )
+}
+
+/**
+ * Will copy the report js files into invert so we can use them in dev cycles
+ */
+tasks.register("copyJsFiles") {
+  doLast {
+    copy {
+      from(fileTree("build/reports/invert/js") { include("*.js") }) // Replace "src/js" with your source directory
+      into("../invert-report/src/jsMain/resources/js") // Replace "build/js" with your target directory
+    }
+  }
+}
+
+afterEvaluate {
+  rootProject.tasks.findByName("invert")!!.finalizedBy("copyJsFiles")
 }

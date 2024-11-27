@@ -26,7 +26,6 @@ import com.squareup.invert.common.pages.OwnerDetailNavRoute
 import com.squareup.invert.common.pages.OwnersNavRoute
 import com.squareup.invert.common.pages.OwnersReportPage
 import com.squareup.invert.common.pages.PluginDetailNavRoute
-import com.squareup.invert.common.pages.SuppressAnnotationReportPage
 import com.squareup.invert.common.pages.UnusedModulesReportPage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -103,7 +102,6 @@ object DefaultNavItems {
         "Insights", setOf(
           LeafModulesNavRoute.navPage.toNavItem(),
           UnusedModulesReportPage.navPage.toNavItem(),
-          SuppressAnnotationReportPage.navPage.toNavItem(),
         )
       ),
       NavPageGroup(

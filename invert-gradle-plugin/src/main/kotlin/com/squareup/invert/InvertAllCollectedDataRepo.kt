@@ -19,7 +19,7 @@ class InvertAllCollectedDataRepo(
   private val projectMetadata: MetadataJsReportModel,
 ) {
 
-  val httpsRemoteRepoUrlForCommit: String = "${projectMetadata.remoteRepoUrl}/blob/${projectMetadata.gitSha}"
+  val httpsRemoteRepoUrlForCommit: String = "${projectMetadata.remoteRepoUrl}/blob/${projectMetadata.latestCommitGitSha}"
 
   val mavenRepoUrls = projectMetadata.mavenRepoUrls
 

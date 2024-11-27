@@ -30,6 +30,8 @@ object ProjectMetadataCollector {
     val currentBranch: GitBranch = gitDataCollector.currentBranch()
     val currentBranchHash = gitDataCollector.gitShaOfBranch(currentBranch, logger)
 
+    val latestCommitTimestamp = gitDataCollector.latestCommitTimestamp()
+
     val remoteGitRepoUrl = gitDataCollector.remoteGitRepoUrl()
     val remoteRepoUrl = if (remoteGitRepoUrl.endsWith(".git")) {
       GitDataCollector.remoteRepoGitUrlToHttps(
@@ -40,13 +42,14 @@ object ProjectMetadataCollector {
     }
 
     return MetadataJsReportModel(
-      time = time.epochSecond,
-      timeStr = formatter.format(time),
-      gitSha = currentBranchHash,
+      currentTime = time.epochSecond,
+      currentTimeStr = formatter.format(time),
+      currentTimezoneId = timeZoneId,
+      latestCommitTime = latestCommitTimestamp,
+      latestCommitTimeFormatted = formatter.format(Instant.ofEpochSecond(latestCommitTimestamp)),
+      latestCommitGitSha = currentBranchHash,
       branchName = currentBranch,
-      timezoneId = timeZoneId,
-      currentBranch = currentBranch,
-      currentBranchHash = currentBranchHash,
+      latestCommitSha = currentBranchHash,
       remoteRepoGit = remoteGitRepoUrl,
       remoteRepoUrl = remoteRepoUrl,
       mavenRepoUrls = repoUrls,

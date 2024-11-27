@@ -21,3 +21,5 @@ external fun highlightJsHighlightAll()
 external fun render3dGraph(domElementId: String, graphDataJson: String, width: Int, height: Int)
 
 external fun renderChartJs(domElementId: String, graphDataJson: String, onClick: (label: String, value: Int) -> Unit)
+external fun renderLineChartJs(domElementId: String, graphDataJson: String, onClick: (label: String, value: Int) -> Unit)
+external fun renderPlotlyTreeMap(domElementId: String, graphDataJson: String, onClick: (label: String, value: Int) -> Unit)
