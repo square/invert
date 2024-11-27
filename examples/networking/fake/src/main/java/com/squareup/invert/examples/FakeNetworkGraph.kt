@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 @ContributesBinding(AppScope::class)
 class FakeNetworkGraph @Inject constructor(
-    override val categoryRepo: CategoryRepo,
-    override val itemRepo: ItemRepo,
-    override val userRepo: UserRepo
+  override val categoryRepo: CategoryRepo,
+  override val itemRepo: ItemRepo,
+  override val userRepo: UserRepo
 ) : NetworkGraph

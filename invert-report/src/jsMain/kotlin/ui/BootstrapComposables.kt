@@ -109,9 +109,13 @@ fun BootstrapTableHeaders(
 }
 
 class BootstrapTabData(
-  val tabName: String,
+  val tabHeader: @Composable () -> Unit,
   val content: @Composable () -> Unit
-)
+) {
+  constructor(tabName: String, content: @Composable () -> Unit) : this(@Composable {
+    Text(tabName)
+  }, content)
+}
 
 @Composable
 fun BootstrapTabPane(
@@ -141,7 +145,7 @@ fun BootstrapTabPane(
           attr("role", "tab")
           attr("aria-controls", tabIds[idx])
         }) {
-          Text(tab.tabName)
+          tab.tabHeader()
         }
       }
     }
@@ -456,6 +460,7 @@ fun BootstrapNavItem(text: String, iconSlug: String, onClick: () -> Unit, active
 @Composable
 fun BootstrapAccordion(
   headerContent: @Composable () -> Unit,
+  expanded: Boolean = false,
   bodyContent: @Composable () -> Unit,
 ) {
   val randomInt = Random.nextInt()
@@ -470,17 +475,23 @@ fun BootstrapAccordion(
         classes("accordion-header")
       }) {
         Button({
-          classes("accordion-button collapsed".split(" "))
+          val classes = mutableListOf<String>("accordion-button").apply { if (!expanded) add("collapsed") }
+          classes(classes)
           attr("data-bs-toggle", "collapse")
           attr("data-bs-target", "#$accordionId")
-          attr("aria-expanded", "false")
+          attr("aria-expanded", expanded.toString())
           attr("aria-controls", accordionId)
         }) {
           headerContent()
         }
       }
       Div({
-        classes("accordion-collapse collapse".split(" "))
+        val accordionCollapseClasses = mutableListOf<String>("accordion-collapse", "collapse").apply {
+          if (expanded) {
+            add("show")
+          }
+        }
+        classes(accordionCollapseClasses)
         id(accordionId)
       }) {
         Div({
@@ -588,13 +599,49 @@ fun BootstrapLoadingSpinner() {
   }
 }
 
-
 @Composable
-fun BootstrapRow(
+fun BootstrapCardTitle(
+  classes: List<String> = emptyList(),
   content: @Composable () -> Unit
 ) {
   Div({
-    classes("row")
+    classes(classes + "card-title")
+  }) {
+    content()
+  }
+}
+
+@Composable
+fun BootstrapCardBody(
+  classes: List<String> = emptyList(),
+  content: @Composable () -> Unit
+) {
+  Div({
+    classes(classes + "card-body")
+  }) {
+    content()
+  }
+}
+
+@Composable
+fun BootstrapCard(
+  classes: List<String> = emptyList(),
+  content: @Composable () -> Unit
+) {
+  Div({
+    classes(classes + "card")
+  }) {
+    content()
+  }
+}
+
+@Composable
+fun BootstrapRow(
+  classes: List<String> = emptyList(),
+  content: @Composable () -> Unit
+) {
+  Div({
+    classes(classes + "row")
   }) {
     content()
   }
@@ -603,10 +650,12 @@ fun BootstrapRow(
 @Composable
 fun BootstrapColumn(
   columnCount: Int = 12,
+  type: String = "md",
+  classes: List<String> = emptyList(),
   content: @Composable () -> Unit
 ) {
   Div({
-    classes("col-sm-$columnCount")
+    classes(classes + "col-$type-$columnCount")
   }) {
     content()
   }
@@ -634,13 +683,14 @@ fun BoostrapExpandingCard(
     Div({ classes("card-header") }) {
       H6({ classes("mb-0") }) {
         Button({
-          classes(mutableListOf(
-            "btn", "btn-link"
-          ).apply {
-            if (!expanded) {
-              add("collapsed")
-            }
-          })
+          classes(
+            mutableListOf(
+              "btn", "btn-link"
+            ).apply {
+              if (!expanded) {
+                add("collapsed")
+              }
+            })
           attr("data-bs-toggle", "collapse")
           attr("href", "#$collapseId")
           attr("aria-controls", collapseId)
@@ -653,15 +703,16 @@ fun BoostrapExpandingCard(
     }
     Div({
       id(collapseId)
-      classes(mutableListOf(
-        "collapsed"
-      ).apply {
-        if (expanded) {
-          add("show")
-        } else {
-          add("collapse")
-        }
-      })
+      classes(
+        mutableListOf(
+          "collapsed"
+        ).apply {
+          if (expanded) {
+            add("show")
+          } else {
+            add("collapse")
+          }
+        })
     }) {
       Div({ classes("card-body") }) {
         content()
@@ -680,13 +731,14 @@ fun BoostrapExpandingSection(
   val collapseId = "collapse${randomInt}"
   H6({ classes("mb-0") }) {
     Button({
-      classes(mutableListOf(
-        "btn"
-      ).apply {
-        if (!expanded) {
-          add("collapsed")
-        }
-      })
+      classes(
+        mutableListOf(
+          "btn"
+        ).apply {
+          if (!expanded) {
+            add("collapsed")
+          }
+        })
       attr("data-bs-toggle", "collapse")
       attr("aria-controls", collapseId)
       attr("aria-expanded", expanded.toString())
@@ -696,15 +748,16 @@ fun BoostrapExpandingSection(
   }
   Div({
     id(collapseId)
-    classes(mutableListOf(
-      "collapsed"
-    ).apply {
-      if (expanded) {
-        add("show")
-      } else {
-        add("collapse")
-      }
-    })
+    classes(
+      mutableListOf(
+        "collapsed"
+      ).apply {
+        if (expanded) {
+          add("show")
+        } else {
+          add("collapse")
+        }
+      })
   }) {
     content()
   }

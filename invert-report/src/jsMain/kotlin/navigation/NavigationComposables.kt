@@ -15,8 +15,8 @@ import com.squareup.invert.common.pages.CodeReferencesNavRoute
 import com.squareup.invert.common.pages.StatDetailNavRoute
 import com.squareup.invert.common.utils.FormattingUtils.dateDisplayStr
 import com.squareup.invert.models.StatDataType
-import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
+import com.squareup.invert.models.js.StatTotalAndMetadata
 import org.jetbrains.compose.web.attributes.ATarget.Blank
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.dom.A
@@ -43,13 +43,13 @@ fun LeftNavigationComposable(
   val statTotals: CollectedStatTotalsJsReportModel? by reportDataRepo.statTotals.collectAsState(null)
 
   val otherNavGroups: List<NavPageGroup> = if (statTotals != null) {
-    statTotals!!.statTotals.entries
-      .groupBy { a: Map.Entry<StatMetadata, Int> -> a.key.category }
-      .mapNotNull { categoryToEntries: Map.Entry<String?, List<Map.Entry<StatMetadata, Int>>> ->
-        if (categoryToEntries.key == null) {
+    statTotals!!.statTotals.values
+      .groupBy { a: StatTotalAndMetadata -> a.metadata.category }
+      .mapNotNull { categoryToEntries ->
+        if (false) {
           null
         } else {
-          val groupTitle = categoryToEntries.key!!.replace("_", " ")
+          val groupTitle = categoryToEntries.key.replace("_", " ")
             .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
           val navItems = categoryToEntries.value.map { (statMetadata, _) ->
             NavItem(
@@ -144,7 +144,7 @@ fun LeftNavigationComposable(
         }
       }
       Br()
-      metadata.currentBranchHash.let { currentBranchHash ->
+      metadata.latestCommitSha.let { currentBranchHash ->
         Text("Commit ")
         A(href = metadata.remoteRepoUrl + "/tree/${currentBranchHash}", attrs = { target(Blank) }) {
           Text(currentBranchHash.substring(0, 7))

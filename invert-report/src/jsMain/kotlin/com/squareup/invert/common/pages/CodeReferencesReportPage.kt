@@ -8,6 +8,7 @@ import com.squareup.invert.common.DependencyGraph
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ModuleOwnerAndCodeReference
 import com.squareup.invert.common.ReportDataRepo
+import com.squareup.invert.common.charts.PlotlyTreeMapComposable
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
@@ -16,6 +17,7 @@ import com.squareup.invert.models.ExtraKey
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.StatDataType
+import com.squareup.invert.models.js.StatTotalAndMetadata
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.H3
@@ -34,6 +36,7 @@ data class CodeReferencesNavRoute(
   val statKey: String? = null,
   val owner: String? = null,
   val module: String? = null,
+  val treemap: Boolean? = null,
 ) : BaseNavRoute(CodeReferencesReportPage.navPage) {
 
   override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
@@ -47,6 +50,9 @@ data class CodeReferencesNavRoute(
       if (!module.isNullOrBlank()) {
         params[MODULE_PARAM] = module
       }
+      treemap?.let {
+        params[TREEMAP_PARAM] = treemap.toString()
+      }
     }
 
   companion object {
@@ -54,6 +60,7 @@ data class CodeReferencesNavRoute(
     private const val STATKEY_PARAM = "statkey"
     private const val OWNER_PARAM = "owner"
     private const val MODULE_PARAM = "module"
+    private const val TREEMAP_PARAM = "treemap"
 
     fun parser(params: Map<String, String?>): CodeReferencesNavRoute {
       val statKey = params[STATKEY_PARAM]
@@ -71,10 +78,18 @@ data class CodeReferencesNavRoute(
           null
         }
       }
+      val treemap = params[TREEMAP_PARAM]?.trim()?.let {
+        if (it.isNotBlank()) {
+          it.toBoolean()
+        } else {
+          null
+        }
+      }
       return CodeReferencesNavRoute(
         statKey = statKey,
         owner = owner,
         module = module,
+        treemap = treemap,
       )
     }
   }
@@ -130,6 +145,27 @@ fun CodeReferencesComposable(
       }) {
         Text("View Grouped by Module")
       }
+
+      Text(" ")
+      A("#", {
+        onClick {
+          navRouteRepo.updateNavRoute(
+            codeReferencesNavRoute.copy(
+              treemap = if (codeReferencesNavRoute.treemap != null) {
+                !codeReferencesNavRoute.treemap
+              } else {
+                true
+              }
+            )
+          )
+        }
+      }) {
+        if (codeReferencesNavRoute.treemap == true) {
+          Text("Hide Treemap")
+        } else {
+          Text("Show Treemap")
+        }
+      }
     }
   }
 
@@ -157,8 +193,11 @@ fun CodeReferencesComposable(
       BootstrapLoadingMessageWithSpinner("Loading Code References")
       return
     }
-    StatTiles(statTotalsOrig!!.statTotals
-      .filter { it.key.dataType == StatDataType.CODE_REFERENCES }) { statKey ->
+    val codeReferenceStatTotals: List<StatTotalAndMetadata> = statTotalsOrig!!.statTotals.values
+      .filter { statTotalAndMetadata -> statTotalAndMetadata.metadata.dataType == StatDataType.CODE_REFERENCES }
+    StatTiles(
+      codeReferenceStatTotals
+    ) { statKey ->
       navRouteRepo.updateNavRoute(
         CodeReferencesNavRoute(statKey)
       )
@@ -206,6 +245,16 @@ fun CodeReferencesComposable(
         }
       }
 
+    if (codeReferencesNavRoute.treemap == true) {
+      BootstrapRow {
+        BootstrapColumn {
+          PlotlyTreeMapComposable(
+            filePaths = filteredByOwner.map { it.codeReference.filePath },
+          )
+        }
+      }
+    }
+
     val codeReferencesByOwner = allCodeReferencesForStat.groupBy { it.owner }
     val totalCodeReferenceCount = allCodeReferencesForStat.size
     BootstrapRow {
@@ -223,10 +272,8 @@ fun CodeReferencesComposable(
             }.sortedBy { it.displayText }
           ) {
             navRouteRepo.updateNavRoute(
-              CodeReferencesNavRoute(
-                statKey = statKey,
+              codeReferencesNavRoute.copy(
                 owner = it?.value,
-                module = codeReferencesNavRoute.module,
               )
             )
           }
@@ -248,9 +295,7 @@ fun CodeReferencesComposable(
             }.sortedBy { it.displayText }
           ) {
             navRouteRepo.updateNavRoute(
-              CodeReferencesNavRoute(
-                statKey = codeReferencesNavRoute.statKey,
-                owner = codeReferencesNavRoute.owner,
+              codeReferencesNavRoute.copy(
                 module = it?.value
               )
             )

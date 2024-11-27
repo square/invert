@@ -15,7 +15,7 @@ object FormattingUtils {
   }
 
   internal fun MetadataJsReportModel.dateDisplayStr(): String {
-    val instant = Instant.fromEpochSeconds(time)
+    val instant = Instant.fromEpochSeconds(currentTime)
     val timeZone = TimeZone.currentSystemDefault()
     val dateTime = instant.toLocalDateTime(timeZone)
 
@@ -25,7 +25,7 @@ object FormattingUtils {
     } ${dateTime.dayOfMonth}, ${dateTime.year} at " +
         "${dateTime.hour.toString().padStart(2, '0')}:${
           dateTime.minute.toString().padStart(2, '0')
-        }:${dateTime.second.toString().padStart(2, '0')} ($timezoneId)"
+        }:${dateTime.second.toString().padStart(2, '0')} ($currentTimezoneId)"
 
     return formattedDate
   }

@@ -29,7 +29,6 @@ import com.squareup.invert.common.pages.OwnerDetailReportPage
 import com.squareup.invert.common.pages.OwnersReportPage
 import com.squareup.invert.common.pages.PluginDetailReportPage
 import com.squareup.invert.common.pages.StatDetailReportPage
-import com.squareup.invert.common.pages.SuppressAnnotationReportPage
 import com.squareup.invert.common.pages.UnusedModulesReportPage
 import invertComposeMain
 import kotlinx.browser.window
@@ -134,7 +133,6 @@ class InvertReport(
       GradlePluginsReportPage,
       StatDetailReportPage,
       UnusedModulesReportPage,
-      SuppressAnnotationReportPage,
       GitHubMarkdownReportPage,
       GradleRepositoriesReportPage,
     )

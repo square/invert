@@ -7,7 +7,6 @@ import com.squareup.invert.examples.repository.CategoryRepo
 import com.squareup.invert.examples.scopes.AppScope
 import javax.inject.Inject
 
-
 @ContributesBinding(AppScope::class)
 class FakeCategoryRepo @Inject constructor(
     private val mockAccount: MockAccount

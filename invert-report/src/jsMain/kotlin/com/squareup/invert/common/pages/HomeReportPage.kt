@@ -76,7 +76,7 @@ fun HomeComposable(
       }
     }) {
     Div({ classes("text-center") }) {
-      metadata.gitSha?.let { gitSha ->
+      metadata.latestCommitGitSha?.let { gitSha ->
         P({
           classes("fs-6")
         }) {
@@ -91,13 +91,6 @@ fun HomeComposable(
             Text(gitSha.substring(0, minOf(7, gitSha.length)))
           }
           Text(" on " + metadata.dateDisplayStr())
-        }
-        if (metadata.branchName != metadata.currentBranch) {
-          P({
-            classes("fs-6 text-warning bg-dark text-center".split(" "))
-          }) {
-            Text("Report was not run on ${metadata.branchName}, but on ${metadata.currentBranch} instead with commit ${metadata.currentBranchHash}")
-          }
         }
       }
     }
@@ -146,31 +139,31 @@ fun HomeComposable(
       OwnersReportPage.navPage
     ) { navRouteRepo.updateNavRoute(OwnersNavRoute) }
 
-    statTotals.statTotals.entries.forEach { statTotal ->
+    statTotals.statTotals.values.forEach { statTotalAndMetadata ->
       BootstrapColumn(3) {
         BootstrapJumbotron(
           centered = true,
           paddingNum = 2,
           headerContent = {
-            Text(statTotal.value.formatDecimalSeparator())
+            Text(statTotalAndMetadata.total.formatDecimalSeparator())
           }
         ) {
           A(href = "#", {
             onClick {
               navRouteRepo.updateNavRoute(
-                if (statTotal.key.dataType == StatDataType.CODE_REFERENCES) {
-                  CodeReferencesNavRoute(statKey = statTotal.key.key)
+                if (statTotalAndMetadata.metadata.dataType == StatDataType.CODE_REFERENCES) {
+                  CodeReferencesNavRoute(statKey = statTotalAndMetadata.metadata.key)
                 } else {
                   StatDetailNavRoute(
                     pluginIds = listOf(),
-                    statKeys = listOf(statTotal.key.key)
+                    statKeys = listOf(statTotalAndMetadata.metadata.key)
                   )
                 }
               )
             }
           }) {
             Small {
-              Text(statTotal.key.description)
+              Text(statTotalAndMetadata.metadata.description)
             }
           }
         }

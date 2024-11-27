@@ -22,13 +22,16 @@ import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatKey
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.target
+import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Br
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.Hr
+import org.jetbrains.compose.web.dom.Li
 import org.jetbrains.compose.web.dom.P
 import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.dom.Ul
 import ui.BootstrapColumn
 import ui.BootstrapLoadingMessageWithSpinner
 import ui.BootstrapRow
@@ -171,6 +174,7 @@ fun ByOwnerComposable(
 
   val codeReferenceStatTypes = statInfosOrig!!
     .filter { it.dataType == StatDataType.CODE_REFERENCES }
+    .sortedBy { it.description }
 
   BootstrapRow {
     BootstrapColumn(6) {
@@ -224,6 +228,28 @@ fun ByOwnerComposable(
     }
     .map { it.key }
 
+  if(navRoute.statKey.isNullOrBlank()){
+
+
+    H3{
+      Text("Select a Stat to view Owner Breakdown")
+    }
+    Ul {
+      codeReferenceStatTypes.forEach {statMetadata ->
+        Li {
+          A("#", {
+            onClick {
+              navRouteRepo.updateNavRoute(navRoute.copy(statKey = statMetadata.key))
+            }
+          }) {
+            Text(statMetadata.description + " (" + statMetadata.key + ")")
+          }
+        }
+      }
+    }
+    return
+  }
+
   BootstrapTabPane(
     codeReferenceStatTypesFilteredByNavParams
       .mapNotNull { statKey ->
@@ -260,12 +286,14 @@ fun ByOwnerComposable(
           getStatDescription(statKey) + " ($countMessage)"
         ) {
           BootstrapRow {
-            BootstrapColumn(3) {
+            BootstrapColumn(6) {
               val bySize: Map<OwnerName, Int> =
                 ownerToModulePathToCodeReferences.entries.map { it.key to it.value.values.sumOf { it.size } }
                   .sortedByDescending { it.second }.toMap()
               ChartJsChartComposable(
+                domId = "owner_breakdown_${statKey}_bar",
                 type = "bar",
+                height = 274.px,
                 data = ChartsJs.ChartJsData(
                   labels = bySize.keys,
                   datasets = listOf(
@@ -285,12 +313,14 @@ fun ByOwnerComposable(
                 }
               )
             }
-            BootstrapColumn(3) {
+            BootstrapColumn(6) {
               val bySize: Map<OwnerName, Int> =
                 ownerToModulePathToCodeReferences.entries.map { it.key to it.value.values.sumOf { it.size } }
                   .sortedByDescending { it.second }.toMap()
               ChartJsChartComposable(
+                domId = "owner_breakdown_${statKey}_pie",
                 type = "pie",
+                height = 274.px,
                 data = ChartsJs.ChartJsData(
                   labels = bySize.keys,
                   datasets = listOf(

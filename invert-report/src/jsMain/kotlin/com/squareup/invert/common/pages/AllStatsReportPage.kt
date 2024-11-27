@@ -1,6 +1,7 @@
 package com.squareup.invert.common.pages
 
 
+import PagingConstants
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -15,6 +16,7 @@ import com.squareup.invert.common.utils.FormattingUtils.formatDecimalSeparator
 import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
+import com.squareup.invert.models.js.StatTotalAndMetadata
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Text
@@ -81,7 +83,7 @@ fun AllStatsComposable(
   val statTotalsOrig by reportDataRepo.statTotals.collectAsState(null)
   val moduleToOwnerMapFlowValue by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
-  H1({classes("text-center")}) { Text("Stat Totals") }
+  H1({ classes("text-center") }) { Text("Stat Totals") }
 
   if (moduleToOwnerMapFlowValue == null) {
     BootstrapLoadingSpinner()
@@ -99,7 +101,7 @@ fun AllStatsComposable(
   val statInfos = statsData.statInfos.values
 
   StatDataType.entries.forEach { statDataType: StatDataType ->
-    val statsOfType = statTotals.statTotals.filterKeys { it.dataType == statDataType }
+    val statsOfType = statTotals.statTotals.values.filter { it.metadata.dataType == statDataType }
     if (statsOfType.isNotEmpty()) {
       H1 { Text("${statDataType.displayName} Stat Counts") }
       StatTiles(statsOfType) { statKey ->
@@ -119,7 +121,8 @@ fun AllStatsComposable(
     }
   }
 
-  BootstrapButton("View All",
+  BootstrapButton(
+    "View All",
     BootstrapButtonType.PRIMARY,
     onClick = {
       navRouteRepo.updateNavRoute(
@@ -133,21 +136,21 @@ fun AllStatsComposable(
 
   val stats = statsData.statInfos.values
 
-  val statTotalsMap = statTotalsOrig?.statTotals
+  val statTotalsMap: Map<StatKey, StatTotalAndMetadata>? = statTotalsOrig?.statTotals
 
   BootstrapTable(
     headers = listOf("Key", "Description", "Type", "Category", "Count"),
     maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
     rows = stats
       .filter { it.dataType != StatDataType.STRING }
-      .map { statMetadata ->
+      .map { statMetadata: StatMetadata ->
         mutableListOf<String>(
           statMetadata.key,
           statMetadata.description,
           statMetadata.dataType.name,
           statMetadata.category
         ).apply {
-          statTotalsMap?.get(statMetadata)?.let { count ->
+          statTotalsMap?.get(statMetadata.key)?.let { count ->
             add(count.toString())
           }
         }
@@ -173,23 +176,23 @@ fun AllStatsComposable(
 }
 
 @Composable
-fun StatTiles(statTotals: Map<StatMetadata, Int>, onClick: (StatKey) -> Unit) {
+fun StatTiles(codeReferenceStatTotals: List<StatTotalAndMetadata>, onClick: (StatKey) -> Unit) {
   BootstrapRow {
-    statTotals.entries.sortedBy { it.key.description }.forEach { statTotal ->
+    codeReferenceStatTotals.sortedBy { it.metadata.description }.forEach { statTotalAndMetadata ->
       BootstrapColumn(4) {
         BootstrapJumbotron(
           centered = true,
           paddingNum = 2,
           headerContent = {
-            Text(statTotal.value.formatDecimalSeparator())
+            Text(statTotalAndMetadata.total.formatDecimalSeparator())
           }
         ) {
           A(href = "#", {
             onClick {
-              onClick(statTotal.key.key)
+              onClick(statTotalAndMetadata.metadata.key)
             }
           }) {
-            Text(statTotal.key.description)
+            Text(statTotalAndMetadata.metadata.description)
           }
         }
       }
