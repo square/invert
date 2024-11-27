@@ -193,3 +193,10 @@ window.renderPlotlyTreeMap = function (domElementId, filePaths, onClick) {
         Plotly.newPlot(domElementId, plotlyData, layout, config);
     });
 }
+
+/**
+ * Allows someone to define a "customizeInvert" function to be called before it is loaded.
+ */
+if (typeof window.configureInvert === 'function') {
+    window.configureInvert();
+}
