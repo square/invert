@@ -1,5 +1,9 @@
 # Change Log
 
+_2024-11-27_
+
+## Version 0.0.3-dev
+* Lots of changes, will update this after release.
 
 ## Version 0.0.2-dev
 
