@@ -80,7 +80,7 @@ window.render3dGraph = function (domElementId, graphDataJson, width, height) {
 
 // https://www.chartjs.org/docs/latest/getting-started/
 window.renderChartJs = function (domElementId, graphDataJson, onClick) {
-    if (window.ForceGraph == undefined) {
+    if (window.Chart === undefined) {
         loadJsFileAsync("https://cdn.jsdelivr.net/npm/chart.js", function (obj) {
             const chartJsData = JSON.parse(graphDataJson)
             const ctx = document.getElementById(domElementId);
@@ -92,7 +92,6 @@ window.renderChartJs = function (domElementId, graphDataJson, onClick) {
                     onClick(label, value)
                 }
             }
-            // chartJsData['type']='bar'
             chartJsData['options']['indexAxis'] = 'y'
             new Chart(ctx, chartJsData);
         });
