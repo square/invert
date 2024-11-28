@@ -26,7 +26,8 @@ import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Br
 import org.jetbrains.compose.web.dom.H1
-import org.jetbrains.compose.web.dom.H3
+import org.jetbrains.compose.web.dom.H5
+import org.jetbrains.compose.web.dom.H6
 import org.jetbrains.compose.web.dom.Hr
 import org.jetbrains.compose.web.dom.Li
 import org.jetbrains.compose.web.dom.P
@@ -41,7 +42,6 @@ import ui.BootstrapTabData
 import ui.BootstrapTabPane
 import ui.BootstrapTable
 import kotlin.reflect.KClass
-
 
 data class OwnerBreakdownNavRoute(
   val owner: String?,
@@ -177,24 +177,47 @@ fun ByOwnerComposable(
     .sortedBy { it.description }
 
   BootstrapRow {
-    BootstrapColumn(6) {
-      H3 {
-        Text("Filter by Owner")
-        BootstrapSelectDropdown(
-          placeholderText = "-- All Owners --",
-          currentValue = ownerParamValue,
-          options = allOwnerNames!!.map { BootstrapSelectOption(it, it) }
-        ) {
-          navRouteRepo.updateNavRoute(
-            navRoute.copy(
-              owner = it?.value
+    BootstrapColumn(classes = listOf("text-center")) {
+      H5 {
+        Text("Owner Breakdown")
+        if (!navRoute.statKey.isNullOrBlank()) {
+          Text(" (")
+          A(href = "#", {
+            onClick {
+              navRouteRepo.updateNavRoute(
+                navRoute.copy(
+                  owner = null,
+                  statKey = null,
+                )
+              )
+            }
+          }) { Text("View All") }
+          Text(")")
+        }
+      }
+    }
+  }
+  BootstrapRow {
+    if (navRoute.statKey?.isNotBlank() == true) {
+      BootstrapColumn(6) {
+        H6 {
+          Text("Filter by Owner")
+          BootstrapSelectDropdown(
+            placeholderText = "-- All Owners --",
+            currentValue = ownerParamValue,
+            options = allOwnerNames!!.map { BootstrapSelectOption(it, it) }
+          ) {
+            navRouteRepo.updateNavRoute(
+              navRoute.copy(
+                owner = it?.value
+              )
             )
-          )
+          }
         }
       }
     }
     BootstrapColumn(6) {
-      H3 {
+      H6 {
         Text("Filter by Stat")
         BootstrapSelectDropdown(
           placeholderText = "-- All Stats --",
@@ -228,21 +251,23 @@ fun ByOwnerComposable(
     }
     .map { it.key }
 
-  if(navRoute.statKey.isNullOrBlank()){
+  if (navRoute.statKey.isNullOrBlank()) {
+    val codeReferencesByCategory = codeReferenceStatTypes.groupBy { it.category }
 
-
-    H3{
-      Text("Select a Stat to view Owner Breakdown")
-    }
-    Ul {
-      codeReferenceStatTypes.forEach {statMetadata ->
-        Li {
-          A("#", {
-            onClick {
-              navRouteRepo.updateNavRoute(navRoute.copy(statKey = statMetadata.key))
+    codeReferencesByCategory.entries.sortedBy { it.key }.forEach { (category, codeReferenceStatTypes) ->
+      H6 {
+        Text(category)
+      }
+      Ul {
+        codeReferenceStatTypes.forEach { statMetadata ->
+          Li {
+            A("#", {
+              onClick {
+                navRouteRepo.updateNavRoute(navRoute.copy(statKey = statMetadata.key))
+              }
+            }) {
+              Text(statMetadata.description + " (" + statMetadata.key + ")")
             }
-          }) {
-            Text(statMetadata.description + " (" + statMetadata.key + ")")
           }
         }
       }

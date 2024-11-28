@@ -19,10 +19,12 @@ import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.js.StatTotalAndMetadata
 import org.jetbrains.compose.web.dom.A
-import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.H4
+import org.jetbrains.compose.web.dom.Li
+import org.jetbrains.compose.web.dom.P
 import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.dom.Ul
 import ui.BootstrapColumn
 import ui.BootstrapLoadingMessageWithSpinner
 import ui.BootstrapLoadingSpinner
@@ -127,47 +129,73 @@ fun CodeReferencesComposable(
   }
 
   val metadata by reportDataRepo.reportMetadata.collectAsState(null)
-  H1 {
-    Text(buildString {
-      append("Code References")
-      codeReferencesNavRoute.statKey?.let { statKey ->
-        val statInfo = statInfosOrig?.filter { it.key == codeReferencesNavRoute.statKey }?.firstOrNull()
-        append(" for ${statInfo?.description ?: statKey} (${codeReferencesNavRoute.statKey})")
+  BootstrapRow {
+    BootstrapColumn(8) {
+      H4 {
+        Text(buildString {
+          append("Code References")
+          codeReferencesNavRoute.statKey?.let { statKey ->
+            val statInfo = statInfosOrig?.filter { it.key == codeReferencesNavRoute.statKey }?.firstOrNull()
+            append(" for ${statInfo?.description ?: statKey} (${codeReferencesNavRoute.statKey})")
+          }
+        })
       }
-    })
-  }
-  H4 {
-    codeReferencesNavRoute.statKey?.let { statKey ->
-      A("#", {
-        onClick {
-          navRouteRepo.updateNavRoute(StatDetailNavRoute(statKeys = listOf(statKey)))
-        }
-      }) {
-        Text("View Grouped by Module")
-      }
+    }
+    BootstrapColumn(4) {
 
-      Text(" ")
-      A("#", {
-        onClick {
-          navRouteRepo.updateNavRoute(
-            codeReferencesNavRoute.copy(
-              treemap = if (codeReferencesNavRoute.treemap != null) {
-                !codeReferencesNavRoute.treemap
-              } else {
-                true
+      codeReferencesNavRoute.statKey?.let { statKey ->
+        P {
+          Ul {
+            Li {
+              A("#", {
+                onClick {
+                  navRouteRepo.updateNavRoute(StatDetailNavRoute(statKeys = listOf(statKey)))
+                }
+              }) {
+                Text("View Grouped by Module")
               }
-            )
-          )
-        }
-      }) {
-        if (codeReferencesNavRoute.treemap == true) {
-          Text("Hide Treemap")
-        } else {
-          Text("Show Treemap")
+            }
+            Li {
+              A("#", {
+                onClick {
+                  navRouteRepo.updateNavRoute(
+                    codeReferencesNavRoute.copy(
+                      treemap = if (codeReferencesNavRoute.treemap != null) {
+                        !codeReferencesNavRoute.treemap
+                      } else {
+                        true
+                      }
+                    )
+                  )
+                }
+              }) {
+                if (codeReferencesNavRoute.treemap == true) {
+                  Text("Hide Treemap")
+                } else {
+                  Text("Show Treemap")
+                }
+              }
+            }
+            Li {
+              A("#", {
+                onClick {
+                  navRouteRepo.updateNavRoute(
+                    OwnerBreakdownNavRoute(
+                      statKey = codeReferencesNavRoute.statKey,
+                      owner = codeReferencesNavRoute.owner,
+                    )
+                  )
+                }
+              }) {
+                Text("View Owner Breakdown")
+              }
+            }
+          }
         }
       }
     }
   }
+
 
   if (moduleToOwnerMapFlowValue == null || metadata == null) {
     BootstrapLoadingSpinner()
