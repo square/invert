@@ -1,5 +1,7 @@
 package com.squareup.invert.models.js
 
+import com.squareup.invert.models.ModulePath
+import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import kotlinx.serialization.Serializable
@@ -13,4 +15,6 @@ data class CollectedStatTotalsJsReportModel(
 data class StatTotalAndMetadata(
   val metadata: StatMetadata,
   val total: Int,
+  val totalByModule: Map<ModulePath, Int>,
+  val totalByOwner: Map<OwnerName, Int>,
 )
