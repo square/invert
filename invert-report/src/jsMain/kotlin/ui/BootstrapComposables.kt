@@ -239,7 +239,7 @@ fun BootstrapTable(
     var sortIdx by remember { mutableStateOf(sortByColumn) }
     var ascending by remember { mutableStateOf(sortAscending) }
 
-    val sortedRows = if (enableSorting && types != null) {
+    val sortedRows = if (enableSorting) {
       val typeToSortBy = types[sortIdx]
       val sorted1 = when (typeToSortBy) {
         Int::class -> {

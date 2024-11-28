@@ -3,6 +3,7 @@ import com.squareup.invert.InvertGradlePlugin
 
 initscript {
   repositories {
+    mavenLocal()
     mavenCentral()
     gradlePluginPortal()
     // SNAPSHOT Versions
@@ -27,9 +28,9 @@ class InvertInitScriptPlugin : Plugin<Gradle> {
       gradle.rootProject {
         buildscript {
           repositories {
+            mavenLocal()
             mavenCentral()
             gradlePluginPortal()
-            mavenLocal()
             // SNAPSHOT Versions
             maven {
               url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")

@@ -212,10 +212,6 @@ val OTHER_REPOS_TO_CONSIDER = listOf(
     project = "nowinandroid",
   ),
   TargetRepo(
-    org = "handstandsam",
-    project = "ShoppingApp",
-  ),
-  TargetRepo(
     org = "rickbusarow",
     project = "ModuleCheck",
     hasAnvil = true,
@@ -223,6 +219,10 @@ val OTHER_REPOS_TO_CONSIDER = listOf(
 )
 
 val ALL_REPOS = listOf(
+  TargetRepo(
+    org = "handstandsam",
+    project = "ShoppingApp",
+  ),
   TargetRepo(
     runOnGitHubAction = false,
     org = "JetBrains",
@@ -325,7 +325,6 @@ val ALL_REPOS = listOf(
       true
     }
   }
-  .filter { it.org == "flipperdevices" }
 
 val CLONES_DIR = File("build/clones").apply {
   if (!exists()) {
