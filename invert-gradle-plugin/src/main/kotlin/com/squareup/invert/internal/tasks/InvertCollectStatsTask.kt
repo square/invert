@@ -1,7 +1,7 @@
 package com.squareup.invert.internal.tasks
 
 import com.squareup.invert.InvertExtension
-import com.squareup.invert.InvertProjectData
+import com.squareup.invert.InvertCollectContext
 import com.squareup.invert.StatCollector
 import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.InvertFileUtils.addSlashAnd
@@ -62,10 +62,10 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
         .also { collectedStats ->
           this.statCollectors?.forEach { statCollector ->
             statCollector.collect(
-              InvertProjectData(
-                rootProjectDir = File(rootProjectPath.get()),
-                projectPath = projectPath,
-                projectDir = projectDir,
+              InvertCollectContext(
+                gitCloneDir = File(rootProjectPath.get()),
+                modulePath = projectPath,
+                moduleDir = projectDir,
               )
             )?.forEach { collectedStat ->
               val statKey = collectedStat.metadata.key

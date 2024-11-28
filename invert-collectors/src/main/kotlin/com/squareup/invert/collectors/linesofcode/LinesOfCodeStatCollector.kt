@@ -1,7 +1,7 @@
 package com.squareup.invert.collectors.linesofcode
 
 import com.squareup.invert.CollectedStat
-import com.squareup.invert.InvertProjectData
+import com.squareup.invert.InvertCollectContext
 import com.squareup.invert.StatCollector
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatDataType
@@ -13,7 +13,7 @@ open class LinesOfCodeStatCollector(
   name: String,
   private val fileExtensions: List<String>,
   keySuffix: String = fileExtensions.joinToString("_"),
-  private val sourcesDirectory: (InvertProjectData) -> File = {
+  private val sourcesDirectory: (InvertCollectContext) -> File = {
     it.projectSrcDir
   },
 ) : StatCollector {
@@ -37,9 +37,9 @@ open class LinesOfCodeStatCollector(
   )
 
   override fun collect(
-    invertProjectData: InvertProjectData,
+    invertCollectContext: InvertCollectContext,
   ): List<CollectedStat>? {
-    val matchingSourceFiles = sourcesDirectory(invertProjectData)
+    val matchingSourceFiles = sourcesDirectory(invertCollectContext)
       .walkTopDown()
       .filter { file -> file.isFile }
       .filter { fileExtensions.contains(it.extension) }

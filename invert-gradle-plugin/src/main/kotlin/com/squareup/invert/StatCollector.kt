@@ -14,7 +14,7 @@ interface StatCollector : Named {
    * Collect [CollectedStat]s for a specific project.
    */
   fun collect(
-    invertProjectData: InvertProjectData,
+    invertCollectContext: InvertCollectContext,
   ): List<CollectedStat>? = null
 
   /**

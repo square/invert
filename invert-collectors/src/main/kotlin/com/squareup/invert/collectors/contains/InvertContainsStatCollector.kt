@@ -1,7 +1,7 @@
 package com.squareup.invert.collectors.contains
 
 import com.squareup.invert.CollectedStat
-import com.squareup.invert.InvertProjectData
+import com.squareup.invert.InvertCollectContext
 import com.squareup.invert.StatCollector
 import com.squareup.invert.collectors.internal.wrapCodeForMarkdown
 import com.squareup.invert.models.Stat
@@ -16,15 +16,15 @@ open class InvertContainsStatCollector(
   private val filePredicate: (File) -> Boolean = { true },
 ) : StatCollector {
   override fun collect(
-    invertProjectData: InvertProjectData,
+    invertCollectContext: InvertCollectContext,
   ): List<CollectedStat>? {
     val codeReferences = mutableListOf<Stat.CodeReferencesStat.CodeReference>()
-    invertProjectData.projectDir
+    invertCollectContext.moduleDir
       .walkTopDown()
       .filter { it.isFile && it.length() > 0 }
       .filter { filePredicate(it) }
       .forEach { sourceFile ->
-        val relativeFilePath = sourceFile.relativeTo(invertProjectData.rootProjectDir).path
+        val relativeFilePath = sourceFile.relativeTo(invertCollectContext.gitCloneDir).path
         sourceFile.readLines()
           .map { it.trim() }
           .forEachIndexed { index, line ->
