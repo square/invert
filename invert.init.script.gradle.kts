@@ -11,8 +11,10 @@ initscript {
     }
   }
   dependencies {
-    val invertVersion = "+"
+    val invertVersion = "0.0.4-dev-SNAPSHOT"
     classpath("com.squareup.invert:invert-gradle-plugin:$invertVersion")
+    classpath("com.squareup.invert:invert-collectors:$invertVersion")
+    classpath("com.squareup.invert:invert-owners-github:$invertVersion")
   }
 }
 
