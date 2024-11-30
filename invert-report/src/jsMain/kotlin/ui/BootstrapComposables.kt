@@ -177,6 +177,18 @@ fun BootstrapTableRow(
   }) {
     cellValues.forEachIndexed { idx, cellValue ->
       Td({
+        style {
+//          property("max-width", "350px")
+
+//      property("word-wrap", "break-word")
+//      property("white-space", "normal")
+//      property("white-space", "nowrap")
+          if (!cellValue.startsWith("```")) {
+            property("word-break", "break-all") // Don't allow wrapping for code references
+          }
+//      property("overflow", "hidden")
+        }
+//      max-width: 150px; /* Set a maximum width for the cells */
         if (idx == 0) {
           onClicked?.let {
             onClick { onClicked(idx) }
@@ -235,6 +247,19 @@ fun BootstrapTable(
   var maxNumberOfRows by remember { mutableStateOf(maxResultsLimitConstant) }
   Table({
     classes("table table-bordered table-striped table-hover table-sm".split(" "))
+    style {
+      property("font-size", "0.6rem")
+//      : ;
+//      -overflow: ellipsis;
+//      white-space: nowrap; /* Prevents wrapping */
+//      max-width: 150px; /* Set a maximum width for the cells */
+//      : ; /* Adjust to make text smaller */
+//      property("transform", "scale(0.7)")
+//      property("transform-origin", "top left")
+//      property("width", "100%")
+//      transform: scale(0.9); /* Adjust the scale factor as needed */
+//      transform-origin: top left; /* Keeps the table aligned to its original position */
+    }
   }) {
     var sortIdx by remember { mutableStateOf(sortByColumn) }
     var ascending by remember { mutableStateOf(sortAscending) }
