@@ -9,6 +9,7 @@ import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.GradlePluginId
 import com.squareup.invert.models.ModulePath
+import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatKey
@@ -42,8 +43,28 @@ object InvertJsReportUtils {
     )
   }
 
-  fun computeGlobalStats(allProjectsStatsData: StatsJsReportModel): Map<StatKey, StatTotalAndMetadata> {
-    val globalStats: Map<StatMetadata, Int> = allProjectsStatsData.statInfos.values
+  fun countFromStat(stat: Stat?): Int {
+    return when (stat) {
+      is Stat.NumericStat -> stat.value
+      is Stat.CodeReferencesStat -> stat.value.size
+      is Stat.BooleanStat -> if (stat.value) {
+        1
+      } else {
+        0
+      }
+
+      else -> {
+        0 // Default Value
+      }
+    }
+  }
+
+  fun computeGlobalTotals(
+    allProjectsStatsData: StatsJsReportModel,
+    collectedOwnershipInfo: OwnershipJsReportModel
+  ): Map<StatKey, StatTotalAndMetadata> {
+    val moduleToOwnerMap = collectedOwnershipInfo.modules
+    val allStatMetadatas: List<StatMetadata> = allProjectsStatsData.statInfos.values
       .filter { statInfo ->
         when (statInfo.dataType) {
           StatDataType.BOOLEAN,
@@ -55,26 +76,51 @@ object InvertJsReportUtils {
           }
         }
       }
-      .associateWith { statMetadata: StatMetadata ->
-        val statKey = statMetadata.key
-        allProjectsStatsData.statsByModule.values.sumOf { statsForModule: Map<StatKey, Stat> ->
-          val stat: Stat? = statsForModule[statKey]
-          when (stat) {
-            is Stat.NumericStat -> stat.value
-            is Stat.CodeReferencesStat -> stat.value.size
-            is Stat.BooleanStat -> if (stat.value) {
-              1
-            } else {
-              0
-            }
 
-            else -> {
-              0 // Default Value
-            }
+
+    val globalTotals: Map<StatKey, StatTotalAndMetadata> = allStatMetadatas.associate { statMetadata: StatMetadata ->
+      var totalCount = 0 // Total count of the stat across all modules
+      val totalByModule: Map<ModulePath, Int> = allProjectsStatsData.statsByModule.entries
+        .mapNotNull { (modulePath: ModulePath, statsForModule: Map<StatKey, Stat>) ->
+          val stat: Stat? = statsForModule[statMetadata.key]
+          if (stat != null) {
+            val countForStat = countFromStat(stat)
+            totalCount += countForStat
+            modulePath to countForStat
+          } else {
+            null
           }
         }
-      }.toMap()
-    return globalStats.entries.associate { it.key.key to StatTotalAndMetadata(it.key, it.value) }
+        .filter { it.second != 0 } // Drop all the `0` entries to avoid clutter in the JSON files
+        .toMap()
+
+      val ownerToTotalCount: Map<OwnerName, Int> = totalByModule.entries
+        .groupBy { (modulePath, totalForModule) ->
+          val ownerName = moduleToOwnerMap[modulePath]
+
+          ownerName
+        }
+        .map { (modulePath, entry) ->
+          modulePath to entry.sumOf { it.value }
+        }
+        .mapNotNull { (ownerName, totalCountForOwner) ->
+          if (ownerName == null) {
+            null
+          } else {
+            ownerName to totalCountForOwner
+          }
+        }
+        .toMap()
+
+      statMetadata.key to StatTotalAndMetadata(
+        metadata = statMetadata,
+        total = totalCount,
+        totalByModule = totalByModule,
+        totalByOwner = ownerToTotalCount
+      )
+    }.toMap()
+
+    return globalTotals
   }
 
   /**
