@@ -8,6 +8,7 @@ import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import com.squareup.invert.models.js.ConfigurationsJsReportModel
 import com.squareup.invert.models.js.DependenciesJsReportModel
 import com.squareup.invert.models.js.DirectDependenciesJsReportModel
+import com.squareup.invert.models.js.HistoricalData
 import com.squareup.invert.models.js.HomeJsReportModel
 import com.squareup.invert.models.js.JsReportFileKey
 import com.squareup.invert.models.js.MetadataJsReportModel
@@ -17,6 +18,7 @@ import com.squareup.invert.models.js.StatsJsReportModel
 import externalLoadJavaScriptFile
 import kotlinx.browser.window
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.serialization.builtins.ListSerializer
 
 object RemoteJsLoadingProgress {
   val awaitingResults = MutableStateFlow<List<JsReportFileKey>>(listOf())
@@ -53,7 +55,7 @@ object RemoteJsLoadingProgress {
         JsReportFileKey.INVERTED_DEPENDENCIES -> {
           collectedDataRepo.reportDataUpdated(
             InvertJson.decodeFromString(DependenciesJsReportModel.serializer(), json)
-            )
+          )
         }
 
         JsReportFileKey.DIRECT_DEPENDENCIES -> {
@@ -103,6 +105,10 @@ object RemoteJsLoadingProgress {
             InvertJson.decodeFromString(CollectedStatTotalsJsReportModel.serializer(), json)
           )
         }
+
+        JsReportFileKey.HISTORICAL_DATA -> collectedDataRepo.historicalDataUpdated(
+          InvertJson.decodeFromString(ListSerializer(HistoricalData.serializer()), json)
+        )
       }
     }
 }

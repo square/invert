@@ -10,6 +10,7 @@ enum class InvertPluginFileKey(
 ) {
   DEPENDENCIES("dependencies.json", "Dependencies"),
   CONFIGURATIONS("configurations.json", "Configurations"),
+  HISTORICAL_DATA("historical_data.json", "Historical Data"),
   PLUGINS("plugins.json", "Plugins"),
   OWNERS("owners.json", "Owners"),
   METADATA("metadata.json", "Metadata"),

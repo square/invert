@@ -96,6 +96,7 @@ abstract class InvertTask : DefaultTask() {
         collectedDependencies = allCollectedData.collectedDependencies,
         collectedConfigurations = allCollectedData.collectedConfigurations,
         collectedPlugins = allCollectedData.collectedPlugins,
+        historicalData = emptyList(),
       )
     }
   }

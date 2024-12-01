@@ -10,6 +10,7 @@ import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import com.squareup.invert.models.js.ConfigurationsJsReportModel
 import com.squareup.invert.models.js.DependenciesJsReportModel
 import com.squareup.invert.models.js.DirectDependenciesJsReportModel
+import com.squareup.invert.models.js.HistoricalData
 import com.squareup.invert.models.js.HomeJsReportModel
 import com.squareup.invert.models.js.JsReportFileKey
 import com.squareup.invert.models.js.MetadataJsReportModel
@@ -17,6 +18,7 @@ import com.squareup.invert.models.js.OwnershipJsReportModel
 import com.squareup.invert.models.js.PluginsJsReportModel
 import com.squareup.invert.models.js.StatsJsReportModel
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.ListSerializer
 import java.io.File
 
 class InvertJsReportWriter(
@@ -35,6 +37,7 @@ class InvertJsReportWriter(
     collectedOwnershipInfo: OwnershipJsReportModel,
     globalStatTotals: CollectedStatTotalsJsReportModel,
     reportMetadata: MetadataJsReportModel,
+    historicalData: List<HistoricalData>,
   ) {
     val pluginsReport = InvertJsReportUtils.toCollectedPlugins(allPluginsData)
     val modulesList = allProjectsDependencyData.map { it.path }
@@ -49,6 +52,12 @@ class InvertJsReportWriter(
       fileKey = JsReportFileKey.METADATA,
       serializer = MetadataJsReportModel.serializer(),
       value = reportMetadata
+    )
+
+    writeJsFileInDir(
+      fileKey = JsReportFileKey.HISTORICAL_DATA,
+      serializer = ListSerializer(HistoricalData.serializer()),
+      value = historicalData
     )
 
     writeJsFileInDir(

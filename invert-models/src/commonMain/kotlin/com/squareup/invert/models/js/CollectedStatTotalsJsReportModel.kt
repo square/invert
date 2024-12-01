@@ -18,3 +18,9 @@ data class StatTotalAndMetadata(
   val totalByModule: Map<ModulePath, Int>,
   val totalByOwner: Map<OwnerName, Int>,
 )
+
+@Serializable
+data class HistoricalData(
+  val reportMetadata: MetadataJsReportModel,
+  val statTotalsAndMetadata: CollectedStatTotalsJsReportModel
+)

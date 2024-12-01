@@ -4,6 +4,7 @@ import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import com.squareup.invert.models.js.ConfigurationsJsReportModel
 import com.squareup.invert.models.js.DependenciesJsReportModel
 import com.squareup.invert.models.js.DirectDependenciesJsReportModel
+import com.squareup.invert.models.js.HistoricalData
 import com.squareup.invert.models.js.HomeJsReportModel
 import com.squareup.invert.models.js.JsReportFileKey
 import com.squareup.invert.models.js.MetadataJsReportModel
@@ -13,6 +14,7 @@ import com.squareup.invert.models.js.StatsJsReportModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 
@@ -48,6 +50,14 @@ class CollectedDataRepo(
     MutableStateFlow(null)
   val combinedReportData: Flow<DependenciesJsReportModel?> = _combinedReportData.onEach {
     loadJsOfType(JsReportFileKey.INVERTED_DEPENDENCIES)
+  }
+
+  private val _historicalData: MutableStateFlow<List<HistoricalData>?> =
+    MutableStateFlow(null)
+  val historicalData: Flow<List<HistoricalData>?> = _historicalData.onEach {
+    loadJsOfType(JsReportFileKey.HISTORICAL_DATA)
+  }.map {
+    it?.sortedBy { it.reportMetadata.currentTime }
   }
 
   private val _directDependenciesData: MutableStateFlow<DirectDependenciesJsReportModel?> =
@@ -111,6 +121,10 @@ class CollectedDataRepo(
 
   fun statTotalsUpdated(statTotals: CollectedStatTotalsJsReportModel) {
     this._statTotals.value = statTotals
+  }
+
+  fun historicalDataUpdated(historicalData: List<HistoricalData>) {
+    this._historicalData.value = historicalData
   }
 
   fun homeUpdated(data: HomeJsReportModel) {
