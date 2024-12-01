@@ -6,7 +6,7 @@ import com.squareup.invert.internal.models.CollectedOwnershipForProject
 import com.squareup.invert.internal.models.CollectedPluginsForProject
 import com.squareup.invert.internal.models.CollectedStatsForProject
 import com.squareup.invert.internal.report.js.InvertJsReportUtils
-import com.squareup.invert.internal.report.js.InvertJsReportUtils.computeGlobalStats
+import com.squareup.invert.internal.report.js.InvertJsReportUtils.computeGlobalTotals
 import com.squareup.invert.internal.report.js.InvertJsReportWriter
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
 import com.squareup.invert.logging.InvertLogger
@@ -40,7 +40,7 @@ class InvertReportWriter(
       invertedModulesList = invertedDependenciesJsReportModel.getAllModulePaths()
     )
 
-    val globalStats = computeGlobalStats(allProjectsStatsData)
+    val globalStats = computeGlobalTotals(allProjectsStatsData, collectedOwnershipInfo)
 
     // JSON Report
     InvertJsonReportWriter(invertLogger, rootBuildReportsDir).createInvertJsonReport(
