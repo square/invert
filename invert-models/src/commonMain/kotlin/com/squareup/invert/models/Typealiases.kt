@@ -7,5 +7,6 @@ typealias ModulePath = String
 typealias OwnerName = String
 typealias GitSha = String
 typealias GitBranch = String
+typealias GitTag = String
 typealias StatKey = String
 typealias ExtraKey = String
