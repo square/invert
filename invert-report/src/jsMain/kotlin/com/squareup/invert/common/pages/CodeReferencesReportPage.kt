@@ -8,15 +8,19 @@ import com.squareup.invert.common.DependencyGraph
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ModuleOwnerAndCodeReference
 import com.squareup.invert.common.ReportDataRepo
+import com.squareup.invert.common.charts.ChartJsLineChartComposable
+import com.squareup.invert.common.charts.ChartsJs
 import com.squareup.invert.common.charts.PlotlyTreeMapComposable
 import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.CodeReferencesNavRoute.Companion.parser
+import com.squareup.invert.common.utils.FormattingUtils.formatEpochToDate
 import com.squareup.invert.models.ExtraKey
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.StatDataType
+import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.js.StatTotalAndMetadata
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.H3
@@ -39,6 +43,7 @@ data class CodeReferencesNavRoute(
   val owner: String? = null,
   val module: String? = null,
   val treemap: Boolean? = null,
+  val chart: Boolean? = null,
 ) : BaseNavRoute(CodeReferencesReportPage.navPage) {
 
   override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
@@ -55,11 +60,15 @@ data class CodeReferencesNavRoute(
       treemap?.let {
         params[TREEMAP_PARAM] = treemap.toString()
       }
+      chart?.let {
+        params[CHART_PARAM] = chart.toString()
+      }
     }
 
   companion object {
 
     private const val STATKEY_PARAM = "statkey"
+    private const val CHART_PARAM = "chart"
     private const val OWNER_PARAM = "owner"
     private const val MODULE_PARAM = "module"
     private const val TREEMAP_PARAM = "treemap"
@@ -87,11 +96,19 @@ data class CodeReferencesNavRoute(
           null
         }
       }
+      val chart = params[CHART_PARAM]?.trim()?.let {
+        if (it.isNotBlank()) {
+          it.toBoolean()
+        } else {
+          null
+        }
+      }
       return CodeReferencesNavRoute(
         statKey = statKey,
         owner = owner,
         module = module,
         treemap = treemap,
+        chart = chart,
       )
     }
   }
@@ -119,14 +136,17 @@ fun CodeReferencesComposable(
   navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
   val allModulesOrig by reportDataRepo.allModules.collectAsState(null)
+  val historicalDataOrig by reportDataRepo.historicalData.collectAsState(null)
   val allOwnerNames by reportDataRepo.allOwnerNames.collectAsState(null)
   val moduleToOwnerMapFlowValue: Map<ModulePath, OwnerName>? by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
   val statInfosOrig by reportDataRepo.statInfos.collectAsState(null)
-  if (statInfosOrig == null || allOwnerNames == null) {
+  if (statInfosOrig == null || allOwnerNames == null || historicalDataOrig == null) {
     BootstrapLoadingMessageWithSpinner("Loading Stats")
     return
   }
+
+  val historicalData = historicalDataOrig!!
 
   val metadata by reportDataRepo.reportMetadata.collectAsState(null)
   BootstrapRow {
@@ -142,7 +162,6 @@ fun CodeReferencesComposable(
       }
     }
     BootstrapColumn(4) {
-
       codeReferencesNavRoute.statKey?.let { statKey ->
         P {
           Ul {
@@ -153,6 +172,29 @@ fun CodeReferencesComposable(
                 }
               }) {
                 Text("View Grouped by Module")
+              }
+            }
+            if (historicalData.size > 1) {
+              Li {
+                A("#", {
+                  onClick {
+                    navRouteRepo.updateNavRoute(
+                      codeReferencesNavRoute.copy(
+                        chart = if (codeReferencesNavRoute.chart != null) {
+                          !codeReferencesNavRoute.chart
+                        } else {
+                          true
+                        }
+                      )
+                    )
+                  }
+                }) {
+                  if (codeReferencesNavRoute.chart == true) {
+                    Text("Hide Chart")
+                  } else {
+                    Text("Show Chart")
+                  }
+                }
               }
             }
             Li {
@@ -279,6 +321,39 @@ fun CodeReferencesComposable(
           PlotlyTreeMapComposable(
             filePaths = filteredByOwner.map { it.codeReference.filePath },
           )
+        }
+      }
+    }
+
+    if (codeReferencesNavRoute.chart == true) {
+      BootstrapRow {
+        BootstrapColumn {
+          val datasets = mutableListOf<ChartsJs.ChartJsDataset>()
+          val currentHistoricalData = historicalData.last()
+          val remainingStatKeys: List<StatKey> = listOf(statKey)
+          remainingStatKeys.forEach { remainingStatKey ->
+            val values: List<Int> = historicalData.map { historicalDataPoint ->
+              historicalDataPoint.statTotalsAndMetadata.statTotals[remainingStatKey]?.total ?: 0
+            }
+            val remainingStat = currentHistoricalData.statTotalsAndMetadata.statTotals[remainingStatKey]!!.metadata
+            datasets.add(
+              ChartsJs.ChartJsDataset(
+                label = remainingStat.description,
+                data = values
+              )
+            )
+          }
+
+          val chartJsData = ChartsJs.ChartJsData(
+            labels = historicalData.map { formatEpochToDate(it.reportMetadata.latestCommitTime) },
+            datasets = datasets,
+          )
+
+          ChartJsLineChartComposable(
+            data = chartJsData,
+            onClick = { label, value ->
+
+            })
         }
       }
     }
