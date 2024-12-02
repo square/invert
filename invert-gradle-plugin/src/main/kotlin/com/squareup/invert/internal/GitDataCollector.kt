@@ -56,7 +56,7 @@ internal class GitDataCollector(private val gitProjectRootDir: File) {
 
   fun currentTag(): GitBranch? {
     val cmdResult = exec("git describe --tags --exact-match", gitProjectRootDir).stdOut.lines()[0]
-    return if (cmdResult.contains("fatal: no tag exactly matches")) {
+    return if (cmdResult.contains("fatal: no tag exactly matches") || cmdResult.isEmpty()) {
       null
     } else {
       cmdResult
