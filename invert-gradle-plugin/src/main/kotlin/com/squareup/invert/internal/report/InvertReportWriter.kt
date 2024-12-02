@@ -47,7 +47,7 @@ class InvertReportWriter(
     val historicalDataWithCurrent = (historicalData + HistoricalData(
       reportMetadata = reportMetadata,
       statTotalsAndMetadata = CollectedStatTotalsJsReportModel(globalStats)
-    )).sortedBy { it.reportMetadata.latestCommitTime  }
+    )).sortedByDescending { it.reportMetadata.latestCommitTime  }
 
     // JSON Report
     InvertJsonReportWriter(invertLogger, rootBuildReportsDir).createInvertJsonReport(
