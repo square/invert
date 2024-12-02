@@ -2,6 +2,7 @@ package com.squareup.invert.models.js
 
 import com.squareup.invert.models.GitBranch
 import com.squareup.invert.models.GitSha
+import com.squareup.invert.models.GitTag
 import kotlinx.serialization.Serializable
 
 /**
@@ -17,6 +18,7 @@ data class MetadataJsReportModel(
     val latestCommitTimeFormatted: String,
     val latestCommitGitSha: GitSha?,
     val branchName: GitBranch?,
+    val tagName: GitTag?,
     val remoteRepoGit: String,
     val remoteRepoUrl: String,
     val mavenRepoUrls: List<String>

@@ -57,7 +57,7 @@ class CollectedDataRepo(
   val historicalData: Flow<List<HistoricalData>?> = _historicalData.onEach {
     loadJsOfType(JsReportFileKey.HISTORICAL_DATA)
   }.map {
-    it?.sortedBy { it.reportMetadata.currentTime }
+    it?.sortedBy { it.reportMetadata.latestCommitTime }
   }
 
   private val _directDependenciesData: MutableStateFlow<DirectDependenciesJsReportModel?> =

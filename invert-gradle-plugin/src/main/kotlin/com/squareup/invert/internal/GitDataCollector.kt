@@ -54,6 +54,19 @@ internal class GitDataCollector(private val gitProjectRootDir: File) {
     return exec("git rev-parse --abbrev-ref HEAD", gitProjectRootDir).stdOut.lines()[0]
   }
 
+  fun currentTag(): GitBranch? {
+    val cmdResult = exec("git describe --tags --exact-match", gitProjectRootDir).stdOut.lines()[0]
+    return if (cmdResult.contains("fatal: no tag exactly matches") || cmdResult.isEmpty()) {
+      null
+    } else {
+      cmdResult
+    }
+  }
+
+  fun currentBranchOrTag(): GitBranch {
+    return currentTag() ?: currentBranch()
+  }
+
   /**
    *
    * Example output of the command is:
