@@ -27,7 +27,7 @@ object ProjectMetadataCollector {
       .withZone(TimeZone.getTimeZone(timeZoneId).toZoneId())
 
     val gitDataCollector = GitDataCollector(gitProjectDir)
-    val currentBranch: GitBranch = gitDataCollector.currentBranch()
+    val currentBranch: GitBranch = gitDataCollector.currentBranchOrTag()
     val currentBranchHash = gitDataCollector.gitShaOfBranch(currentBranch, logger)
 
     val latestCommitTimestamp = gitDataCollector.latestCommitTimestamp()
