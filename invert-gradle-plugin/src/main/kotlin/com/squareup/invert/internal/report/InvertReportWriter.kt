@@ -13,6 +13,7 @@ import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
+import com.squareup.invert.models.js.HistoricalData
 import com.squareup.invert.models.js.MetadataJsReportModel
 import java.io.File
 
@@ -27,12 +28,13 @@ class InvertReportWriter(
     collectedDependencies: List<CollectedDependenciesForProject>,
     collectedConfigurations: List<CollectedConfigurationsForProject>,
     collectedPlugins: List<CollectedPluginsForProject>,
+    historicalData: List<HistoricalData>,
   ) {
     val collectedOwnershipInfo = InvertJsReportUtils.buildModuleToOwnerMap(collectedOwners)
     val allProjectsStatsData = InvertJsReportUtils.buildModuleToStatsMap(collectedStats)
     val directDependenciesJsReportModel = InvertJsReportUtils.toDirectDependenciesJsReportModel(collectedDependencies)
-    val invertedDependenciesJsReportModel = InvertJsReportUtils
-      .toInvertedDependenciesJsReportModel(collectedDependencies)
+    val invertedDependenciesJsReportModel =
+      InvertJsReportUtils.toInvertedDependenciesJsReportModel(collectedDependencies)
 
     assertModuleMatch(
       logger = invertLogger,
@@ -50,7 +52,8 @@ class InvertReportWriter(
       allProjectsStatsData = allProjectsStatsData,
       allPluginsData = collectedPlugins,
       allOwnersData = collectedOwners,
-      globalStats = globalStats
+      globalStats = globalStats,
+      historicalData = historicalData,
     )
 
     // HTML/JS Report
@@ -64,6 +67,7 @@ class InvertReportWriter(
       collectedOwnershipInfo = collectedOwnershipInfo,
       allProjectsConfigurationsData = collectedConfigurations,
       globalStatTotals = CollectedStatTotalsJsReportModel(globalStats),
+      historicalData = historicalData,
     )
   }
 

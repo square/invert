@@ -62,12 +62,18 @@ object ChartsJs {
     val data: ChartJsData,
     val options: ChartJsOptions,
   )
+  @Serializable
+  data class ChartJsLineChartParam(
+    val type: String,
+    val data: ChartJsData,
+    val options: ChartJsOptions,
+  )
 }
 
 @Composable
 private fun LineChartJsComposable(
   graphDomId: String,
-  chartData: ChartsJs.ChartJsParam,
+  chartData: ChartsJs.ChartJsLineChartParam,
   heightCssValue: CSSSizeValue<*>,
   onClick: (label: String, value: Int) -> Unit = { _, _ -> }
 ) {
@@ -83,12 +89,13 @@ private fun LineChartJsComposable(
       maxWidth(100.percent)
     }
   })
+  val dataAsJson = InvertSerialization.InvertJsonPrettyPrint.encodeToString(
+    ChartsJs.ChartJsLineChartParam.serializer(), chartData
+  )
   CoroutineScope(Dispatchers.Main).launch {
     renderLineChartJs(
       graphDomId,
-      InvertSerialization.InvertJson.encodeToString(
-        ChartsJs.ChartJsParam.serializer(), chartData
-      ),
+      dataAsJson,
       onClick = onClick
     )
   }
@@ -186,7 +193,7 @@ fun ChartJsLineChartComposable(
   LineChartJsComposable(
     graphDomId = domId,
     heightCssValue = height,
-    chartData = ChartsJs.ChartJsParam(
+    chartData = ChartsJs.ChartJsLineChartParam(
       type = "line",
       data = data,
       options = ChartsJs.ChartJsOptions(

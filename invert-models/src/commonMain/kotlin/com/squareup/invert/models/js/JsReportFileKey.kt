@@ -10,6 +10,7 @@ enum class JsReportFileKey(
 ) {
   DIRECT_DEPENDENCIES("direct_dependencies", "Direct Dependencies"),
   INVERTED_DEPENDENCIES("inverted_dependencies", "Inverted Dependencies"),
+  HISTORICAL_DATA("historical_stats", "Historical Stats"),
   HOME("home", "Home"),
   PLUGINS("plugins", "Plugins"),
   OWNERS("owners", "Owners"),

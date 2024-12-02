@@ -13,6 +13,7 @@ import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
+import com.squareup.invert.models.js.HistoricalData
 import com.squareup.invert.models.js.MetadataJsReportModel
 import com.squareup.invert.models.js.PluginsJsReportModel
 import com.squareup.invert.models.js.StatsJsReportModel
@@ -41,6 +42,8 @@ class ReportDataRepo(
     }
 
   val statsData: Flow<StatsJsReportModel?> = collectedDataRepo.statsData
+
+  val historicalData: Flow<List<HistoricalData>?> = collectedDataRepo.historicalData.mapLatest { it }
 
   val statInfos: Flow<Collection<StatMetadata>?> = collectedDataRepo.statsData.mapLatest { it?.statInfos?.values }
 
