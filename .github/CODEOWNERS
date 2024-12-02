@@ -1,3 +1,2 @@
-examples/jvm-with-anvil/ Anvil
 examples/scopes/ @handstandsam
-examples/app/ AppTeam
+examples/app/ @handstandsam

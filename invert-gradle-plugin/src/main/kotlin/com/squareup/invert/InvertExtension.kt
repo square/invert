@@ -6,6 +6,7 @@ import com.squareup.invert.internal.NoOpOwnershipCollector
 import com.squareup.invert.models.ConfigurationName
 import org.gradle.api.Project
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
 
 /**
  * Extension for configuring the [InvertGradlePlugin]
@@ -45,8 +46,16 @@ open class InvertExtension(project: Project) {
   internal val includeConfigurationProperty =
     objects.property(InvertIncludeConfigurationCalculator::class.java)
 
+  @get:InputFile
+  @get:Input
+  internal val historicalDataFileProperty = objects.property<String?>(String::class.java)
+
   fun ownershipCollector(ownershipCollector: InvertOwnershipCollector) {
     ownershipCollectorProperty.set(ownershipCollector)
+  }
+
+  fun historicalData(historicalDataFile: String) {
+    this.historicalDataFileProperty.set(historicalDataFile)
   }
 
   fun includeSubproject(invertShouldIncludeSubProject: (subproject: Project) -> Boolean) {
@@ -77,6 +86,10 @@ open class InvertExtension(project: Project) {
 
   fun addStatCollector(statCollector: StatCollector) {
     statCollectors.add(statCollector)
+  }
+
+  internal fun getHistoricalDataFilePath(): String? {
+    return historicalDataFileProperty.orNull
   }
 
   internal fun getStatCollectors(): Collection<StatCollector> {

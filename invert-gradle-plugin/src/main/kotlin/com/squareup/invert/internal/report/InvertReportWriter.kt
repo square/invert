@@ -44,6 +44,11 @@ class InvertReportWriter(
 
     val globalStats = computeGlobalTotals(allProjectsStatsData, collectedOwnershipInfo)
 
+    val historicalDataWithCurrent = historicalData + HistoricalData(
+      reportMetadata = reportMetadata,
+      statTotalsAndMetadata = CollectedStatTotalsJsReportModel(globalStats)
+    )
+
     // JSON Report
     InvertJsonReportWriter(invertLogger, rootBuildReportsDir).createInvertJsonReport(
       reportMetadata = reportMetadata,
@@ -53,7 +58,7 @@ class InvertReportWriter(
       allPluginsData = collectedPlugins,
       allOwnersData = collectedOwners,
       globalStats = globalStats,
-      historicalData = historicalData,
+      historicalData = historicalDataWithCurrent,
     )
 
     // HTML/JS Report
@@ -67,10 +72,9 @@ class InvertReportWriter(
       collectedOwnershipInfo = collectedOwnershipInfo,
       allProjectsConfigurationsData = collectedConfigurations,
       globalStatTotals = CollectedStatTotalsJsReportModel(globalStats),
-      historicalData = historicalData,
+      historicalData = historicalDataWithCurrent,
     )
   }
-
 
   /**
    * This provides a warning to the user to let them know that a module was found as a dependency

@@ -11,7 +11,10 @@ import com.squareup.invert.internal.report.GradleProjectAnalysisCombiner
 import com.squareup.invert.internal.report.InvertReportWriter
 import com.squareup.invert.logging.GradleInvertLogger
 import com.squareup.invert.logging.InvertLogger
+import com.squareup.invert.models.InvertSerialization.InvertJson
+import com.squareup.invert.models.js.HistoricalData
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.ListSerializer
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.artifacts.repositories.UrlArtifactRepository
@@ -20,6 +23,7 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import java.io.File
@@ -40,6 +44,10 @@ abstract class InvertTask : DefaultTask() {
 
   @get:Internal
   abstract var statCollectors: List<StatCollector>?
+
+  @get:Optional
+  @get:Input
+  abstract val historicalDataFileProperty: Property<String?>
 
   @get:Input
   abstract val projectPath: Property<String>
@@ -86,6 +94,20 @@ abstract class InvertTask : DefaultTask() {
         )
       )
 
+      val historicalDataFile: File? = historicalDataFileProperty.orNull?.let { File(it) }
+      val historicalData: List<HistoricalData> =
+        if (historicalDataFile?.isFile == true && historicalDataFile.length() > 0) {
+          try {
+            val fileContents = historicalDataFile.readText()
+            InvertJson.decodeFromString(ListSerializer(HistoricalData.serializer()), fileContents)
+          } catch (e: Exception) {
+            invertLogger().warn("Failed to read historical data file: $e")
+            listOf()
+          }
+        } else {
+          listOf()
+        }
+
       InvertReportWriter(
         invertLogger = invertLogger(),
         rootBuildReportsDir = invertReportDir,
@@ -96,7 +118,7 @@ abstract class InvertTask : DefaultTask() {
         collectedDependencies = allCollectedData.collectedDependencies,
         collectedConfigurations = allCollectedData.collectedConfigurations,
         collectedPlugins = allCollectedData.collectedPlugins,
-        historicalData = emptyList(),
+        historicalData = historicalData,
       )
     }
   }
@@ -117,7 +139,7 @@ abstract class InvertTask : DefaultTask() {
         InvertFileUtils.REPORTS_SLASH_INVERT_PATH
       )
     )
-
+    this.historicalDataFileProperty.set(extension.getHistoricalDataFilePath())
     this.statCollectors = extension.getStatCollectors().toList()
 
     this.mavenRepoUrls.set(
