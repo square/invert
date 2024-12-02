@@ -7,11 +7,15 @@ import kotlinx.datetime.toLocalDateTime
 
 object FormattingUtils {
   fun Int.formatDecimalSeparator(): String {
-    return toString()
-      .reversed()
-      .chunked(3)
-      .joinToString(",")
-      .reversed()
+    if (this < 1000) {
+      return this.toString()
+    } else {
+      return toString()
+        .reversed()
+        .chunked(3)
+        .joinToString(",")
+        .reversed()
+    }
   }
 
   internal fun MetadataJsReportModel.dateDisplayStr(): String {
