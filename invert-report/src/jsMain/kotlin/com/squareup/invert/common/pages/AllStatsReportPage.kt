@@ -150,8 +150,8 @@ fun AllStatsComposable(
           statMetadata.dataType.name,
           statMetadata.category
         ).apply {
-          statTotalsMap?.get(statMetadata.key)?.let { count ->
-            add(count.toString())
+          statTotalsMap?.get(statMetadata.key)?.let { statTotalAndMetadata: StatTotalAndMetadata ->
+            add(statTotalAndMetadata.total.toString())
           }
         }
       },
