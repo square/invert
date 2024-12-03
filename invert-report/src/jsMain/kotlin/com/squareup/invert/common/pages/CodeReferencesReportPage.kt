@@ -16,11 +16,13 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.CodeReferencesNavRoute.Companion.parser
 import com.squareup.invert.common.utils.FormattingUtils.formatEpochToDate
+import com.squareup.invert.models.ExtraDataType
 import com.squareup.invert.models.ExtraKey
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatKey
+import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.StatTotalAndMetadata
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.H3
@@ -146,7 +148,11 @@ fun CodeReferencesComposable(
     return
   }
 
+  val statInfos = statInfosOrig!!
+
   val historicalData = historicalDataOrig!!
+
+  val currentStatMetadata: StatMetadata? = statInfos.firstOrNull { it.key == codeReferencesNavRoute.statKey }
 
   val metadata by reportDataRepo.reportMetadata.collectAsState(null)
   BootstrapRow {
@@ -154,9 +160,8 @@ fun CodeReferencesComposable(
       H4 {
         Text(buildString {
           append("Code References")
-          codeReferencesNavRoute.statKey?.let { statKey ->
-            val statInfo = statInfosOrig?.filter { it.key == codeReferencesNavRoute.statKey }?.firstOrNull()
-            append(" for ${statInfo?.description ?: statKey} (${codeReferencesNavRoute.statKey})")
+          currentStatMetadata?.let {
+            append(" for ${currentStatMetadata.description} (${codeReferencesNavRoute.statKey})")
           }
         })
       }
@@ -407,6 +412,14 @@ fun CodeReferencesComposable(
       }
     }
 
+    val extraTypes = currentStatMetadata?.extras?.map { extra ->
+      if (extra.type == ExtraDataType.NUMERIC) {
+        Int::class
+      } else {
+        String::class
+      }
+    } ?: emptyList()
+
     BootstrapTable(
       headers = listOf("Module", "Owner", "File", "Code") + extraKeys,
       rows = filteredByOwner
@@ -422,7 +435,7 @@ fun CodeReferencesComposable(
       maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
       sortAscending = true,
       sortByColumn = 2,
-      types = listOf(String::class, String::class, String::class, String::class) + extraKeys.map { String::class }
+      types = listOf(String::class, String::class, String::class, String::class) + extraTypes
     )
   }
 }
