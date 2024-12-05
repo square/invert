@@ -17,7 +17,6 @@ import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.CodeReferencesNavRoute.Companion.parser
 import com.squareup.invert.common.utils.FormattingUtils.formatEpochToDate
 import com.squareup.invert.models.ExtraDataType
-import com.squareup.invert.models.ExtraKey
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.StatDataType
@@ -25,6 +24,7 @@ import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.StatTotalAndMetadata
 import org.jetbrains.compose.web.dom.A
+import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.H4
 import org.jetbrains.compose.web.dom.Li
@@ -153,6 +153,11 @@ fun CodeReferencesComposable(
   val historicalData = historicalDataOrig!!
 
   val currentStatMetadata: StatMetadata? = statInfos.firstOrNull { it.key == codeReferencesNavRoute.statKey }
+  if (currentStatMetadata == null) {
+    H1 { Text("No stat with key ${codeReferencesNavRoute.statKey} found") }
+    return
+  }
+
 
   val metadata by reportDataRepo.reportMetadata.collectAsState(null)
   BootstrapRow {
@@ -160,9 +165,7 @@ fun CodeReferencesComposable(
       H4 {
         Text(buildString {
           append("Code References")
-          currentStatMetadata?.let {
-            append(" for ${currentStatMetadata.description} (${codeReferencesNavRoute.statKey})")
-          }
+          append(" for ${currentStatMetadata.description} (${codeReferencesNavRoute.statKey})")
         })
       }
     }
@@ -288,14 +291,6 @@ fun CodeReferencesComposable(
 
     val allCodeReferencesForStat: Set<ModuleOwnerAndCodeReference> = statsForKey!!.toSet()
 
-    val extraKeys = mutableSetOf<ExtraKey>()
-    allCodeReferencesForStat
-      .forEach { moduleOwnerAndCodeReference ->
-        moduleOwnerAndCodeReference.codeReference.extras.forEach {
-          extraKeys.add(it.key)
-        }
-      }
-
     val filteredByOwner: List<ModuleOwnerAndCodeReference> = allCodeReferencesForStat
       // Filter By Module
       .filter { moduleOwnerAndCodeReference: ModuleOwnerAndCodeReference ->
@@ -398,7 +393,7 @@ fun CodeReferencesComposable(
             options = codeReferencesByModule.map {
               BootstrapSelectOption(
                 value = it.key,
-                displayText = "${it.key}",// (${it.value.size} of $totalCodeReferenceCount)"
+                displayText = it.key,// (${it.value.size} of $totalCodeReferenceCount)"
               )
             }.sortedBy { it.displayText }
           ) {
@@ -412,19 +407,17 @@ fun CodeReferencesComposable(
       }
     }
 
-    val extraTypes = currentStatMetadata?.extras?.map { extra ->
-      if (extra.type == ExtraDataType.NUMERIC) {
-        Int::class
-      } else {
-        String::class
-      }
-    } ?: emptyList()
-
     BootstrapTable(
-      headers = listOf("Module", "Owner", "File", "Code") + extraKeys,
+      headers = listOf(
+        "Module",
+        "Owner",
+        "File",
+        "Code"
+      ) + currentStatMetadata.extras.map { "${it.description} (${it.key})" },
       rows = filteredByOwner
         .map {
-          val listOfExtraValues: List<String> = extraKeys.map { key -> it.codeReference.extras[key] ?: "" }
+          val listOfExtraValues: List<String> =
+            currentStatMetadata.extras.map { extra -> it.codeReference.extras[extra.key] ?: "" }
           listOf(
             it.module,
             it.codeReference.owner ?: (it.owner + " (Owns Module)"),
@@ -435,7 +428,18 @@ fun CodeReferencesComposable(
       maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
       sortAscending = true,
       sortByColumn = 2,
-      types = listOf(String::class, String::class, String::class, String::class) + extraTypes
+      types = listOf(
+        String::class,
+        String::class,
+        String::class,
+        String::class
+      ) + currentStatMetadata.extras.map { extra ->
+        when (extra.type) {
+          ExtraDataType.BOOLEAN -> Boolean::class
+          ExtraDataType.NUMERIC -> Int::class
+          ExtraDataType.STRING -> String::class
+        }
+      }
     )
   }
 }
