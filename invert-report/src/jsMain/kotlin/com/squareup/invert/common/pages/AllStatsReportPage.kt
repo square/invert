@@ -83,8 +83,6 @@ fun AllStatsComposable(
   val statTotalsOrig by reportDataRepo.statTotals.collectAsState(null)
   val moduleToOwnerMapFlowValue by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
-  H1({ classes("text-center") }) { Text("Stat Totals") }
-
   if (moduleToOwnerMapFlowValue == null) {
     BootstrapLoadingSpinner()
     return
@@ -103,7 +101,7 @@ fun AllStatsComposable(
   StatDataType.entries.forEach { statDataType: StatDataType ->
     val statsOfType = statTotals.statTotals.values.filter { it.metadata.dataType == statDataType }
     if (statsOfType.isNotEmpty()) {
-      H1 { Text("${statDataType.displayName} Stat Counts") }
+      H1 { Text("${statDataType.displayName} Stats") }
       StatTiles(statsOfType) { statKey ->
         navRouteRepo.updateNavRoute(
           if (statDataType == StatDataType.CODE_REFERENCES) {
@@ -120,19 +118,6 @@ fun AllStatsComposable(
       }
     }
   }
-
-  BootstrapButton(
-    "View All",
-    BootstrapButtonType.PRIMARY,
-    onClick = {
-      navRouteRepo.updateNavRoute(
-        StatDetailNavRoute(
-          pluginIds = listOf(),
-          statKeys = statInfos.map { it.key }
-        )
-      )
-    }
-  )
 
   val stats = statsData.statInfos.values
 
@@ -171,6 +156,19 @@ fun AllStatsComposable(
         }
       )
 
+    }
+  )
+
+  BootstrapButton(
+    "View All, Grouped By Module",
+    BootstrapButtonType.SECONDARY,
+    onClick = {
+      navRouteRepo.updateNavRoute(
+        StatDetailNavRoute(
+          pluginIds = listOf(),
+          statKeys = statInfos.map { it.key }
+        )
+      )
     }
   )
 }

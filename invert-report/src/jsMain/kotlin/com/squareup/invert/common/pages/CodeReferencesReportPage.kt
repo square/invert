@@ -12,6 +12,7 @@ import com.squareup.invert.common.charts.ChartJsLineChartComposable
 import com.squareup.invert.common.charts.ChartsJs
 import com.squareup.invert.common.charts.PlotlyTreeMapComposable
 import com.squareup.invert.common.navigation.NavPage
+import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.CodeReferencesNavRoute.Companion.parser
@@ -31,6 +32,7 @@ import org.jetbrains.compose.web.dom.Li
 import org.jetbrains.compose.web.dom.P
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.Ul
+import ui.BootstrapButton
 import ui.BootstrapColumn
 import ui.BootstrapLoadingMessageWithSpinner
 import ui.BootstrapLoadingSpinner
@@ -41,7 +43,7 @@ import ui.BootstrapTable
 import kotlin.reflect.KClass
 
 data class CodeReferencesNavRoute(
-  val statKey: String? = null,
+  val statKey: String,
   val owner: String? = null,
   val module: String? = null,
   val treemap: Boolean? = null,
@@ -50,7 +52,7 @@ data class CodeReferencesNavRoute(
 
   override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
     .also { params ->
-      statKey?.let {
+      statKey.let {
         params[STATKEY_PARAM] = it
       }
       if (!owner.isNullOrBlank()) {
@@ -75,7 +77,7 @@ data class CodeReferencesNavRoute(
     private const val MODULE_PARAM = "module"
     private const val TREEMAP_PARAM = "treemap"
 
-    fun parser(params: Map<String, String?>): CodeReferencesNavRoute {
+    fun parser(params: Map<String, String?>): NavRoute {
       val statKey = params[STATKEY_PARAM]
       val owner = params[OWNER_PARAM]?.trim()?.let {
         if (it.isNotBlank()) {
@@ -105,13 +107,17 @@ data class CodeReferencesNavRoute(
           null
         }
       }
-      return CodeReferencesNavRoute(
-        statKey = statKey,
-        owner = owner,
-        module = module,
-        treemap = treemap,
-        chart = chart,
-      )
+      return if (statKey == null) {
+        AllStatsNavRoute()
+      } else {
+        CodeReferencesNavRoute(
+          statKey = statKey,
+          owner = owner,
+          module = module,
+          treemap = treemap,
+          chart = chart,
+        )
+      }
     }
   }
 }
@@ -154,7 +160,10 @@ fun CodeReferencesComposable(
 
   val currentStatMetadata: StatMetadata? = statInfos.firstOrNull { it.key == codeReferencesNavRoute.statKey }
   if (currentStatMetadata == null) {
-    H1 { Text("No stat with key ${codeReferencesNavRoute.statKey} found") }
+    H1 { Text("No stat with key '${codeReferencesNavRoute.statKey}' found") }
+    BootstrapButton("View All Stats") {
+      navRouteRepo.updateNavRoute(AllStatsNavRoute())
+    }
     return
   }
 

@@ -70,7 +70,6 @@ object DefaultNavItems {
       ),
       NavPageGroup(
         "Collected Stats", setOf(
-          CodeReferencesReportPage.navPage.toNavItem(),
           AllStatsNavRoute().navPage.toNavItem(),
           OwnerBreakdownReportPage.navPage.toNavItem()
         )
