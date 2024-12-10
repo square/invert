@@ -53,7 +53,7 @@ fun GradleRepositoriesComposable(
     }
     Br()
     Ul({ classes("fs-6") }) {
-        metadata!!.mavenRepoUrls.forEach { mavenRepoUrl ->
+        metadata!!.artifactRepositories.forEach { mavenRepoUrl ->
             Li {
                 A(href = mavenRepoUrl) {
                     Text(mavenRepoUrl)

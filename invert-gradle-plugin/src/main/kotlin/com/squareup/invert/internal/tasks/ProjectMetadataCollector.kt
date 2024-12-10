@@ -3,6 +3,7 @@ package com.squareup.invert.internal.tasks
 import com.squareup.invert.internal.GitDataCollector
 import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.GitBranch
+import com.squareup.invert.models.js.BuildSystem
 import com.squareup.invert.models.js.MetadataJsReportModel
 import java.io.File
 import java.time.Instant
@@ -42,6 +43,13 @@ object ProjectMetadataCollector {
       remoteGitRepoUrl
     }
 
+    val buildSystem = if (gitProjectDir.listFiles().any { it.name.contains(".gradle") }) {
+      // Has a settings.gradle or settings.gradle.kts or build.gradle or build.gradle.kts file in the root
+      BuildSystem.GRADLE
+    } else {
+      BuildSystem.OTHER
+    }
+
     return MetadataJsReportModel(
       currentTime = time.epochSecond,
       currentTimeStr = formatter.format(time),
@@ -54,7 +62,8 @@ object ProjectMetadataCollector {
       latestCommitSha = currentBranchHash,
       remoteRepoGit = remoteGitRepoUrl,
       remoteRepoUrl = remoteRepoUrl,
-      mavenRepoUrls = repoUrls,
+      artifactRepositories = repoUrls,
+      buildSystem = buildSystem,
     )
   }
 

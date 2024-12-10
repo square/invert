@@ -21,5 +21,6 @@ data class MetadataJsReportModel(
     val tagName: GitTag?,
     val remoteRepoGit: String,
     val remoteRepoUrl: String,
-    val mavenRepoUrls: List<String>
+    val artifactRepositories: List<String>,
+    val buildSystem: BuildSystem,
 )
