@@ -9,6 +9,18 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavPageGroup
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
+import com.squareup.invert.common.navigation.toNavItem
+import com.squareup.invert.common.pages.AnnotationProcessorsReportPage
+import com.squareup.invert.common.pages.ArtifactDetailNavRoute
+import com.squareup.invert.common.pages.ArtifactsNavRoute
+import com.squareup.invert.common.pages.ArtifactsReportPage
+import com.squareup.invert.common.pages.ConfigurationDetailNavRoute
+import com.squareup.invert.common.pages.ConfigurationsNavRoute
+import com.squareup.invert.common.pages.GradlePluginsNavRoute
+import com.squareup.invert.common.pages.GradlePluginsReportPage
+import com.squareup.invert.common.pages.GradleRepositoriesReportPage
+import com.squareup.invert.common.pages.KotlinCompilerPluginsReportPage
+import com.squareup.invert.common.pages.PluginDetailNavRoute
 import com.squareup.invert.common.utils.FormattingUtils.dateDisplayStr
 import org.jetbrains.compose.web.attributes.ATarget.Blank
 import org.jetbrains.compose.web.attributes.target
@@ -37,7 +49,37 @@ fun LeftNavigationComposable(
   Ul({ classes("list-unstyled", "ps-0") }) {
     val random = Random(0)
     val navGroups by navGroupsRepo.navGroups.collectAsState(setOf())
-    navGroups
+    navGroups.let {
+      if (metadataOrig?.artifactRepositories?.isNotEmpty() == true) {
+        it.plus(
+          NavPageGroup(
+            "Gradle", setOf(
+              GradlePluginsReportPage.navPage.toNavItem().copy(
+                matchesCurrentNavRoute = {
+                  it is GradlePluginsNavRoute || it is PluginDetailNavRoute
+                },
+                destinationNavRoute = GradlePluginsNavRoute(null)
+              ),
+              ArtifactsReportPage.navPage.toNavItem().copy(
+                matchesCurrentNavRoute = {
+                  it is ArtifactsNavRoute || it is ArtifactDetailNavRoute
+                }
+              ),
+              GradleRepositoriesReportPage.navPage.toNavItem(),
+              ConfigurationsNavRoute.navPage.toNavItem().copy(
+                matchesCurrentNavRoute = {
+                  it is ConfigurationsNavRoute || it is ConfigurationDetailNavRoute
+                }
+              ),
+              AnnotationProcessorsReportPage.navPage.toNavItem(),
+              KotlinCompilerPluginsReportPage.navPage.toNavItem(),
+            )
+          ),
+        )
+      } else {
+        it
+      }
+    }
       .forEach { navPageGroup: NavPageGroup ->
         val collapseId = "nav-group-id-" + random.nextInt()
         Li({ classes("mb-1") }) {

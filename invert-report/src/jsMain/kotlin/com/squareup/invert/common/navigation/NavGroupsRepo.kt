@@ -75,29 +75,6 @@ object DefaultNavItems {
         )
       ),
       NavPageGroup(
-        "Gradle", setOf(
-          GradlePluginsReportPage.navPage.toNavItem().copy(
-            matchesCurrentNavRoute = {
-              it is GradlePluginsNavRoute || it is PluginDetailNavRoute
-            },
-            destinationNavRoute = GradlePluginsNavRoute(null)
-          ),
-          ArtifactsReportPage.navPage.toNavItem().copy(
-            matchesCurrentNavRoute = {
-              it is ArtifactsNavRoute || it is ArtifactDetailNavRoute
-            }
-          ),
-          GradleRepositoriesReportPage.navPage.toNavItem(),
-          ConfigurationsNavRoute.navPage.toNavItem().copy(
-            matchesCurrentNavRoute = {
-              it is ConfigurationsNavRoute || it is ConfigurationDetailNavRoute
-            }
-          ),
-          AnnotationProcessorsReportPage.navPage.toNavItem(),
-          KotlinCompilerPluginsReportPage.navPage.toNavItem(),
-        )
-      ),
-      NavPageGroup(
         "Insights", setOf(
           LeafModulesNavRoute.navPage.toNavItem(),
           UnusedModulesReportPage.navPage.toNavItem(),
