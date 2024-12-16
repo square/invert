@@ -52,14 +52,13 @@ object ProjectMetadataCollector {
 
     return MetadataJsReportModel(
       currentTime = time.epochSecond,
-      currentTimeStr = formatter.format(time),
-      currentTimezoneId = timeZoneId,
+      currentTimeFormatted = formatter.format(time),
+      timezoneId = timeZoneId,
       latestCommitTime = latestCommitTimestamp,
       latestCommitTimeFormatted = formatter.format(Instant.ofEpochSecond(latestCommitTimestamp)),
       latestCommitGitSha = currentBranchHash,
       branchName = currentBranch,
       tagName = currentTag,
-      latestCommitSha = currentBranchHash,
       remoteRepoGit = remoteGitRepoUrl,
       remoteRepoUrl = remoteRepoUrl,
       artifactRepositories = repoUrls,

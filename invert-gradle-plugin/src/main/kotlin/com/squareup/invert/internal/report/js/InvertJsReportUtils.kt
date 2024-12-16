@@ -115,7 +115,6 @@ object InvertJsReportUtils {
       statMetadata.key to StatTotalAndMetadata(
         metadata = statMetadata,
         total = totalCount,
-        totalByModule = totalByModule,
         totalByOwner = ownerToTotalCount
       )
     }.toMap()

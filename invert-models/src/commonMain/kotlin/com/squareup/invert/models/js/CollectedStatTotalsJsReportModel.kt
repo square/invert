@@ -15,7 +15,6 @@ data class CollectedStatTotalsJsReportModel(
 data class StatTotalAndMetadata(
   val metadata: StatMetadata,
   val total: Int,
-  val totalByModule: Map<ModulePath, Int>,
   val totalByOwner: Map<OwnerName, Int>,
 )
 

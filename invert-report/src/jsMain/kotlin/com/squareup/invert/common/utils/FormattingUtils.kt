@@ -30,7 +30,7 @@ object FormattingUtils {
     } ${dateTime.dayOfMonth}, ${dateTime.year} at " +
         "${dateTime.hour.toString().padStart(2, '0')}:${
           dateTime.minute.toString().padStart(2, '0')
-        }:${dateTime.second.toString().padStart(2, '0')} ($currentTimezoneId)"
+        }:${dateTime.second.toString().padStart(2, '0')} ($timezoneId)"
 
     return formattedDate
   }

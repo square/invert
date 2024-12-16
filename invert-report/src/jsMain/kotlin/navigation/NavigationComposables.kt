@@ -141,7 +141,7 @@ fun LeftNavigationComposable(
         }
       }
       Br()
-      metadata.latestCommitSha.let { currentBranchHash ->
+      metadata.latestCommitGitSha.let { currentBranchHash ->
         Text("Commit ")
         A(href = metadata.remoteRepoUrl + "/tree/${currentBranchHash}", attrs = { target(Blank) }) {
           Text(currentBranchHash.substring(0, 7))
