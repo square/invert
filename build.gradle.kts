@@ -34,6 +34,23 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.jetbrains.compose) apply false
     alias(libs.plugins.vanniktech.maven.publish) apply false
+    id("org.openrewrite.rewrite") version("6.28.3")
+}
+
+rewrite {
+    // OpenRewrite Extension Configuration
+    activeRecipe("org.openrewrite.kotlin.FindKotlinSources")
+    activeRecipe("org.openrewrite.kotlin.cleanup.RemoveTrailingComma")
+    isExportDatatables = true
+}
+
+dependencies {
+    rewrite("org.openrewrite:rewrite-kotlin:1.24.0")
+}
+
+// Ensure a repository is declared that the rewrite core libraries can be resolved from
+repositories {
+    mavenCentral()
 }
 
 if (hasProperty("buildScan")) {
