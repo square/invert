@@ -20,7 +20,9 @@ object MathUtils {
   }
 
   fun percentage(amount: Int, total: Int): Double {
-    return if (amount == 0 || total == 0) {
+    return if (amount == 0 && total == 0) {
+      100.0
+    } else if (amount == 0) {
       0.0
     } else {
       roundToDecimal(amount / total.toDouble() * 100)
