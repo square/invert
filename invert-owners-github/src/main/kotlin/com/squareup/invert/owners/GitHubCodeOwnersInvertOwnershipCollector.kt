@@ -10,7 +10,7 @@ import com.squareup.invert.models.OwnerInfo
 import java.io.File
 
 object GitHubCodeOwnersInvertOwnershipCollector : InvertOwnershipCollector {
-  override fun collect(rootProjectDir: String, modulePath: ModulePath): OwnerInfo? {
+  override fun collect(rootProjectDir: String, modulePath: ModulePath): OwnerInfo {
 
     val gitRoot = File(rootProjectDir).findGitRootPath()
       ?: throw IllegalStateException("This is not a Git Repository.  Could not locate the .git folder at the root.")
@@ -38,7 +38,7 @@ object GitHubCodeOwnersInvertOwnershipCollector : InvertOwnershipCollector {
         val relativePath = projectDir.absolutePath.replace(gitRoot.absolutePath, "")
         val owners = ownersResolver
           .resolveOwnership(relativePath)
-        owners?.joinToString("/n") ?: "NONE"
+        owners?.joinToString("/n") ?: OwnerInfo.UNOWNED
       }
     )
   }

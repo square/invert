@@ -10,5 +10,5 @@ interface InvertOwnershipCollector {
   fun collect(
     rootProjectDir: String,
     modulePath: ModulePath
-  ): OwnerInfo?
+  ): OwnerInfo
 }

@@ -14,9 +14,7 @@ import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.AllModulesReportPage.navPage
 import com.squareup.invert.models.ModulePath
-import org.jetbrains.compose.web.dom.H1
-import org.jetbrains.compose.web.dom.Text
-import ui.BootstrapAccordion
+import com.squareup.invert.models.OwnerName
 import ui.BootstrapLoadingMessageWithSpinner
 import ui.BootstrapSearchBox
 import ui.BootstrapTabData
@@ -61,6 +59,10 @@ object AllModulesReportPage : InvertReportPage<AllModulesNavRoute> {
   }
 }
 
+data class ModuleWithOwner(
+  val modulePath: ModulePath,
+  val ownerName: OwnerName
+)
 
 @Composable
 fun ModulesComposable(
@@ -68,85 +70,71 @@ fun ModulesComposable(
   reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
   navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo
 ) {
-  val allModulesCollected by reportDataRepo.allModules.collectAsState(null)
+  val allModulesOrig by reportDataRepo.allModules.collectAsState(null)
+  val moduleToOwnerMap by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
   val query = modulesNavRoute.query
 
-
-  if (allModulesCollected == null) {
+  if (
+    listOf(
+      allModulesOrig,
+      moduleToOwnerMap,
+    ).any { it == null }
+  ) {
     BootstrapLoadingMessageWithSpinner()
     return
   }
 
-  val allModules = allModulesCollected!!
-
-  val allModulesMatchingQuery = if (query != null && query != ":" && query.isNotEmpty()) {
-    allModules.filter { it.contains(query) }
-  } else {
-    allModules
+  val modulesWithOwner = moduleToOwnerMap!!.entries.map { (modulePath, ownerName) ->
+    ModuleWithOwner(
+      modulePath = modulePath,
+      ownerName = ownerName
+    )
   }
 
+  val allModulesWithOwnerMatchingQuery = if (query != null && query != ":" && query.isNotEmpty()) {
+    modulesWithOwner.filter { it.modulePath.contains(query) }
+  } else {
+    modulesWithOwner
+  }
 
   val tabs = mutableListOf<BootstrapTabData>()
-  tabs.add(BootstrapTabData("By Name") {
+  tabs.add(BootstrapTabData(" Name") {
     BootstrapSearchBox(
       query = query ?: "",
       placeholderText = "Module Query...",
     ) {
       navRouteRepo.updateNavRoute(modulesNavRoute.copy(query = it))
     }
-    ModulesByNameComposable(allModulesMatchingQuery) {
+    ModulesByNameComposable(allModulesWithOwnerMatchingQuery) {
       navRouteRepo.updateNavRoute(ModuleDetailNavRoute(it))
     }
   })
-//  tabs.add(BootstrapTabData("By Plugin") {
-//    ModulesByPluginComposable(
-//      reportDataRepo = reportDataRepo,
-//      navRouteRepo = navRouteRepo,
-//    )
-//  })
   BootstrapTabPane(
     tabs
   )
 }
 
-
 @Composable
-fun ModulesByNameComposable(allModules: List<String>?, moduleClicked: (ModulePath) -> Unit) {
+fun ModulesByNameComposable(allModules: List<ModuleWithOwner>, moduleClicked: (ModulePath) -> Unit) {
   ModuleListComposable(allModules) { cellValues ->
     moduleClicked(cellValues[0])
   }
 }
 
 @Composable
-fun ModuleListComposable(allModules: List<String>?, limit: Int = MAX_RESULTS, onRowClicked: (List<String>) -> Unit) {
-  if (allModules.isNullOrEmpty()) {
-    H1 { Text("Loading...") }
-  } else {
-    BootstrapTable(
-      headers = listOf("Module"),
-      rows = allModules.map { listOf(it) },
-      types = listOf(String::class),
-      maxResultsLimitConstant = limit,
-      onItemClickCallback = onRowClicked,
-    )
-  }
+fun ModuleListComposable(
+  modulesWithOwner: List<ModuleWithOwner>,
+  limit: Int = MAX_RESULTS,
+  onRowClicked: (List<String>) -> Unit
+) {
+  val headers = listOf("Module", "Owner")
+  BootstrapTable(
+    headers = headers,
+    rows = modulesWithOwner.map { listOf(it.modulePath, it.ownerName) },
+    types = headers.map { String::class },
+    maxResultsLimitConstant = limit,
+    onItemClickCallback = onRowClicked,
+  )
 }
-
-
-@Composable
-fun ModulesByPluginComposable(reportDataRepo: ReportDataRepo, navRouteRepo: NavRouteRepo) {
-  val pluginIdToAllModulesMap by reportDataRepo.pluginIdToAllModulesMap.collectAsState(null)
-  pluginIdToAllModulesMap?.keys?.sorted()?.forEach { pluginId ->
-    val modules = pluginIdToAllModulesMap!![pluginId]
-    val headerText = pluginId + " (${modules?.size})"
-    BootstrapAccordion({ Text(headerText) }) {
-      ModuleListComposable(modules) { cellValues ->
-        navRouteRepo.updateNavRoute(ModuleDetailNavRoute(cellValues[0]))
-      }
-    }
-  }
-
-}
-
 
