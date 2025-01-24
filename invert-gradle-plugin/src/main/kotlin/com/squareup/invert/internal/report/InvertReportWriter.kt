@@ -23,12 +23,12 @@ class InvertReportWriter(
 ) {
   fun writeProjectData(
     reportMetadata: MetadataJsReportModel,
-    collectedOwners: List<CollectedOwnershipForProject>,
-    collectedStats: List<CollectedStatsForProject>,
-    collectedDependencies: List<CollectedDependenciesForProject>,
-    collectedConfigurations: List<CollectedConfigurationsForProject>,
-    collectedPlugins: List<CollectedPluginsForProject>,
-    historicalData: List<HistoricalData>,
+    collectedOwners: Set<CollectedOwnershipForProject>,
+    collectedStats: Set<CollectedStatsForProject>,
+    collectedDependencies: Set<CollectedDependenciesForProject>,
+    collectedConfigurations: Set<CollectedConfigurationsForProject>,
+    collectedPlugins: Set<CollectedPluginsForProject>,
+    historicalData: Set<HistoricalData>,
   ) {
     val collectedOwnershipInfo = InvertJsReportUtils.buildModuleToOwnerMap(collectedOwners)
     val allProjectsStatsData = InvertJsReportUtils.buildModuleToStatsMap(collectedStats)
@@ -47,7 +47,7 @@ class InvertReportWriter(
     val historicalDataWithCurrent = (historicalData + HistoricalData(
       reportMetadata = reportMetadata,
       statTotalsAndMetadata = CollectedStatTotalsJsReportModel(globalStats)
-    )).sortedBy { it.reportMetadata.latestCommitTime  }
+    )).sortedBy { it.reportMetadata.latestCommitTime  }.toSet()
 
     // JSON Report
     InvertJsonReportWriter(invertLogger, rootBuildReportsDir).createInvertJsonReport(

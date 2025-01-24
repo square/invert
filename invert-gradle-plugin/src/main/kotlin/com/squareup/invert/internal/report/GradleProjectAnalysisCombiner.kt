@@ -14,11 +14,11 @@ import java.io.File
  */
 object GradleProjectAnalysisCombiner {
   fun combineAnalysisResults(resultDirPaths: List<String>): InvertCombinedCollectedData {
-    val collectedConfigurations = mutableListOf<CollectedConfigurationsForProject>()
-    val collectedDependencies = mutableListOf<CollectedDependenciesForProject>()
-    val collectedOwners = mutableListOf<CollectedOwnershipForProject>()
-    val collectedStats = mutableListOf<CollectedStatsForProject>()
-    val collectedPlugins = mutableListOf<CollectedPluginsForProject>()
+    val collectedConfigurations = mutableSetOf<CollectedConfigurationsForProject>()
+    val collectedDependencies = mutableSetOf<CollectedDependenciesForProject>()
+    val collectedOwners = mutableSetOf<CollectedOwnershipForProject>()
+    val collectedStats = mutableSetOf<CollectedStatsForProject>()
+    val collectedPlugins = mutableSetOf<CollectedPluginsForProject>()
 
     resultDirPaths
       .map { File(it) }

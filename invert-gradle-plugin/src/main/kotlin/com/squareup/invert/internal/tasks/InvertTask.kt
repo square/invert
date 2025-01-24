@@ -95,7 +95,7 @@ abstract class InvertTask : DefaultTask() {
       )
 
       val historicalDataFile: File? = historicalDataFileProperty.orNull?.let { File(it) }
-      val historicalData: List<HistoricalData> =
+      val historicalData: Set<HistoricalData> =
         if (historicalDataFile?.isFile == true && historicalDataFile.length() > 0) {
           try {
             val fileContents = historicalDataFile.readText()
@@ -106,7 +106,7 @@ abstract class InvertTask : DefaultTask() {
           }
         } else {
           listOf()
-        }
+        }.toSet()
 
       InvertReportWriter(
         invertLogger = invertLogger(),

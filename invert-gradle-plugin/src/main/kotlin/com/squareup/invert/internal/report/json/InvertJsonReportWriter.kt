@@ -17,6 +17,7 @@ import com.squareup.invert.models.js.StatTotalAndMetadata
 import com.squareup.invert.models.js.StatsJsReportModel
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.SetSerializer
 import java.io.File
 
 class InvertJsonReportWriter(
@@ -25,14 +26,14 @@ class InvertJsonReportWriter(
 ) {
   private val rootBuildJsonReportsDir = File(rootBuildReportsDir, InvertFileUtils.JSON_FOLDER_NAME)
   fun createInvertJsonReport(
-    allConfigurationsData: List<CollectedConfigurationsForProject>,
-    allProjectsDependencyData: List<CollectedDependenciesForProject>,
+    allConfigurationsData: Set<CollectedConfigurationsForProject>,
+    allProjectsDependencyData: Set<CollectedDependenciesForProject>,
     allProjectsStatsData: StatsJsReportModel,
-    allPluginsData: List<CollectedPluginsForProject>,
-    allOwnersData: List<CollectedOwnershipForProject>,
+    allPluginsData: Set<CollectedPluginsForProject>,
+    allOwnersData: Set<CollectedOwnershipForProject>,
     globalStats: Map<StatKey, StatTotalAndMetadata>,
     reportMetadata: MetadataJsReportModel,
-    historicalData: List<HistoricalData>,
+    historicalData: Set<HistoricalData>,
   ) {
     writeJsonFileInDir(
       jsonFileKey = InvertPluginFileKey.METADATA,
@@ -41,12 +42,12 @@ class InvertJsonReportWriter(
     )
     writeJsonFileInDir(
       jsonFileKey = InvertPluginFileKey.PLUGINS,
-      serializer = ListSerializer(CollectedPluginsForProject.serializer()),
+      serializer = SetSerializer(CollectedPluginsForProject.serializer()),
       value = allPluginsData
     )
     writeJsonFileInDir(
       jsonFileKey = InvertPluginFileKey.HISTORICAL_DATA,
-      serializer = ListSerializer(HistoricalData.serializer()),
+      serializer = SetSerializer(HistoricalData.serializer()),
       value = historicalData
     )
 
@@ -58,13 +59,13 @@ class InvertJsonReportWriter(
 
     writeJsonFileInDir(
       jsonFileKey = InvertPluginFileKey.CONFIGURATIONS,
-      serializer = ListSerializer(CollectedConfigurationsForProject.serializer()),
+      serializer = SetSerializer(CollectedConfigurationsForProject.serializer()),
       value = allConfigurationsData
     )
 
     writeJsonFileInDir(
       jsonFileKey = InvertPluginFileKey.DEPENDENCIES,
-      serializer = ListSerializer(CollectedDependenciesForProject.serializer()),
+      serializer = SetSerializer(CollectedDependenciesForProject.serializer()),
       value = allProjectsDependencyData
     )
 
@@ -76,7 +77,7 @@ class InvertJsonReportWriter(
 
     writeJsonFileInDir(
       jsonFileKey = InvertPluginFileKey.OWNERS,
-      serializer = ListSerializer(CollectedOwnershipForProject.serializer()),
+      serializer = SetSerializer(CollectedOwnershipForProject.serializer()),
       value = allOwnersData
     )
   }

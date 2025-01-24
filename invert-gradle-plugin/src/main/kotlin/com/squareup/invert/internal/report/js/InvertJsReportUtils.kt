@@ -31,7 +31,7 @@ object InvertJsReportUtils {
    * Takes all [CollectedOwnershipForProject] collected by Invert, and creates the JS Report Model.
    */
   fun buildModuleToOwnerMap(
-    collectedOwners: List<CollectedOwnershipForProject>
+    collectedOwners: Set<CollectedOwnershipForProject>
   ): OwnershipJsReportModel {
     return OwnershipJsReportModel(
       modules = collectedOwners
@@ -125,7 +125,7 @@ object InvertJsReportUtils {
   /**
    * Takes all [CollectedStatsForProject] collected by Invert, and creates the JS Report Model.
    */
-  fun buildModuleToStatsMap(collectedStats: List<CollectedStatsForProject>): StatsJsReportModel {
+  fun buildModuleToStatsMap(collectedStats: Set<CollectedStatsForProject>): StatsJsReportModel {
     val statInfos: Map<StatKey, StatMetadata> = mutableSetOf<StatMetadata>()
       .also { statInfos ->
         collectedStats.forEach { collectedStatsForProject ->
@@ -148,7 +148,7 @@ object InvertJsReportUtils {
   /**
    * Takes all [CollectedPluginsForProject] collected by Invert, and creates the JS Report Model.
    */
-  fun toCollectedPlugins(allPlugins: List<CollectedPluginsForProject>): PluginsJsReportModel {
+  fun toCollectedPlugins(allPlugins: Set<CollectedPluginsForProject>): PluginsJsReportModel {
     return PluginsJsReportModel(
       plugins = mutableMapOf<GradlePluginId, MutableList<ModulePath>>()
         .also { resultingDepIdToModuleUsageInfo ->
@@ -175,7 +175,7 @@ object InvertJsReportUtils {
    * Takes all [CollectedDependenciesForProject] collected by Invert, and creates the JS Report Model.
    */
   fun toInvertedDependenciesJsReportModel(
-    collectedDependenciesForProjects: List<CollectedDependenciesForProject>
+    collectedDependenciesForProjects: Set<CollectedDependenciesForProject>
   ): DependenciesJsReportModel {
     return DependenciesJsReportModel(
       mutableMapOf<DependencyId, MutableMap<ModulePath, MutableList<ConfigurationName>>>()
@@ -197,7 +197,7 @@ object InvertJsReportUtils {
   }
 
   fun toCollectedConfigurations(
-    allProjectsConfigurationsData: List<CollectedConfigurationsForProject>
+    allProjectsConfigurationsData: Set<CollectedConfigurationsForProject>
   ): ConfigurationsJsReportModel {
     val allConfigurationNames = mutableSetOf<String>()
     val moduleToAllConfigurationNames = mutableMapOf<ModulePath, Set<ConfigurationName>>()
@@ -227,7 +227,7 @@ object InvertJsReportUtils {
   }
 
   fun toDirectDependenciesJsReportModel(
-    allProjectsDependencyData: List<CollectedDependenciesForProject>
+    allProjectsDependencyData: Set<CollectedDependenciesForProject>
   ): DirectDependenciesJsReportModel {
     return DirectDependenciesJsReportModel(
       allProjectsDependencyData.associate { it.path to it.directDependencies }

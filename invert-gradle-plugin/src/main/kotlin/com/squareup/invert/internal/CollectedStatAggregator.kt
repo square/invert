@@ -137,7 +137,7 @@ object CollectedStatAggregator {
       }
     }
     return origAllCollectedData.copy(
-      collectedStats = projectPathToCollectedStatsForProject.values.toList()
+      collectedStats = projectPathToCollectedStatsForProject.values.toSet()
     )
   }
 }
