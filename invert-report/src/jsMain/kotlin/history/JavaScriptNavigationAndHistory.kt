@@ -26,6 +26,43 @@ class JavaScriptNavigationAndHistory(
       keysForObject(this).forEach { map[it] = this.get(it) }
       return map
     }
+
+    fun setUrlFromNavRoute(navRoute: NavRoute) {
+      val newUrl = URL(window.location.toString())
+
+      val currUrlParamsMap = mutableMapOf<String, String>().also { urlParamsMap ->
+        keysForObject(newUrl.searchParams).forEach { key ->
+          newUrl.searchParams.get(key)?.let { value ->
+            if (value.isNotBlank()) {
+              urlParamsMap[key] = value
+            }
+          }
+        }
+      }
+
+      val newNavRouteParamsMap = navRoute.toSearchParams()
+      if (currUrlParamsMap != newNavRouteParamsMap) {
+        // Clear current params from Current URL Search Params
+        newUrl.search = ""
+
+        // Populate Search Params with key/values
+        newNavRouteParamsMap.forEach { (key, value) ->
+          if (value.isNotBlank()) {
+            newUrl.searchParams.set(key, value)
+          }
+        }
+
+        // Convert params to JSON
+        val jsonState = InvertJson.encodeToString(HistoryState.serializer(), HistoryState(navRoute.toSearchParams()))
+        val isNewPage =
+          currUrlParamsMap[BaseNavRoute.PAGE_ID_PARAM] != newNavRouteParamsMap[BaseNavRoute.PAGE_ID_PARAM]
+        if (isNewPage) {
+          window.history.pushState(jsonState, "", newUrl.toString())
+        } else {
+          window.history.replaceState(jsonState, "", newUrl.toString())
+        }
+      }
+    }
   }
 
   fun registerForPopstate() {
@@ -50,42 +87,5 @@ class JavaScriptNavigationAndHistory(
         }
       }
     }, false)
-  }
-
-  fun setUrlFromNavRoute(navRoute: NavRoute) {
-    val newUrl = URL(window.location.toString())
-
-    val currUrlParamsMap = mutableMapOf<String, String>().also { urlParamsMap ->
-      keysForObject(newUrl.searchParams).forEach { key ->
-        newUrl.searchParams.get(key)?.let { value ->
-          if (value.isNotBlank()) {
-            urlParamsMap[key] = value
-          }
-        }
-      }
-    }
-
-    val newNavRouteParamsMap = navRoute.toSearchParams()
-    if (currUrlParamsMap != newNavRouteParamsMap) {
-      // Clear current params from Current URL Search Params
-      newUrl.search = ""
-
-      // Populate Search Params with key/values
-      newNavRouteParamsMap.forEach { (key, value) ->
-        if (value.isNotBlank()) {
-          newUrl.searchParams.set(key, value)
-        }
-      }
-
-      // Convert params to JSON
-      val jsonState = InvertJson.encodeToString(HistoryState.serializer(), HistoryState(navRoute.toSearchParams()))
-      val isNewPage =
-        currUrlParamsMap[BaseNavRoute.PAGE_ID_PARAM] != newNavRouteParamsMap[BaseNavRoute.PAGE_ID_PARAM]
-      if (isNewPage) {
-        window.history.pushState(jsonState, "", newUrl.toString())
-      } else {
-        window.history.replaceState(jsonState, "", newUrl.toString())
-      }
-    }
   }
 }

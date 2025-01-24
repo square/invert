@@ -60,7 +60,7 @@ fun setupNavigation(routeManager: NavRouteManager, navRouteRepo: NavRouteRepo) {
     val javaScriptNavigationAndHistory = JavaScriptNavigationAndHistory(routeManager, navRouteRepo)
     // Update Route on Every Change
     navRouteRepo.navRoute.onEach {
-        javaScriptNavigationAndHistory.setUrlFromNavRoute(it)
+        JavaScriptNavigationAndHistory.setUrlFromNavRoute(it)
     }.launchIn(GlobalScope)
 
     // Register for Browser Back/Forward Button Events
