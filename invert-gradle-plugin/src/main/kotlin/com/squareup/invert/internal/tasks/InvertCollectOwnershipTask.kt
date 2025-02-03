@@ -20,6 +20,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import java.io.File
 
 /**
  * Using the specified [InvertOwnershipCollector], it collects ownership info for a given module.
@@ -46,7 +47,7 @@ internal abstract class InvertCollectOwnershipTask : DefaultTask() {
   @TaskAction
   internal fun execute() {
     val collectedOwnerInfo: OwnerInfo? =
-      ownershipCollector.collect(rootProjectDir.get(), targetModule.get())
+      ownershipCollector.collect(File(rootProjectDir.get()), targetModule.get())
 
     if (collectedOwnerInfo != null) {
       val projectOwnershipInfo = CollectedOwnershipForProject(

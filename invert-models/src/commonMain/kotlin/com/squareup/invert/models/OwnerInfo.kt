@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class OwnerInfo(
-  val name: OwnerName,
+  val name: OwnerName = UNOWNED,
 ) {
   companion object {
     const val UNOWNED: OwnerName = "Unowned"

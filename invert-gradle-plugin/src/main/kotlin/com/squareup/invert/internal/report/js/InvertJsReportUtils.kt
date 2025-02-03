@@ -9,6 +9,7 @@ import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.GradlePluginId
 import com.squareup.invert.models.ModulePath
+import com.squareup.invert.models.OwnerInfo
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatDataType
@@ -43,22 +44,6 @@ object InvertJsReportUtils {
     )
   }
 
-  fun countFromStat(stat: Stat?): Int {
-    return when (stat) {
-      is Stat.NumericStat -> stat.value
-      is Stat.CodeReferencesStat -> stat.value.size
-      is Stat.BooleanStat -> if (stat.value) {
-        1
-      } else {
-        0
-      }
-
-      else -> {
-        0 // Default Value
-      }
-    }
-  }
-
   fun computeGlobalTotals(
     allProjectsStatsData: StatsJsReportModel,
     collectedOwnershipInfo: OwnershipJsReportModel
@@ -71,53 +56,59 @@ object InvertJsReportUtils {
           StatDataType.NUMERIC,
           StatDataType.CODE_REFERENCES -> true
 
-          else -> {
-            false
-          }
+          StatDataType.STRING -> false
         }
       }
 
 
-    val globalTotals: Map<StatKey, StatTotalAndMetadata> = allStatMetadatas.associate { statMetadata: StatMetadata ->
+    val globalTotals = mutableMapOf<StatKey, StatTotalAndMetadata>()
+    allStatMetadatas.forEach { statMetadata: StatMetadata ->
       var totalCount = 0 // Total count of the stat across all modules
-      val totalByModule: Map<ModulePath, Int> = allProjectsStatsData.statsByModule.entries
-        .mapNotNull { (modulePath: ModulePath, statsForModule: Map<StatKey, Stat>) ->
-          val stat: Stat? = statsForModule[statMetadata.key]
-          if (stat != null) {
-            val countForStat = countFromStat(stat)
-            totalCount += countForStat
-            modulePath to countForStat
-          } else {
-            null
+
+      val ownerToTotalCount1 = mutableMapOf<OwnerName, Int>()
+
+      allProjectsStatsData.statsByModule.entries.forEach { (modulePath, statTotalAndMetadata) ->
+        val stat: Stat? = statTotalAndMetadata[statMetadata.key]
+        if (stat != null) {
+          val moduleOwnerName = moduleToOwnerMap[modulePath]!!
+
+          when (stat) {
+            is Stat.NumericStat -> {
+              val currentModuleOwnerCount: Int = ownerToTotalCount1.getOrDefault(moduleOwnerName, 0)
+              ownerToTotalCount1[moduleOwnerName] = currentModuleOwnerCount + stat.value
+            }
+
+            is Stat.CodeReferencesStat -> {
+              stat.value.forEach { codeReference ->
+                val currentOwnerCount: Int = ownerToTotalCount1.getOrDefault(moduleOwnerName, 0)
+                val codeReferenceOwner = codeReference.owner ?: OwnerInfo.UNOWNED
+                ownerToTotalCount1[codeReferenceOwner] = currentOwnerCount + 1
+              }
+            }
+
+            is Stat.BooleanStat -> {
+              val currentModuleOwnerCount: Int = ownerToTotalCount1.getOrDefault(moduleOwnerName, 0)
+              ownerToTotalCount1[moduleOwnerName] = currentModuleOwnerCount + if (stat.value) {
+                1
+              } else {
+                0
+              }
+            }
+
+            else -> {
+              val currentModuleOwnerCount: Int = ownerToTotalCount1.getOrDefault(moduleOwnerName, 0)
+              ownerToTotalCount1[moduleOwnerName] = currentModuleOwnerCount + 0 // Default Value
+            }
           }
-        }
-        .filter { it.second != 0 } // Drop all the `0` entries to avoid clutter in the JSON files
-        .toMap()
 
-      val ownerToTotalCount: Map<OwnerName, Int> = totalByModule.entries
-        .groupBy { (modulePath, totalForModule) ->
-          val ownerName = moduleToOwnerMap[modulePath]
-
-          ownerName
+          globalTotals[statMetadata.key] = StatTotalAndMetadata(
+            metadata = statMetadata,
+            total = totalCount,
+            totalByOwner = ownerToTotalCount1
+          )
         }
-        .map { (modulePath, entry) ->
-          modulePath to entry.sumOf { it.value }
-        }
-        .mapNotNull { (ownerName, totalCountForOwner) ->
-          if (ownerName == null) {
-            null
-          } else {
-            ownerName to totalCountForOwner
-          }
-        }
-        .toMap()
-
-      statMetadata.key to StatTotalAndMetadata(
-        metadata = statMetadata,
-        total = totalCount,
-        totalByOwner = ownerToTotalCount
-      )
-    }.toMap()
+      }
+    }
 
     return globalTotals
   }
