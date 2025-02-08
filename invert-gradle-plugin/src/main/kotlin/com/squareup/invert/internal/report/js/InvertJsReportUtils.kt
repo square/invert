@@ -9,7 +9,6 @@ import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.GradlePluginId
 import com.squareup.invert.models.ModulePath
-import com.squareup.invert.models.OwnerInfo
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatDataType
@@ -63,47 +62,50 @@ object InvertJsReportUtils {
     allStatMetadatas.forEach { statMetadata: StatMetadata ->
       var totalCount = 0 // Total count of the stat across all modules
 
-      val ownerToTotalCount1 = mutableMapOf<OwnerName, Int>()
+      val ownerToTotalCountForStat = mutableMapOf<OwnerName, Int>()
 
       allProjectsStatsData.statsByModule.entries.forEach { (modulePath, statTotalAndMetadata) ->
         val stat: Stat? = statTotalAndMetadata[statMetadata.key]
         if (stat != null) {
           val moduleOwnerName = moduleToOwnerMap[modulePath]!!
 
+          val currentCountForOwner: Int = ownerToTotalCountForStat.getOrDefault(moduleOwnerName, 0)
           when (stat) {
             is Stat.NumericStat -> {
-              val currentModuleOwnerCount: Int = ownerToTotalCount1.getOrDefault(moduleOwnerName, 0)
-              ownerToTotalCount1[moduleOwnerName] = currentModuleOwnerCount + stat.value
+              ownerToTotalCountForStat[moduleOwnerName] = currentCountForOwner + stat.value
             }
 
             is Stat.CodeReferencesStat -> {
               stat.value.forEach { codeReference ->
-                val currentOwnerCount: Int = ownerToTotalCount1.getOrDefault(moduleOwnerName, 0)
-                val codeReferenceOwner = codeReference.owner ?: OwnerInfo.UNOWNED
-                ownerToTotalCount1[codeReferenceOwner] = currentOwnerCount + 1
+                val owner = codeReference.owner ?: moduleOwnerName
+                println("Adding for $owner, $codeReference")
+                val currentCountForOwner: Int = ownerToTotalCountForStat.getOrDefault(owner, 0)
+                ownerToTotalCountForStat[owner] = currentCountForOwner + 1
               }
             }
 
             is Stat.BooleanStat -> {
-              val currentModuleOwnerCount: Int = ownerToTotalCount1.getOrDefault(moduleOwnerName, 0)
-              ownerToTotalCount1[moduleOwnerName] = currentModuleOwnerCount + if (stat.value) {
+              val currentModuleOwnerCount: Int = ownerToTotalCountForStat.getOrDefault(moduleOwnerName, 0)
+              ownerToTotalCountForStat[moduleOwnerName] = currentModuleOwnerCount + if (stat.value) {
                 1
               } else {
                 0
               }
             }
 
-            else -> {
-              val currentModuleOwnerCount: Int = ownerToTotalCount1.getOrDefault(moduleOwnerName, 0)
-              ownerToTotalCount1[moduleOwnerName] = currentModuleOwnerCount + 0 // Default Value
+            is Stat.StringStat -> {
+              val currentModuleOwnerCount: Int = ownerToTotalCountForStat.getOrDefault(moduleOwnerName, 0)
+              ownerToTotalCountForStat[moduleOwnerName] = currentModuleOwnerCount + 1
             }
           }
 
           globalTotals[statMetadata.key] = StatTotalAndMetadata(
             metadata = statMetadata,
-            total = totalCount,
-            totalByOwner = ownerToTotalCount1
-          )
+            total = ownerToTotalCountForStat.values.sum(),
+            totalByOwner = ownerToTotalCountForStat
+          ).also { total ->
+            println(total)
+          }
         }
       }
     }
