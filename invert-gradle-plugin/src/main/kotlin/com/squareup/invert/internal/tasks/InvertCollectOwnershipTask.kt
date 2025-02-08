@@ -11,7 +11,7 @@ import com.squareup.invert.internal.report.json.InvertJsonReportWriter
 import com.squareup.invert.logging.GradleInvertLogger
 import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.ModulePath
-import com.squareup.invert.models.OwnerInfo
+import com.squareup.invert.models.OwnerName
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
@@ -46,13 +46,11 @@ internal abstract class InvertCollectOwnershipTask : DefaultTask() {
 
   @TaskAction
   internal fun execute() {
-    val collectedOwnerInfo: OwnerInfo? =
-      ownershipCollector.collect(File(rootProjectDir.get()), targetModule.get())
+    val ownerName: OwnerName = ownershipCollector.collect(File(rootProjectDir.get()), targetModule.get())
 
-    if (collectedOwnerInfo != null) {
       val projectOwnershipInfo = CollectedOwnershipForProject(
         path = targetModule.get(),
-        ownerInfo = collectedOwnerInfo
+        ownerName = ownerName
       )
 
       InvertJsonReportWriter.writeJsonFile(
@@ -62,9 +60,6 @@ internal abstract class InvertCollectOwnershipTask : DefaultTask() {
         serializer = CollectedOwnershipForProject.serializer(),
         value = projectOwnershipInfo
       )
-    } else {
-      logger.info("Could not determine Ownership for Module ${this.targetModule}")
-    }
   }
 
   fun setParams(

@@ -1,7 +1,7 @@
 package com.squareup.invert.internal.models
 
 import com.squareup.invert.models.ModulePath
-import com.squareup.invert.models.OwnerInfo
+import com.squareup.invert.models.OwnerName
 import kotlinx.serialization.Serializable
 
 /**
@@ -12,5 +12,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CollectedOwnershipForProject(
   val path: ModulePath,
-  val ownerInfo: OwnerInfo,
+  val ownerName: OwnerName,
 )

@@ -2,7 +2,7 @@ package com.squareup.invert
 
 import com.squareup.invert.internal.IncludeAnySubprojectCalculator
 import com.squareup.invert.internal.IncludeRuntimeClasspathConfigurationsCalculator
-import com.squareup.invert.internal.NoOpOwnershipCollector
+import com.squareup.invert.internal.NoOpInvertOwnershipCollector
 import com.squareup.invert.models.ConfigurationName
 import org.gradle.api.Project
 import org.gradle.api.tasks.Input
@@ -106,7 +106,7 @@ open class InvertExtension(project: Project) {
 
   internal fun getOwnershipCollector(): InvertOwnershipCollector {
     return ownershipCollectorProperty.getOrElse(
-      NoOpOwnershipCollector
+      NoOpInvertOwnershipCollector
     )
   }
 }

@@ -37,10 +37,8 @@ object InvertJsReportUtils {
     return OwnershipJsReportModel(
       modules = collectedOwners
         .associateBy { it.path }
-        .mapValues { it.value.ownerInfo.name },
-      teams = collectedOwners
-        .associateBy { it.ownerInfo.name }
-        .mapValues { it.value.ownerInfo }
+        .mapValues { it.value.ownerName },
+      teams = collectedOwners.map { it.ownerName }.toSet()
     )
   }
 

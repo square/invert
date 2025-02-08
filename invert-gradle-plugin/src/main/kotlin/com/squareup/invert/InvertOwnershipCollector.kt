@@ -8,16 +8,14 @@ import java.io.File
 /**
  * Allows a user of Invert to specify how ownership is calculated.
  */
-abstract class InvertOwnershipCollector {
-  abstract fun collect(
+interface InvertOwnershipCollector {
+  fun collect(
     rootProjectDir: File,
     modulePath: ModulePath
-  ): OwnerInfo
+  ): OwnerName
 
-  open fun getOwnerNameForFile(
+  fun getOwnerNameForFile(
     rootProjectDir: File,
     fileInProject: File
-  ): OwnerName {
-    return OwnerInfo.UNOWNED
-  }
+  ): OwnerName
 }
