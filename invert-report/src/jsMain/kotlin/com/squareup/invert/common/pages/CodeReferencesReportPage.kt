@@ -22,7 +22,6 @@ import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
-import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.H4
@@ -210,19 +209,16 @@ fun CodeReferencesComposable(
               }
             }
             Li {
-              A("#", {
-                onClick {
-                  navRouteRepo.updateNavRoute(
-                    codeReferencesNavRoute.copy(
-                      treemap = if (codeReferencesNavRoute.treemap != null) {
-                        !codeReferencesNavRoute.treemap
-                      } else {
-                        true
-                      }
-                    )
-                  )
-                }
-              }) {
+              NavRouteLink(
+                codeReferencesNavRoute.copy(
+                  treemap = if (codeReferencesNavRoute.treemap != null) {
+                    !codeReferencesNavRoute.treemap
+                  } else {
+                    true
+                  }
+                ),
+                navRouteRepo::updateNavRoute,
+              ) {
                 if (codeReferencesNavRoute.treemap == true) {
                   Text("Hide Treemap")
                 } else {
@@ -231,16 +227,13 @@ fun CodeReferencesComposable(
               }
             }
             Li {
-              A("#", {
-                onClick {
-                  navRouteRepo.updateNavRoute(
-                    OwnerBreakdownNavRoute(
-                      statKey = codeReferencesNavRoute.statKey,
-                      owner = codeReferencesNavRoute.owner,
-                    )
-                  )
-                }
-              }) {
+              NavRouteLink(
+                OwnerBreakdownNavRoute(
+                  statKey = codeReferencesNavRoute.statKey,
+                  owner = codeReferencesNavRoute.owner,
+                ),
+                navRouteRepo::updateNavRoute
+              ) {
                 Text("View Owner Breakdown")
               }
             }
@@ -268,7 +261,6 @@ fun CodeReferencesComposable(
   }
 
   val statKey = codeReferencesNavRoute.statKey
-
 
   val statsForKey: MutableList<ModuleOwnerAndCodeReference>? by reportDataRepo.statsForKey(statKey)
     .collectAsState(null)

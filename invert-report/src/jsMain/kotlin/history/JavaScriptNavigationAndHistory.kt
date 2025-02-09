@@ -15,6 +15,7 @@ import org.w3c.dom.PopStateEvent
 import org.w3c.dom.url.URL
 import org.w3c.dom.url.URLSearchParams
 
+
 class JavaScriptNavigationAndHistory(
   private val routeManager: NavRouteManager,
   private val navRouteRepo: NavRouteRepo
@@ -27,7 +28,7 @@ class JavaScriptNavigationAndHistory(
       return map
     }
 
-    fun setUrlFromNavRoute(navRoute: NavRoute) {
+    fun setUrlFromNavRoute(navRoute: NavRoute, pushOrReplaceState: PushOrReplaceState) {
       val newUrl = URL(window.location.toString())
 
       val currUrlParamsMap = mutableMapOf<String, String>().also { urlParamsMap ->
@@ -57,13 +58,16 @@ class JavaScriptNavigationAndHistory(
         val isNewPage =
           currUrlParamsMap[BaseNavRoute.PAGE_ID_PARAM] != newNavRouteParamsMap[BaseNavRoute.PAGE_ID_PARAM]
         val newUrlStr = newUrl.toString()
-//        if (isNewPage) {
-          println("pushState $newUrlStr")
-          window.history.pushState(jsonState, "", newUrlStr)
-//        } else {
-//          println("replaceState $newUrlStr")
-//          window.history.replaceState(jsonState, "", newUrlStr)
-//        }
+        Log.d("$pushOrReplaceState $newUrlStr")
+        when (pushOrReplaceState) {
+          PushOrReplaceState.PUSH -> {
+            window.history.pushState(jsonState, "", newUrlStr)
+          }
+
+          PushOrReplaceState.REPLACE -> {
+            window.history.replaceState(jsonState, "", newUrlStr)
+          }
+        }
       }
     }
   }

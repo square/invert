@@ -9,6 +9,7 @@ import com.squareup.invert.common.DependencyGraph
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
+import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.AllStatsReportPage.navPage
@@ -17,7 +18,6 @@ import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.StatTotalAndMetadata
-import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Text
 import ui.BootstrapButton
@@ -28,6 +28,7 @@ import ui.BootstrapLoadingMessageWithSpinner
 import ui.BootstrapLoadingSpinner
 import ui.BootstrapRow
 import ui.BootstrapTable
+import ui.NavRouteLink
 import kotlin.reflect.KClass
 
 
@@ -79,7 +80,6 @@ fun AllStatsComposable(
   reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
   navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo
 ) {
-  val statsDataOrig by reportDataRepo.statsData.collectAsState(null)
   val statTotalsOrig by reportDataRepo.statTotals.collectAsState(null)
   val moduleToOwnerMapFlowValue by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
@@ -88,45 +88,31 @@ fun AllStatsComposable(
     return
   }
 
-  if (statsDataOrig == null || statTotalsOrig == null) {
+  if (statTotalsOrig == null) {
     BootstrapLoadingMessageWithSpinner("Loading...")
     return
   }
 
   val statTotals = statTotalsOrig!!
-  val statsData = statsDataOrig!!
 
-  val statInfos = statsData.statInfos.values
+  val statInfos = statTotals.statTotals.values
 
   StatDataType.entries.forEach { statDataType: StatDataType ->
     val statsOfType = statTotals.statTotals.values.filter { it.metadata.dataType == statDataType }
     if (statsOfType.isNotEmpty()) {
       H1 { Text("${statDataType.displayName} Stats") }
-      StatTiles(statsOfType) { statKey ->
-        navRouteRepo.updateNavRoute(
-          if (statDataType == StatDataType.CODE_REFERENCES) {
-            CodeReferencesNavRoute(
-              statKey = statKey,
-            )
-          } else {
-            StatDetailNavRoute(
-              pluginIds = listOf(),
-              statKeys = listOf(statKey)
-            )
-          }
-        )
-      }
+      StatTiles(statsOfType, navRouteRepo::updateNavRoute)
     }
   }
 
-  val stats = statsData.statInfos.values
 
   val statTotalsMap: Map<StatKey, StatTotalAndMetadata>? = statTotalsOrig?.statTotals
 
   BootstrapTable(
     headers = listOf("Key", "Description", "Type", "Category", "Count"),
     maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
-    rows = stats
+    rows = statInfos
+      .map { it.metadata }
       .filter { it.dataType != StatDataType.STRING }
       .map { statMetadata: StatMetadata ->
         mutableListOf<String>(
@@ -166,7 +152,7 @@ fun AllStatsComposable(
       navRouteRepo.updateNavRoute(
         StatDetailNavRoute(
           pluginIds = listOf(),
-          statKeys = statInfos.map { it.key }
+          statKeys = statInfos.map { it.metadata.key }
         )
       )
     }
@@ -174,9 +160,10 @@ fun AllStatsComposable(
 }
 
 @Composable
-fun StatTiles(codeReferenceStatTotals: List<StatTotalAndMetadata>, onClick: (StatKey) -> Unit) {
+fun StatTiles(codeReferenceStatTotals: List<StatTotalAndMetadata>, onClick: (NavRoute) -> Unit) {
   BootstrapRow {
     codeReferenceStatTotals.sortedBy { it.metadata.description }.forEach { statTotalAndMetadata ->
+      val statMetadata = statTotalAndMetadata.metadata
       BootstrapColumn(4) {
         BootstrapJumbotron(
           centered = true,
@@ -185,11 +172,19 @@ fun StatTiles(codeReferenceStatTotals: List<StatTotalAndMetadata>, onClick: (Sta
             Text(statTotalAndMetadata.total.formatDecimalSeparator())
           }
         ) {
-          A(href = "#", {
-            onClick {
-              onClick(statTotalAndMetadata.metadata.key)
-            }
-          }) {
+          NavRouteLink(
+            if (statMetadata.dataType == StatDataType.CODE_REFERENCES) {
+              CodeReferencesNavRoute(
+                statKey = statMetadata.key,
+              )
+            } else {
+              StatDetailNavRoute(
+                pluginIds = listOf(),
+                statKeys = listOf(statMetadata.key)
+              )
+            },
+            onClick,
+          ) {
             Text(statTotalAndMetadata.metadata.description)
           }
         }

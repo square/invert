@@ -44,7 +44,9 @@ fun LeftNavigationComposable(
   reportDataRepo: ReportDataRepo,
   navGroupsRepo: NavGroupsRepo,
 ) {
-  val currentNavRoute by navRouteRepo.navRoute.collectAsState(initialRoute)
+  val currentNavRoute by navRouteRepo.navRoute.collectAsState(
+    NavRouteRepo.NavChangeEvent(initialRoute)
+  )
   val metadataOrig by reportDataRepo.reportMetadata.collectAsState(null)
 
   Ul({ classes("list-unstyled", "ps-0") }) {
@@ -100,7 +102,7 @@ fun LeftNavigationComposable(
           }) {
             Ul({ classes("btn-toggle-nav list-unstyled fw-normal pb-1 small".split(" ")) }) {
               navPageGroup.navItems.forEach { rootNavItem: NavPage.NavItem ->
-                val activeTab = rootNavItem.matchesCurrentNavRoute(currentNavRoute)
+                val activeTab = rootNavItem.matchesCurrentNavRoute(currentNavRoute.navRoute)
                 Li {
                   A(
                     href = rootNavItem.destinationNavRoute.toQueryString(),

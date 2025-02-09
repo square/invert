@@ -41,6 +41,7 @@ import ui.BootstrapSelectOption
 import ui.BootstrapTabData
 import ui.BootstrapTabPane
 import ui.BootstrapTable
+import ui.NavRouteLink
 import kotlin.reflect.KClass
 
 data class OwnerBreakdownNavRoute(
@@ -182,16 +183,15 @@ fun ByOwnerComposable(
         Text("Owner Breakdown")
         if (!navRoute.statKey.isNullOrBlank()) {
           Text(" (")
-          A(href = "#", {
-            onClick {
-              navRouteRepo.updateNavRoute(
-                navRoute.copy(
-                  owner = null,
-                  statKey = null,
-                )
-              )
-            }
-          }) { Text("View All") }
+          NavRouteLink(
+            navRoute.copy(
+              owner = null,
+              statKey = null,
+            ),
+            navRouteRepo::updateNavRoute
+          ) {
+            Text("View All")
+          }
           Text(")")
         }
       }
@@ -261,11 +261,10 @@ fun ByOwnerComposable(
       Ul {
         codeReferenceStatTypes.forEach { statMetadata ->
           Li {
-            A("#", {
-              onClick {
-                navRouteRepo.updateNavRoute(navRoute.copy(statKey = statMetadata.key))
-              }
-            }) {
+            NavRouteLink(
+              navRoute.copy(statKey = statMetadata.key),
+              navRouteRepo::updateNavRoute
+            ) {
               Text(statMetadata.description + " (" + statMetadata.key + ")")
             }
           }

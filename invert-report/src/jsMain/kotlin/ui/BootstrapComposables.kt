@@ -325,27 +325,6 @@ fun GenericList(
   )
 }
 
-
-@Composable
-fun BootstrapNavSectionHeader(title: String, iconSlug: String? = null) {
-  H6({
-    classes(
-      "sidebar-heading d-flex justify-content-between px-3 mt-4 mb-1 text-muted"
-        .split(" ")
-    )
-  }) {
-    Text(title.uppercase())
-    iconSlug?.let {
-      A("#", {
-        classes("d-flex text-muted".split(" "))
-      }) {
-        BootstrapIcon(iconSlug) {}
-      }
-    }
-  }
-}
-
-
 @Composable
 fun BootstrapJumbotron(
   centered: Boolean = false,

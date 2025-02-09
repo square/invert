@@ -111,6 +111,11 @@ fun InverteDependenciesComposable(
         BootstrapLoadingMessageWithSpinner()
         return
     }
+    println("1")
+    if (allConfigurationNames!!.isEmpty()) {
+        H1 { Text("No analyzed configurations found.") }
+        return
+    }
 
     BootstrapTabPane(
         listOf(
