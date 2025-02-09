@@ -160,7 +160,7 @@ fun StatDetailComposable(
     query = query ?: "",
     placeholderText = "Module Filter...",
   ) {
-    navRouteRepo.updateNavRoute(statsNavRoute.copy(moduleQuery = it))
+    navRouteRepo.pushNavRoute(statsNavRoute.copy(moduleQuery = it))
   }
 
   val SUPPORTED_TYPES = listOf(
@@ -269,7 +269,7 @@ fun StatDetailComposable(
           types = headers.map { MarkdownCellContent::class },
           maxResultsLimitConstant = PagingConstants.MAX_RESULTS
         ) { cellValues ->
-          navRouteRepo.updateNavRoute(ModuleDetailNavRoute(cellValues[0]))
+          navRouteRepo.pushNavRoute(ModuleDetailNavRoute(cellValues[0]))
         }
       } else {
         H3 { Text("No Collected Stats of Type(s) ${statsNavRoute.statKeys}") }

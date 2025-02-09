@@ -79,7 +79,7 @@ fun OwnerDetailComposable(
             types = listOf(String::class),
             maxResultsLimitConstant = MAX_RESULTS
         ) { cellValues ->
-            navRouteRepo.updateNavRoute(ModuleDetailNavRoute(cellValues[0]))
+            navRouteRepo.pushNavRoute(ModuleDetailNavRoute(cellValues[0]))
         }
     }
 

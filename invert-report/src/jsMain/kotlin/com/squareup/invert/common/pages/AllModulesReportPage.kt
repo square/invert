@@ -104,10 +104,10 @@ fun ModulesComposable(
       query = query ?: "",
       placeholderText = "Module Query...",
     ) {
-      navRouteRepo.updateNavRoute(modulesNavRoute.copy(query = it))
+      navRouteRepo.replaceNavRoute(modulesNavRoute.copy(query = it))
     }
     ModulesByNameComposable(allModulesWithOwnerMatchingQuery) {
-      navRouteRepo.updateNavRoute(ModuleDetailNavRoute(it))
+      navRouteRepo.pushNavRoute(ModuleDetailNavRoute(it))
     }
   })
   BootstrapTabPane(

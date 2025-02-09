@@ -109,7 +109,7 @@ fun AnnotationProcessorsComposable(
                         types = listOf(String::class),
                         maxResultsLimitConstant = PagingConstants.MAX_RESULTS
                     ) {
-                        navRouteRepo.updateNavRoute(
+                        navRouteRepo.pushNavRoute(
                             ModuleDetailNavRoute(
                                 path = it[0]
                             )

@@ -35,7 +35,6 @@ object OwnersReportPage : InvertReportPage<OwnersNavRoute> {
     override val composableContent: @Composable (OwnersNavRoute) -> Unit = { navRoute ->
         OwnersComposable(navRoute)
     }
-
 }
 
 
@@ -68,7 +67,7 @@ fun OwnersComposable(
             )
         ),
         onClick = { label, value ->
-            navRouteRepo.updateNavRoute(
+            navRouteRepo.pushNavRoute(
                 OwnerDetailNavRoute(
                     owner = label,
                 )
@@ -88,6 +87,6 @@ fun OwnersComposable(
         maxResultsLimitConstant = PagingConstants.MAX_RESULTS
     ) { cellValues ->
         val owner = cellValues[0]
-        navRouteRepo.updateNavRoute(OwnerDetailNavRoute(owner))
+        navRouteRepo.pushNavRoute(OwnerDetailNavRoute(owner))
     }
 }

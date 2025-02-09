@@ -15,6 +15,7 @@ import org.w3c.dom.PopStateEvent
 import org.w3c.dom.url.URL
 import org.w3c.dom.url.URLSearchParams
 
+
 class JavaScriptNavigationAndHistory(
   private val routeManager: NavRouteManager,
   private val navRouteRepo: NavRouteRepo
@@ -27,7 +28,7 @@ class JavaScriptNavigationAndHistory(
       return map
     }
 
-    fun setUrlFromNavRoute(navRoute: NavRoute) {
+    fun setUrlFromNavRoute(navRoute: NavRoute, pushOrReplaceState: PushOrReplaceState) {
       val newUrl = URL(window.location.toString())
 
       val currUrlParamsMap = mutableMapOf<String, String>().also { urlParamsMap ->
@@ -56,10 +57,16 @@ class JavaScriptNavigationAndHistory(
         val jsonState = InvertJson.encodeToString(HistoryState.serializer(), HistoryState(navRoute.toSearchParams()))
         val isNewPage =
           currUrlParamsMap[BaseNavRoute.PAGE_ID_PARAM] != newNavRouteParamsMap[BaseNavRoute.PAGE_ID_PARAM]
-        if (isNewPage) {
-          window.history.pushState(jsonState, "", newUrl.toString())
-        } else {
-          window.history.replaceState(jsonState, "", newUrl.toString())
+        val newUrlStr = newUrl.toString()
+        Log.d("$pushOrReplaceState $newUrlStr")
+        when (pushOrReplaceState) {
+          PushOrReplaceState.PUSH -> {
+            window.history.pushState(jsonState, "", newUrlStr)
+          }
+
+          PushOrReplaceState.REPLACE -> {
+            window.history.replaceState(jsonState, "", newUrlStr)
+          }
         }
       }
     }
@@ -74,10 +81,10 @@ class JavaScriptNavigationAndHistory(
           try {
             val navRouteParams =
               InvertJson.decodeFromString(HistoryState.serializer(), it.state.toString()).params
-            val newRoute = routeManager.parseParamsToRoute(navRouteParams)
+            val newRoute: NavRoute = routeManager.parseParamsToRoute(navRouteParams)
             MainScope().launch {
               if (navRouteRepo.navRoute.first() != newRoute) {
-                navRouteRepo.updateNavRoute(newRoute)
+                navRouteRepo.pushNavRoute(newRoute)
               }
             }
           } catch (e: Throwable) {

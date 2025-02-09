@@ -1,7 +1,7 @@
 package com.squareup.invert.common
 
 import com.squareup.invert.common.PerformanceAndTiming.computeMeasureDuration
-import com.squareup.invert.common.navigation.NavRoute
+import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.pages.InvertedDependenciesNavRoute
 import com.squareup.invert.common.utils.DependencyComputations
 import com.squareup.invert.models.ConfigurationName
@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.mapLatest
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ReportDataRepo(
-  private val navRoute: Flow<NavRoute>,
+  private val navRoute: Flow<NavRouteRepo.NavChangeEvent>,
   private val collectedDataRepo: CollectedDataRepo,
 ) {
 

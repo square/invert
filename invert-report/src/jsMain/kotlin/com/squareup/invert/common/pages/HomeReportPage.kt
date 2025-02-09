@@ -7,8 +7,10 @@ import com.squareup.invert.common.DependencyGraph
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
+import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
+import com.squareup.invert.common.navigation.routes.toQueryString
 import com.squareup.invert.common.utils.FormattingUtils.dateDisplayStr
 import com.squareup.invert.common.utils.FormattingUtils.formatDecimalSeparator
 import com.squareup.invert.models.StatDataType
@@ -116,23 +118,27 @@ fun HomeComposable(
   BootstrapRow {
     HomeCountComposable(
       moduleCount,
-      AllModulesReportPage.navPage
-    ) { navRouteRepo.updateNavRoute(AllModulesNavRoute()) }
+      AllModulesReportPage.navPage,
+      AllModulesNavRoute(),
+    ) { navRouteRepo.pushNavRoute(it) }
 
     HomeCountComposable(
       artifactCount,
-      ArtifactsReportPage.navPage
-    ) { navRouteRepo.updateNavRoute(ArtifactsNavRoute()) }
+      ArtifactsReportPage.navPage,
+      AllModulesNavRoute()
+    ) { navRouteRepo.pushNavRoute(ArtifactsNavRoute()) }
 
     HomeCountComposable(
       pluginIdsCount,
-      GradlePluginsReportPage.navPage
-    ) { navRouteRepo.updateNavRoute(GradlePluginsNavRoute(null)) }
+      GradlePluginsReportPage.navPage,
+      AllModulesNavRoute()
+    ) { navRouteRepo.pushNavRoute(GradlePluginsNavRoute(null)) }
 
     HomeCountComposable(
       ownersCount,
-      OwnersReportPage.navPage
-    ) { navRouteRepo.updateNavRoute(OwnersNavRoute) }
+      OwnersReportPage.navPage,
+      AllModulesNavRoute()
+    ) { navRouteRepo.pushNavRoute(OwnersNavRoute) }
 
     statTotals.statTotals.values.forEach { statTotalAndMetadata ->
       BootstrapColumn(3) {
@@ -143,18 +149,17 @@ fun HomeComposable(
             Text(statTotalAndMetadata.total.formatDecimalSeparator())
           }
         ) {
-          A(href = "#", {
+          val destRoute = if (statTotalAndMetadata.metadata.dataType == StatDataType.CODE_REFERENCES) {
+            CodeReferencesNavRoute(statKey = statTotalAndMetadata.metadata.key)
+          } else {
+            StatDetailNavRoute(
+              pluginIds = listOf(),
+              statKeys = listOf(statTotalAndMetadata.metadata.key)
+            )
+          }
+          A(href = destRoute.toQueryString(), {
             onClick {
-              navRouteRepo.updateNavRoute(
-                if (statTotalAndMetadata.metadata.dataType == StatDataType.CODE_REFERENCES) {
-                  CodeReferencesNavRoute(statKey = statTotalAndMetadata.metadata.key)
-                } else {
-                  StatDetailNavRoute(
-                    pluginIds = listOf(),
-                    statKeys = listOf(statTotalAndMetadata.metadata.key)
-                  )
-                }
-              )
+              navRouteRepo.pushNavRoute(destRoute)
             }
           }) {
             Small {
@@ -168,10 +173,11 @@ fun HomeComposable(
 
 
 
-  BootstrapButton("View All",
+  BootstrapButton(
+    "View All",
     BootstrapButtonType.PRIMARY,
     onClick = {
-      navRouteRepo.updateNavRoute(
+      navRouteRepo.pushNavRoute(
         AllStatsNavRoute()
       )
     }
@@ -179,7 +185,7 @@ fun HomeComposable(
 }
 
 @Composable
-fun HomeCountComposable(count: Int?, navItem: NavPage, onClick: () -> Unit) {
+fun HomeCountComposable(count: Int?, navItem: NavPage, destNavRoute: NavRoute, onClick: (NavRoute) -> Unit) {
   count?.let { count ->
     BootstrapColumn(3) {
       BootstrapJumbotron(
@@ -189,9 +195,9 @@ fun HomeCountComposable(count: Int?, navItem: NavPage, onClick: () -> Unit) {
           Text(count.formatDecimalSeparator())
         }
       ) {
-        A(href = "#", {
+        A(href = destNavRoute.toQueryString(), {
           onClick {
-            onClick()
+            onClick(destNavRoute)
           }
         }) {
           Small { Text(navItem.displayName) }

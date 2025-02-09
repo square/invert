@@ -41,6 +41,7 @@ import ui.BootstrapSelectOption
 import ui.BootstrapTabData
 import ui.BootstrapTabPane
 import ui.BootstrapTable
+import ui.NavRouteLink
 import kotlin.reflect.KClass
 
 data class OwnerBreakdownNavRoute(
@@ -182,16 +183,15 @@ fun ByOwnerComposable(
         Text("Owner Breakdown")
         if (!navRoute.statKey.isNullOrBlank()) {
           Text(" (")
-          A(href = "#", {
-            onClick {
-              navRouteRepo.updateNavRoute(
-                navRoute.copy(
-                  owner = null,
-                  statKey = null,
-                )
-              )
-            }
-          }) { Text("View All") }
+          NavRouteLink(
+            navRoute.copy(
+              owner = null,
+              statKey = null,
+            ),
+            navRouteRepo::pushNavRoute
+          ) {
+            Text("View All")
+          }
           Text(")")
         }
       }
@@ -207,7 +207,7 @@ fun ByOwnerComposable(
             currentValue = ownerParamValue,
             options = allOwnerNames!!.map { BootstrapSelectOption(it, it) }
           ) {
-            navRouteRepo.updateNavRoute(
+            navRouteRepo.pushNavRoute(
               navRoute.copy(
                 owner = it?.value
               )
@@ -229,7 +229,7 @@ fun ByOwnerComposable(
             )
           }
         ) {
-          navRouteRepo.updateNavRoute(
+          navRouteRepo.pushNavRoute(
             navRoute.copy(
               statKey = it?.value
             )
@@ -261,11 +261,10 @@ fun ByOwnerComposable(
       Ul {
         codeReferenceStatTypes.forEach { statMetadata ->
           Li {
-            A("#", {
-              onClick {
-                navRouteRepo.updateNavRoute(navRoute.copy(statKey = statMetadata.key))
-              }
-            }) {
+            NavRouteLink(
+              navRoute.copy(statKey = statMetadata.key),
+              navRouteRepo::pushNavRoute
+            ) {
               Text(statMetadata.description + " (" + statMetadata.key + ")")
             }
           }
@@ -329,7 +328,7 @@ fun ByOwnerComposable(
                   )
                 ),
                 onClick = { label, value ->
-                  navRouteRepo.updateNavRoute(
+                  navRouteRepo.pushNavRoute(
                     CodeReferencesNavRoute(
                       statKey = statKey,
                       owner = label,
@@ -356,7 +355,7 @@ fun ByOwnerComposable(
                   )
                 ),
                 onClick = { label, value ->
-                  navRouteRepo.updateNavRoute(
+                  navRouteRepo.pushNavRoute(
                     CodeReferencesNavRoute(
                       statKey = statKey,
                       owner = label,
@@ -404,7 +403,7 @@ fun ByOwnerComposable(
               "Code References in Modules",
             ),
             onItemClickCallback = {
-              navRouteRepo.updateNavRoute(
+              navRouteRepo.pushNavRoute(
                 CodeReferencesNavRoute(
                   statKey = statKey,
                   owner = it[0]

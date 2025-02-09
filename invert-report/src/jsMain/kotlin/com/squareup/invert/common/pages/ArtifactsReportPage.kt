@@ -121,7 +121,7 @@ fun ArtifactsComposable(
                 navRoute.query ?: "",
                 "Search For Artifact..."
             ) {
-                navRouteRepo.updateNavRoute(
+                navRouteRepo.pushNavRoute(
                     ArtifactsNavRoute(it)
                 )
             }
@@ -140,7 +140,7 @@ fun ArtifactsComposable(
                     )
                 ),
                 onClick = { label, value ->
-                    navRouteRepo.updateNavRoute(
+                    navRouteRepo.pushNavRoute(
                         ArtifactsNavRoute(
                             query = "$label:"
                         )
@@ -169,7 +169,7 @@ fun ArtifactsComposable(
         types = artifactsMatchingQuery.map { String::class },
         maxResultsLimitConstant = MAX_RESULTS,
         onItemClickCallback = {
-            navRouteRepo.updateNavRoute(
+            navRouteRepo.pushNavRoute(
                 ArtifactDetailNavRoute(
                     group = it[0],
                     artifact = it[1],

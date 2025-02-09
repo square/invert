@@ -9,6 +9,7 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavPageGroup
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
+import com.squareup.invert.common.navigation.routes.toQueryString
 import com.squareup.invert.common.navigation.toNavItem
 import com.squareup.invert.common.pages.AnnotationProcessorsReportPage
 import com.squareup.invert.common.pages.ArtifactDetailNavRoute
@@ -22,6 +23,7 @@ import com.squareup.invert.common.pages.GradleRepositoriesReportPage
 import com.squareup.invert.common.pages.KotlinCompilerPluginsReportPage
 import com.squareup.invert.common.pages.PluginDetailNavRoute
 import com.squareup.invert.common.utils.FormattingUtils.dateDisplayStr
+import history.PushOrReplaceState
 import org.jetbrains.compose.web.attributes.ATarget.Blank
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.dom.A
@@ -43,7 +45,12 @@ fun LeftNavigationComposable(
   reportDataRepo: ReportDataRepo,
   navGroupsRepo: NavGroupsRepo,
 ) {
-  val currentNavRoute by navRouteRepo.navRoute.collectAsState(initialRoute)
+  val currentNavRoute by navRouteRepo.navRoute.collectAsState(
+    NavRouteRepo.NavChangeEvent(
+      initialRoute,
+      PushOrReplaceState.PUSH
+    )
+  )
   val metadataOrig by reportDataRepo.reportMetadata.collectAsState(null)
 
   Ul({ classes("list-unstyled", "ps-0") }) {
@@ -99,10 +106,10 @@ fun LeftNavigationComposable(
           }) {
             Ul({ classes("btn-toggle-nav list-unstyled fw-normal pb-1 small".split(" ")) }) {
               navPageGroup.navItems.forEach { rootNavItem: NavPage.NavItem ->
-                val activeTab = rootNavItem.matchesCurrentNavRoute(currentNavRoute)
+                val activeTab = rootNavItem.matchesCurrentNavRoute(currentNavRoute.navRoute)
                 Li {
                   A(
-                    href = "#",
+                    href = rootNavItem.destinationNavRoute.toQueryString(),
                     {
                       classes(
                         "nav-link link-body-emphasis d-inline-flex text-decoration-none rounded".split(
@@ -113,7 +120,10 @@ fun LeftNavigationComposable(
                               it.add("active")
                             }
                           })
-                      onClick { navRouteRepo.updateNavRoute(rootNavItem.destinationNavRoute) }
+                      onClick {
+                        it.preventDefault()
+                        navRouteRepo.pushNavRoute(rootNavItem.destinationNavRoute)
+                      }
                     }) {
 
                     BootstrapIcon(rootNavItem.navIconSlug) {}

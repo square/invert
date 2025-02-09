@@ -110,7 +110,7 @@ fun ModuleDetailComposable(
       Text("Module $modulePath is owned by ")
       AppLink({
         onClick {
-          navRouteRepo.updateNavRoute(OwnerDetailNavRoute(ownerName))
+          navRouteRepo.pushNavRoute(OwnerDetailNavRoute(ownerName))
         }
       }) {
         Text(ownerName)
@@ -146,7 +146,7 @@ fun ModuleDetailComposable(
           types = listOf(String::class, Int::class),
           maxResultsLimitConstant = MAX_RESULTS,
           onItemClickCallback = {
-            navRouteRepo.updateNavRoute(
+            navRouteRepo.pushNavRoute(
               StatDetailNavRoute(
                 statKeys = listOf(statInfos!!.first { statInfo -> statInfo.description == it[0] }).map { it.key }
               )
@@ -195,7 +195,7 @@ fun ModuleDetailComposable(
         types = listOf(String::class, String::class),
         maxResultsLimitConstant = MAX_RESULTS,
         onItemClickCallback = {
-          navRouteRepo.updateNavRoute(ModuleDetailNavRoute(it[0]))
+          navRouteRepo.pushNavRoute(ModuleDetailNavRoute(it[0]))
         }
       )
     }
@@ -210,7 +210,7 @@ fun ModuleDetailComposable(
         types = moduleUsage.keys.map { String::class },
         maxResultsLimitConstant = MAX_RESULTS,
         onItemClickCallback = {
-          navRouteRepo.updateNavRoute(
+          navRouteRepo.pushNavRoute(
             ModuleDetailNavRoute(
               it[0]
             )
@@ -259,7 +259,7 @@ fun ModuleDetailComposable(
         types = listOf(String::class, String::class),
         maxResultsLimitConstant = MAX_RESULTS,
         onItemClickCallback = {
-          navRouteRepo.updateNavRoute(ModuleDetailNavRoute(it[0]))
+          navRouteRepo.pushNavRoute(ModuleDetailNavRoute(it[0]))
         }
       )
     })
@@ -275,7 +275,7 @@ fun ModuleDetailComposable(
         types = moduleUsage.keys.map { String::class },
         maxResultsLimitConstant = MAX_RESULTS,
         onItemClickCallback = {
-          navRouteRepo.updateNavRoute(
+          navRouteRepo.pushNavRoute(
             ModuleDetailNavRoute(
               it[0]
             )
@@ -288,7 +288,7 @@ fun ModuleDetailComposable(
   pluginsForModule?.let {pluginsForModuleNonNull ->
     pageTabs.add(BootstrapTabData(tabName = "Gradle Plugins") {
       BootstrapClickableList("Gradle Plugins", pluginsForModuleNonNull, MAX_RESULTS) {
-        navRouteRepo.updateNavRoute(
+        navRouteRepo.pushNavRoute(
           PluginDetailNavRoute(
             pluginId = it
           )
