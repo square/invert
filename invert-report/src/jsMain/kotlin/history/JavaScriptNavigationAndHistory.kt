@@ -56,11 +56,14 @@ class JavaScriptNavigationAndHistory(
         val jsonState = InvertJson.encodeToString(HistoryState.serializer(), HistoryState(navRoute.toSearchParams()))
         val isNewPage =
           currUrlParamsMap[BaseNavRoute.PAGE_ID_PARAM] != newNavRouteParamsMap[BaseNavRoute.PAGE_ID_PARAM]
-        if (isNewPage) {
-          window.history.pushState(jsonState, "", newUrl.toString())
-        } else {
-          window.history.replaceState(jsonState, "", newUrl.toString())
-        }
+        val newUrlStr = newUrl.toString()
+//        if (isNewPage) {
+          println("pushState $newUrlStr")
+          window.history.pushState(jsonState, "", newUrlStr)
+//        } else {
+//          println("replaceState $newUrlStr")
+//          window.history.replaceState(jsonState, "", newUrlStr)
+//        }
       }
     }
   }
@@ -74,7 +77,7 @@ class JavaScriptNavigationAndHistory(
           try {
             val navRouteParams =
               InvertJson.decodeFromString(HistoryState.serializer(), it.state.toString()).params
-            val newRoute = routeManager.parseParamsToRoute(navRouteParams)
+            val newRoute: NavRoute = routeManager.parseParamsToRoute(navRouteParams)
             MainScope().launch {
               if (navRouteRepo.navRoute.first() != newRoute) {
                 navRouteRepo.updateNavRoute(newRoute)

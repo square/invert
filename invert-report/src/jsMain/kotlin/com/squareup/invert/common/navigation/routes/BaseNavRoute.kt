@@ -21,8 +21,4 @@ abstract class BaseNavRoute(
       }
     }
   }
-
-  fun toQueryString(): String {
-    return toSearchParams().map { (key, value) -> "$key=$value" }.joinToString("&")
-  }
 }

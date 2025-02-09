@@ -9,6 +9,7 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavPageGroup
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
+import com.squareup.invert.common.navigation.routes.toQueryString
 import com.squareup.invert.common.navigation.toNavItem
 import com.squareup.invert.common.pages.AnnotationProcessorsReportPage
 import com.squareup.invert.common.pages.ArtifactDetailNavRoute
@@ -102,7 +103,7 @@ fun LeftNavigationComposable(
                 val activeTab = rootNavItem.matchesCurrentNavRoute(currentNavRoute)
                 Li {
                   A(
-                    href = "#",
+                    href = rootNavItem.destinationNavRoute.toQueryString(),
                     {
                       classes(
                         "nav-link link-body-emphasis d-inline-flex text-decoration-none rounded".split(
@@ -113,7 +114,10 @@ fun LeftNavigationComposable(
                               it.add("active")
                             }
                           })
-                      onClick { navRouteRepo.updateNavRoute(rootNavItem.destinationNavRoute) }
+                      onClick {
+                        it.preventDefault()
+                        navRouteRepo.updateNavRoute(rootNavItem.destinationNavRoute)
+                      }
                     }) {
 
                     BootstrapIcon(rootNavItem.navIconSlug) {}

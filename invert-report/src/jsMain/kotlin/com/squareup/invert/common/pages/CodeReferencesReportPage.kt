@@ -38,6 +38,7 @@ import ui.BootstrapRow
 import ui.BootstrapSelectDropdown
 import ui.BootstrapSelectOption
 import ui.BootstrapTable
+import ui.NavRouteLink
 import kotlin.reflect.KClass
 
 data class CodeReferencesNavRoute(
@@ -177,33 +178,29 @@ fun CodeReferencesComposable(
       }
     }
     BootstrapColumn(4) {
-      codeReferencesNavRoute.statKey?.let { statKey ->
+      codeReferencesNavRoute.statKey.let { statKey ->
         P {
           Ul {
             Li {
-              A("#", {
-                onClick {
-                  navRouteRepo.updateNavRoute(StatDetailNavRoute(statKeys = listOf(statKey)))
-                }
-              }) {
+              NavRouteLink(
+                StatDetailNavRoute(statKeys = listOf(statKey)),
+                navRouteRepo::updateNavRoute
+              ) {
                 Text("View Grouped by Module")
               }
             }
             if (historicalData.size > 1) {
               Li {
-                A("#", {
-                  onClick {
-                    navRouteRepo.updateNavRoute(
-                      codeReferencesNavRoute.copy(
-                        chart = if (codeReferencesNavRoute.chart != null) {
-                          !codeReferencesNavRoute.chart
-                        } else {
-                          true
-                        }
-                      )
-                    )
-                  }
-                }) {
+                NavRouteLink(
+                  codeReferencesNavRoute.copy(
+                    chart = if (codeReferencesNavRoute.chart != null) {
+                      !codeReferencesNavRoute.chart
+                    } else {
+                      true
+                    }
+                  ),
+                  navRouteRepo::updateNavRoute
+                ) {
                   if (codeReferencesNavRoute.chart == true) {
                     Text("Hide Chart")
                   } else {
