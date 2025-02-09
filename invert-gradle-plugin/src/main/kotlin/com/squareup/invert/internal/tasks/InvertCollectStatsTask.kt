@@ -1,7 +1,8 @@
 package com.squareup.invert.internal.tasks
 
-import com.squareup.invert.InvertExtension
 import com.squareup.invert.InvertCollectContext
+import com.squareup.invert.InvertExtension
+import com.squareup.invert.InvertOwnershipCollector
 import com.squareup.invert.StatCollector
 import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.InvertFileUtils.addSlashAnd
@@ -49,6 +50,9 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
   @get:OutputFile
   abstract val projectBuildReportStatsFile: RegularFileProperty
 
+  @get:Internal
+  abstract var ownershipCollector: InvertOwnershipCollector
+
   private fun invertLogger(): InvertLogger = GradleInvertLogger(logger)
 
   @TaskAction
@@ -66,6 +70,7 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
                 gitCloneDir = File(rootProjectPath.get()),
                 modulePath = projectPath,
                 moduleDir = projectDir,
+                ownershipCollector = ownershipCollector,
               )
             )?.forEach { collectedStat ->
               val statKey = collectedStat.metadata.key
@@ -109,5 +114,6 @@ internal abstract class InvertCollectStatsTask : DefaultTask() {
     )
 
     statCollectors = extension.getStatCollectors().toList()
+    ownershipCollector = extension.getOwnershipCollector()
   }
 }

@@ -10,6 +10,7 @@ class InvertCollectContext(
   val gitCloneDir: File,
   val modulePath: ModulePath,
   val moduleDir: File,
+  val ownershipCollector: InvertOwnershipCollector,
 )
 
 val InvertCollectContext.projectSrcDir get() = File(moduleDir, "src")
