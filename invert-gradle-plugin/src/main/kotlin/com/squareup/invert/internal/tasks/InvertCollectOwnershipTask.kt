@@ -46,20 +46,21 @@ internal abstract class InvertCollectOwnershipTask : DefaultTask() {
 
   @TaskAction
   internal fun execute() {
-    val ownerName: OwnerName = ownershipCollector.collect(File(rootProjectDir.get()), targetModule.get())
+    val gradleModuleDir = File(rootProjectDir.get(), targetModule.get().drop(1).replace(":", "/"))
+    val ownerName: OwnerName = ownershipCollector.collect(File(rootProjectDir.get()), gradleModuleDir)
 
-      val projectOwnershipInfo = CollectedOwnershipForProject(
-        path = targetModule.get(),
-        ownerName = ownerName
-      )
+    val projectOwnershipInfo = CollectedOwnershipForProject(
+      path = targetModule.get(),
+      ownerName = ownerName
+    )
 
-      InvertJsonReportWriter.writeJsonFile(
-        logger = invertLogger(),
-        jsonOutputFile = projectOwnershipJsonFile.get().asFile,
-        jsonFileKey = InvertPluginFileKey.OWNERS,
-        serializer = CollectedOwnershipForProject.serializer(),
-        value = projectOwnershipInfo
-      )
+    InvertJsonReportWriter.writeJsonFile(
+      logger = invertLogger(),
+      jsonOutputFile = projectOwnershipJsonFile.get().asFile,
+      jsonFileKey = InvertPluginFileKey.OWNERS,
+      serializer = CollectedOwnershipForProject.serializer(),
+      value = projectOwnershipInfo
+    )
   }
 
   fun setParams(
