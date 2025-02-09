@@ -11,7 +11,7 @@ import com.squareup.invert.internal.report.json.InvertJsonReportWriter
 import com.squareup.invert.logging.GradleInvertLogger
 import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.ModulePath
-import com.squareup.invert.models.OwnerInfo
+import com.squareup.invert.models.OwnerName
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
@@ -20,6 +20,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import java.io.File
 
 /**
  * Using the specified [InvertOwnershipCollector], it collects ownership info for a given module.
@@ -45,25 +46,21 @@ internal abstract class InvertCollectOwnershipTask : DefaultTask() {
 
   @TaskAction
   internal fun execute() {
-    val collectedOwnerInfo: OwnerInfo? =
-      ownershipCollector.collect(rootProjectDir.get(), targetModule.get())
+    val gradleModuleDir = File(rootProjectDir.get(), targetModule.get().drop(1).replace(":", "/"))
+    val ownerName: OwnerName = ownershipCollector.collect(File(rootProjectDir.get()), gradleModuleDir)
 
-    if (collectedOwnerInfo != null) {
-      val projectOwnershipInfo = CollectedOwnershipForProject(
-        path = targetModule.get(),
-        ownerInfo = collectedOwnerInfo
-      )
+    val projectOwnershipInfo = CollectedOwnershipForProject(
+      path = targetModule.get(),
+      ownerName = ownerName
+    )
 
-      InvertJsonReportWriter.writeJsonFile(
-        logger = invertLogger(),
-        jsonOutputFile = projectOwnershipJsonFile.get().asFile,
-        jsonFileKey = InvertPluginFileKey.OWNERS,
-        serializer = CollectedOwnershipForProject.serializer(),
-        value = projectOwnershipInfo
-      )
-    } else {
-      logger.info("Could not determine Ownership for Module ${this.targetModule}")
-    }
+    InvertJsonReportWriter.writeJsonFile(
+      logger = invertLogger(),
+      jsonOutputFile = projectOwnershipJsonFile.get().asFile,
+      jsonFileKey = InvertPluginFileKey.OWNERS,
+      serializer = CollectedOwnershipForProject.serializer(),
+      value = projectOwnershipInfo
+    )
   }
 
   fun setParams(

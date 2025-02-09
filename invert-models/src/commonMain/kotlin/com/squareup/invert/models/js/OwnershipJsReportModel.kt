@@ -10,6 +10,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class OwnershipJsReportModel(
-  val teams: Map<OwnerName, OwnerInfo>,
+  val teams: Set<OwnerName>,
   val modules: Map<ModulePath, OwnerName>
 )

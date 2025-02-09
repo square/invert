@@ -112,7 +112,7 @@ class ReportDataRepo(
   val allOwnerNames: Flow<List<String>?> = collectedDataRepo.ownersInfo
     .mapLatest { ownersInfo ->
       computeMeasureDuration("allOwners") {
-        ownersInfo?.teams?.keys?.sorted()
+        ownersInfo?.teams?.sorted()
       }
     }
 

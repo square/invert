@@ -3,13 +3,15 @@ package com.squareup.invert.internal
 import com.squareup.invert.InvertOwnershipCollector
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerInfo
+import com.squareup.invert.models.OwnerName
+import java.io.File
 
 /**
  * Default implementation of [InvertOwnershipCollector] which provides no ownership.
  */
-object NoOpOwnershipCollector : InvertOwnershipCollector {
+object NoOpInvertOwnershipCollector : InvertOwnershipCollector {
   override fun collect(
-    rootProjectDir: String,
-    modulePath: ModulePath
-  ): OwnerInfo = OwnerInfo(OwnerInfo.UNOWNED)
+    gitRootDir: File,
+    fileWithOwnership: File
+  ): OwnerName = OwnerInfo.UNOWNED
 }

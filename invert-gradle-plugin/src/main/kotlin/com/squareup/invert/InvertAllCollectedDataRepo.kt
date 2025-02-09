@@ -52,7 +52,7 @@ class InvertAllCollectedDataRepo(
       collectedOwners = allCollectedData.collectedOwners.firstOrNull { it.path == modulePath }
         ?: CollectedOwnershipForProject(
           path = modulePath,
-          ownerInfo = OwnerInfo("None"),
+          ownerName = OwnerInfo.UNOWNED,
         ),
       collectedStats = allCollectedData.collectedStats.firstOrNull { it.path == modulePath }
         ?: CollectedStatsForProject(

@@ -20,10 +20,8 @@ import com.squareup.invert.common.utils.FormattingUtils.formatEpochToDate
 import com.squareup.invert.models.ExtraDataType
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
-import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
-import com.squareup.invert.models.js.StatTotalAndMetadata
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.H3
@@ -274,181 +272,164 @@ fun CodeReferencesComposable(
 
   val statKey = codeReferencesNavRoute.statKey
 
-  if (statKey == null) {
-    val statTotalsOrig by reportDataRepo.statTotals.collectAsState(null)
-    if (statTotalsOrig == null) {
-      BootstrapLoadingMessageWithSpinner("Loading Code References")
-      return
-    }
-    val codeReferenceStatTotals: List<StatTotalAndMetadata> = statTotalsOrig!!.statTotals.values
-      .filter { statTotalAndMetadata -> statTotalAndMetadata.metadata.dataType == StatDataType.CODE_REFERENCES }
-    StatTiles(
-      codeReferenceStatTotals
-    ) { statKey ->
-      navRouteRepo.updateNavRoute(
-        CodeReferencesNavRoute(statKey)
-      )
-    }
-  } else {
 
-    val statsForKey: MutableList<ModuleOwnerAndCodeReference>? by reportDataRepo.statsForKey(statKey)
-      .collectAsState(null)
-    if (statsForKey == null) {
-      BootstrapLoadingMessageWithSpinner("Loading Stats for $statKey")
-      return
-    }
-
-    val allCodeReferencesForStat: Set<ModuleOwnerAndCodeReference> = statsForKey!!.toSet()
-
-    val filteredByOwner: List<ModuleOwnerAndCodeReference> = allCodeReferencesForStat
-      // Filter By Module
-      .filter { moduleOwnerAndCodeReference: ModuleOwnerAndCodeReference ->
-        val moduleFromModule = moduleOwnerAndCodeReference.module
-        val moduleFromNavRoute = codeReferencesNavRoute.module
-        if (!moduleFromNavRoute.isNullOrBlank()) {
-          moduleFromNavRoute == moduleOwnerAndCodeReference.module || moduleFromNavRoute == moduleFromModule
-        } else {
-          true
-        }
-
-      }
-      // Filter by Owner
-      .filter { ownerAndCodeReference: ModuleOwnerAndCodeReference ->
-        val ownerOfModule = ownerAndCodeReference.owner
-        val codeReferenceOwner = ownerAndCodeReference.codeReference.owner
-        val ownerFromNavRoute = codeReferencesNavRoute.owner
-        if (!ownerFromNavRoute.isNullOrBlank()) {
-          ownerFromNavRoute == codeReferenceOwner || ownerFromNavRoute == ownerOfModule
-        } else {
-          true
-        }
-      }
-
-    if (codeReferencesNavRoute.treemap == true) {
-      BootstrapRow {
-        BootstrapColumn {
-          PlotlyTreeMapComposable(
-            filePaths = filteredByOwner.map { it.codeReference.filePath },
-          )
-        }
-      }
-    }
-
-    if (codeReferencesNavRoute.chart == true) {
-      BootstrapRow {
-        BootstrapColumn {
-          val datasets = mutableListOf<ChartsJs.ChartJsDataset>()
-          val currentHistoricalData = historicalData.last()
-          val remainingStatKeys: List<StatKey> = listOf(statKey)
-          remainingStatKeys.forEach { remainingStatKey ->
-            val values: List<Int> = historicalData.map { historicalDataPoint ->
-              historicalDataPoint.statTotalsAndMetadata.statTotals[remainingStatKey]?.total ?: 0
-            }
-            val remainingStat = currentHistoricalData.statTotalsAndMetadata.statTotals[remainingStatKey]!!.metadata
-            datasets.add(
-              ChartsJs.ChartJsDataset(
-                label = remainingStat.description,
-                data = values
-              )
-            )
-          }
-
-          val chartJsData = ChartsJs.ChartJsData(
-            labels = historicalData.map { formatEpochToDate(it.reportMetadata.latestCommitTime) },
-            datasets = datasets,
-          )
-
-          ChartJsLineChartComposable(
-            data = chartJsData,
-            onClick = { label, value ->
-
-            })
-        }
-      }
-    }
-
-    val codeReferencesByOwner = allCodeReferencesForStat.groupBy { it.owner }
-    val totalCodeReferenceCount = allCodeReferencesForStat.size
-    BootstrapRow {
-      BootstrapColumn(6) {
-        H3 {
-          Text("Filter by Owner")
-          BootstrapSelectDropdown(
-            placeholderText = "-- All Owners ($totalCodeReferenceCount Total) --",
-            currentValue = codeReferencesNavRoute.owner,
-            options = codeReferencesByOwner.map {
-              BootstrapSelectOption(
-                value = it.key,
-                displayText = "${it.key} (${it.value.size} of $totalCodeReferenceCount)"
-              )
-            }.sortedBy { it.displayText }
-          ) {
-            navRouteRepo.updateNavRoute(
-              codeReferencesNavRoute.copy(
-                owner = it?.value,
-              )
-            )
-          }
-        }
-      }
-      val codeReferencesByModule =
-        allCodeReferencesForStat.groupBy { it.module }
-      BootstrapColumn(6) {
-        H3 {
-          Text("Filter by Module")
-          BootstrapSelectDropdown(
-            placeholderText = "-- All Modules --",// (${codeReferencesByModule.size} Total) --",
-            currentValue = codeReferencesNavRoute.module,
-            options = codeReferencesByModule.map {
-              BootstrapSelectOption(
-                value = it.key,
-                displayText = it.key,// (${it.value.size} of $totalCodeReferenceCount)"
-              )
-            }.sortedBy { it.displayText }
-          ) {
-            navRouteRepo.updateNavRoute(
-              codeReferencesNavRoute.copy(
-                module = it?.value
-              )
-            )
-          }
-        }
-      }
-    }
-
-    BootstrapTable(
-      headers = listOf(
-        "Module",
-        "Owner",
-        "File",
-        "Code"
-      ) + currentStatMetadata.extras.map { "${it.description} (${it.key})" },
-      rows = filteredByOwner
-        .map {
-          val listOfExtraValues: List<String> =
-            currentStatMetadata.extras.map { extra -> it.codeReference.extras[extra.key] ?: "" }
-          listOf(
-            it.module,
-            it.codeReference.owner ?: (it.owner + " (Owns Module)"),
-            it.codeReference.toHrefLink(projectMetadata!!, false),
-            it.codeReference.code ?: ""
-          ) + listOfExtraValues
-        },
-      maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
-      sortAscending = true,
-      sortByColumn = 2,
-      types = listOf(
-        String::class,
-        String::class,
-        String::class,
-        String::class
-      ) + currentStatMetadata.extras.map { extra ->
-        when (extra.type) {
-          ExtraDataType.BOOLEAN -> Boolean::class
-          ExtraDataType.NUMERIC -> Int::class
-          ExtraDataType.STRING -> String::class
-        }
-      }
-    )
+  val statsForKey: MutableList<ModuleOwnerAndCodeReference>? by reportDataRepo.statsForKey(statKey)
+    .collectAsState(null)
+  if (statsForKey == null) {
+    BootstrapLoadingMessageWithSpinner("Loading Stats for $statKey")
+    return
   }
+
+  val allCodeReferencesForStat: Set<ModuleOwnerAndCodeReference> = statsForKey!!.toSet()
+
+  val filteredByOwner: List<ModuleOwnerAndCodeReference> = allCodeReferencesForStat
+    // Filter By Module
+    .filter { moduleOwnerAndCodeReference: ModuleOwnerAndCodeReference ->
+      val moduleFromModule = moduleOwnerAndCodeReference.module
+      val moduleFromNavRoute = codeReferencesNavRoute.module
+      if (!moduleFromNavRoute.isNullOrBlank()) {
+        moduleFromNavRoute == moduleOwnerAndCodeReference.module || moduleFromNavRoute == moduleFromModule
+      } else {
+        true
+      }
+
+    }
+    // Filter by Owner
+    .filter { ownerAndCodeReference: ModuleOwnerAndCodeReference ->
+      val ownerOfModule = ownerAndCodeReference.owner
+      val codeReferenceOwner = ownerAndCodeReference.codeReference.owner
+      val ownerFromNavRoute = codeReferencesNavRoute.owner
+      if (!ownerFromNavRoute.isNullOrBlank()) {
+        ownerFromNavRoute == codeReferenceOwner || ownerFromNavRoute == ownerOfModule
+      } else {
+        true
+      }
+    }
+
+  if (codeReferencesNavRoute.treemap == true) {
+    BootstrapRow {
+      BootstrapColumn {
+        PlotlyTreeMapComposable(
+          filePaths = filteredByOwner.map { it.codeReference.filePath },
+        )
+      }
+    }
+  }
+
+  if (codeReferencesNavRoute.chart == true) {
+    BootstrapRow {
+      BootstrapColumn {
+        val datasets = mutableListOf<ChartsJs.ChartJsDataset>()
+        val currentHistoricalData = historicalData.last()
+        val remainingStatKeys: List<StatKey> = listOf(statKey)
+        remainingStatKeys.forEach { remainingStatKey ->
+          val values: List<Int> = historicalData.map { historicalDataPoint ->
+            historicalDataPoint.statTotalsAndMetadata.statTotals[remainingStatKey]?.total ?: 0
+          }
+          val remainingStat = currentHistoricalData.statTotalsAndMetadata.statTotals[remainingStatKey]!!.metadata
+          datasets.add(
+            ChartsJs.ChartJsDataset(
+              label = remainingStat.description,
+              data = values
+            )
+          )
+        }
+
+        val chartJsData = ChartsJs.ChartJsData(
+          labels = historicalData.map { formatEpochToDate(it.reportMetadata.latestCommitTime) },
+          datasets = datasets,
+        )
+
+        ChartJsLineChartComposable(
+          data = chartJsData,
+          onClick = { label, value ->
+
+          })
+      }
+    }
+  }
+
+  val codeReferencesByOwner = allCodeReferencesForStat.groupBy { it.owner }
+  val totalCodeReferenceCount = allCodeReferencesForStat.size
+  BootstrapRow {
+    BootstrapColumn(6) {
+      H3 {
+        Text("Filter by Owner")
+        BootstrapSelectDropdown(
+          placeholderText = "-- All Owners ($totalCodeReferenceCount Total) --",
+          currentValue = codeReferencesNavRoute.owner,
+          options = codeReferencesByOwner.map {
+            BootstrapSelectOption(
+              value = it.key,
+              displayText = "${it.key} (${it.value.size} of $totalCodeReferenceCount)"
+            )
+          }.sortedBy { it.displayText }
+        ) {
+          navRouteRepo.updateNavRoute(
+            codeReferencesNavRoute.copy(
+              owner = it?.value,
+            )
+          )
+        }
+      }
+    }
+    val codeReferencesByModule =
+      allCodeReferencesForStat.groupBy { it.module }
+    BootstrapColumn(6) {
+      H3 {
+        Text("Filter by Module")
+        BootstrapSelectDropdown(
+          placeholderText = "-- All Modules --",// (${codeReferencesByModule.size} Total) --",
+          currentValue = codeReferencesNavRoute.module,
+          options = codeReferencesByModule.map {
+            BootstrapSelectOption(
+              value = it.key,
+              displayText = it.key,// (${it.value.size} of $totalCodeReferenceCount)"
+            )
+          }.sortedBy { it.displayText }
+        ) {
+          navRouteRepo.updateNavRoute(
+            codeReferencesNavRoute.copy(
+              module = it?.value
+            )
+          )
+        }
+      }
+    }
+  }
+
+  BootstrapTable(
+    headers = listOf(
+      "Module",
+      "Owner",
+      "File",
+      "Code"
+    ) + currentStatMetadata.extras.map { "${it.description} (${it.key})" },
+    rows = filteredByOwner
+      .map {
+        val listOfExtraValues: List<String> =
+          currentStatMetadata.extras.map { extra -> it.codeReference.extras[extra.key] ?: "" }
+        listOf(
+          it.module,
+          it.codeReference.owner ?: (it.owner + " (Owns Module)"),
+          it.codeReference.toHrefLink(projectMetadata!!, false),
+          it.codeReference.code ?: ""
+        ) + listOfExtraValues
+      },
+    maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
+    sortAscending = true,
+    sortByColumn = 2,
+    types = listOf(
+      String::class,
+      String::class,
+      String::class,
+      String::class
+    ) + currentStatMetadata.extras.map { extra ->
+      when (extra.type) {
+        ExtraDataType.BOOLEAN -> Boolean::class
+        ExtraDataType.NUMERIC -> Int::class
+        ExtraDataType.STRING -> String::class
+      }
+    }
+  )
 }
