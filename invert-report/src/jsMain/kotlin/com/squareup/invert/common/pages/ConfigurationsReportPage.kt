@@ -60,7 +60,7 @@ fun ConfigurationsComposable(
     BootstrapRow {
         BootstrapColumn(12) {
             BootstrapClickableList("Analyzed Configurations", list, MAX_RESULTS) { item ->
-                navRouteRepo.updateNavRoute(ConfigurationDetailNavRoute(item))
+                navRouteRepo.pushNavRoute(ConfigurationDetailNavRoute(item))
             }
         }
     }

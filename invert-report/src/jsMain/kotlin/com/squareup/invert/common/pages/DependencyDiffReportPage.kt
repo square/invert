@@ -139,19 +139,19 @@ fun ModuleDependencyDiffComposable(
                 placeholderText = "Module A...",
                 dataListId = ALL_MODULES_DATALIST_ID,
             ) {
-                navRouteRepo.updateNavRoute(navRoute.copy(moduleA = it))
+                navRouteRepo.replaceNavRoute(navRoute.copy(moduleA = it))
             }
             BootstrapSearchBox(
                 query = navRoute.configurationA ?: "",
                 placeholderText = "Configuration A...",
                 dataListId = MODULE_A_CONFIGURATIONS_DATALIST,
             ) {
-                navRouteRepo.updateNavRoute(navRoute.copy(configurationA = it))
+                navRouteRepo.replaceNavRoute(navRoute.copy(configurationA = it))
             }
         }
         BootstrapColumn(2) {
             BootstrapButton("↔️") {
-                navRouteRepo.updateNavRoute(
+                navRouteRepo.replaceNavRoute(
                     navRoute.copy(
                         moduleA = navRoute.moduleB,
                         moduleB = navRoute.moduleA,
@@ -167,23 +167,23 @@ fun ModuleDependencyDiffComposable(
                 placeholderText = "Module B...",
                 dataListId = ALL_MODULES_DATALIST_ID,
             ) {
-                navRouteRepo.updateNavRoute(navRoute.copy(moduleB = it))
+                navRouteRepo.replaceNavRoute(navRoute.copy(moduleB = it))
             }
             BootstrapSearchBox(
                 query = navRoute.configurationB ?: "",
                 placeholderText = "Configuration B...",
                 dataListId = MODULE_A_CONFIGURATIONS_DATALIST,
             ) {
-                navRouteRepo.updateNavRoute(navRoute.copy(configurationB = it))
+                navRouteRepo.replaceNavRoute(navRoute.copy(configurationB = it))
             }
         }
     }
 
     BootstrapSettingsCheckbox("Include Artifacts", navRoute.includeArtifacts) {
-        navRouteRepo.updateNavRoute(navRoute.copy(includeArtifacts = it))
+        navRouteRepo.replaceNavRoute(navRoute.copy(includeArtifacts = it))
     }
     BootstrapSettingsCheckbox("Show Matching", navRoute.showMatching) {
-        navRouteRepo.updateNavRoute(navRoute.copy(showMatching = it))
+        navRouteRepo.replaceNavRoute(navRoute.copy(showMatching = it))
     }
 
     Br()

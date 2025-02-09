@@ -68,7 +68,7 @@ fun PluginDetailComposable(
         TitleRow("Plugin Detail ${navRoute.pluginId} is used by ${modules.size} Modules:")
         Br()
         BootstrapClickableList("Modules Using ${pluginId}", modules, PagingConstants.MAX_RESULTS) { gradlePath ->
-            navRouteRepo.updateNavRoute(ModuleDetailNavRoute(gradlePath))
+            navRouteRepo.pushNavRoute(ModuleDetailNavRoute(gradlePath))
         }
     }
 

@@ -152,13 +152,13 @@ fun ModuleDependencyGraphComposable(
             classes("form-control")
             list(DEPENDENCY_GRAPH_MODULES_DATALIST_ID)
             placeholder("Module...")
-            onInput { navRouteRepo.updateNavRoute(dependencyGraphNavRoute.copy(module = it.value)) }
+            onInput { navRouteRepo.pushNavRoute(dependencyGraphNavRoute.copy(module = it.value)) }
           }
           TextInput(selectedConfiguration) {
             classes("form-control")
             list(ANALYZED_CONFIGURATION_NAMES_DATALIST_ID)
             placeholder("Configuration...")
-            onInput { navRouteRepo.updateNavRoute(dependencyGraphNavRoute.copy(configuration = it.value)) }
+            onInput { navRouteRepo.pushNavRoute(dependencyGraphNavRoute.copy(configuration = it.value)) }
           }
         }
       }

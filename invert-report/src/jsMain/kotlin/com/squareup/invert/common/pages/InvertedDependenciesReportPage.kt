@@ -144,7 +144,7 @@ fun InverteDependenciesComposable(
                             Text("or... ")
                             Br()
                             BootstrapButton("Start by Searching Everything") {
-                                navRouteRepo.updateNavRoute(
+                                navRouteRepo.pushNavRoute(
                                     InvertedDependenciesNavRoute(
                                         pluginGroupByFilter = allPluginIds!!,
                                         configurations = allConfigurationNames!!.toList(),
@@ -158,7 +158,7 @@ fun InverteDependenciesComposable(
                     TitleRow("Inverted Dependency Search (Grouped By Plugin Type)")
                     val query by reportDataRepo.moduleQuery.collectAsState(null)
                     BootstrapSearchBox(query ?: "", "Search For Module...") {
-                        navRouteRepo.updateNavRoute(
+                        navRouteRepo.replaceNavRoute(
                             navRoute.copy(
                                 moduleQuery = it
                             )
@@ -172,7 +172,7 @@ fun InverteDependenciesComposable(
                                 "Matching ${matching?.size} of $totalCount",
                                 matching ?: listOf(),
                                 onItemClick = {
-                                    navRouteRepo.updateNavRoute(
+                                    navRouteRepo.pushNavRoute(
                                         navRoute.copy(
                                             moduleQuery = it
                                         )
@@ -218,12 +218,12 @@ fun SettingsComposable(
             BootstrapColumn(6) {
                 H5 { Text("Configurations") }
                 BootstrapButton("Select All") {
-                    navRouteRepo.updateNavRoute(
+                    navRouteRepo.pushNavRoute(
                         invertedDependenciesNavRoute.copy(configurations = allConfigurationNames)
                     )
                 }
                 BootstrapButton("Unselect All") {
-                    navRouteRepo.updateNavRoute(
+                    navRouteRepo.pushNavRoute(
                         invertedDependenciesNavRoute.copy(configurations = listOf())
                     )
                 }
@@ -232,7 +232,7 @@ fun SettingsComposable(
                         labelText = configurationName,
                         initialIsChecked = invertedDependenciesNavRoute.configurations.contains(configurationName)
                     ) { shouldAdd ->
-                        navRouteRepo.updateNavRoute(
+                        navRouteRepo.pushNavRoute(
                             invertedDependenciesNavRoute.copy(
                                 configurations = invertedDependenciesNavRoute.configurations
                                     .toMutableList()
@@ -250,14 +250,14 @@ fun SettingsComposable(
             BootstrapColumn(6) {
                 H5 { Text("Plugins") }
                 BootstrapButton("Select All") {
-                    navRouteRepo.updateNavRoute(
+                    navRouteRepo.pushNavRoute(
                         invertedDependenciesNavRoute.copy(
                             pluginGroupByFilter = allPluginIds ?: listOf()
                         )
                     )
                 }
                 BootstrapButton("Unselect All") {
-                    navRouteRepo.updateNavRoute(
+                    navRouteRepo.pushNavRoute(
                         invertedDependenciesNavRoute.copy(
                             pluginGroupByFilter = listOf()
                         )
@@ -269,7 +269,7 @@ fun SettingsComposable(
                         labelText = gradlePluginId,
                         initialIsChecked = groupByFilterItems.contains(gradlePluginId)
                     ) { shouldAdd ->
-                        navRouteRepo.updateNavRoute(
+                        navRouteRepo.pushNavRoute(
                             invertedDependenciesNavRoute.copy(
                                 pluginGroupByFilter = invertedDependenciesNavRoute.pluginGroupByFilter.toMutableList()
                                     .apply {

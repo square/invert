@@ -84,7 +84,7 @@ class JavaScriptNavigationAndHistory(
             val newRoute: NavRoute = routeManager.parseParamsToRoute(navRouteParams)
             MainScope().launch {
               if (navRouteRepo.navRoute.first() != newRoute) {
-                navRouteRepo.updateNavRoute(newRoute)
+                navRouteRepo.pushNavRoute(newRoute)
               }
             }
           } catch (e: Throwable) {

@@ -160,7 +160,7 @@ fun CodeReferencesComposable(
   if (currentStatMetadata == null) {
     H1 { Text("No stat with key '${codeReferencesNavRoute.statKey}' found") }
     BootstrapButton("View All Stats") {
-      navRouteRepo.updateNavRoute(AllStatsNavRoute())
+      navRouteRepo.pushNavRoute(AllStatsNavRoute())
     }
     return
   }
@@ -183,7 +183,7 @@ fun CodeReferencesComposable(
             Li {
               NavRouteLink(
                 StatDetailNavRoute(statKeys = listOf(statKey)),
-                navRouteRepo::updateNavRoute
+                navRouteRepo::pushNavRoute
               ) {
                 Text("View Grouped by Module")
               }
@@ -198,7 +198,7 @@ fun CodeReferencesComposable(
                       true
                     }
                   ),
-                  navRouteRepo::updateNavRoute
+                  navRouteRepo::pushNavRoute
                 ) {
                   if (codeReferencesNavRoute.chart == true) {
                     Text("Hide Chart")
@@ -217,7 +217,7 @@ fun CodeReferencesComposable(
                     true
                   }
                 ),
-                navRouteRepo::updateNavRoute,
+                navRouteRepo::pushNavRoute,
               ) {
                 if (codeReferencesNavRoute.treemap == true) {
                   Text("Hide Treemap")
@@ -232,7 +232,7 @@ fun CodeReferencesComposable(
                   statKey = codeReferencesNavRoute.statKey,
                   owner = codeReferencesNavRoute.owner,
                 ),
-                navRouteRepo::updateNavRoute
+                navRouteRepo::pushNavRoute
               ) {
                 Text("View Owner Breakdown")
               }
@@ -354,7 +354,7 @@ fun CodeReferencesComposable(
             )
           }.sortedBy { it.displayText }
         ) {
-          navRouteRepo.updateNavRoute(
+          navRouteRepo.pushNavRoute(
             codeReferencesNavRoute.copy(
               owner = it?.value,
             )
@@ -377,7 +377,7 @@ fun CodeReferencesComposable(
             )
           }.sortedBy { it.displayText }
         ) {
-          navRouteRepo.updateNavRoute(
+          navRouteRepo.pushNavRoute(
             codeReferencesNavRoute.copy(
               module = it?.value
             )

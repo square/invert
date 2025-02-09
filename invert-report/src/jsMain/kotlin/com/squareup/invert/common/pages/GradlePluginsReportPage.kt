@@ -87,14 +87,14 @@ fun PluginsComposable(
         navRoute.query ?: "",
         "Search For Artifact..."
     ) {
-        navRouteRepo.updateNavRoute(
+        navRouteRepo.pushNavRoute(
             ArtifactsNavRoute(it)
         )
     }
     BootstrapRow {
         BootstrapColumn(6) {
             BootstrapClickableList("Plugins", allPluginIds!!, MAX_RESULTS) { gradlePluginId ->
-                navRouteRepo.updateNavRoute(PluginDetailNavRoute(gradlePluginId))
+                navRouteRepo.pushNavRoute(PluginDetailNavRoute(gradlePluginId))
             }
         }
         BootstrapColumn(6) {
@@ -110,7 +110,7 @@ fun PluginsComposable(
                     )
                 ),
                 onClick = { label, value ->
-                    navRouteRepo.updateNavRoute(
+                    navRouteRepo.pushNavRoute(
                         PluginDetailNavRoute(
                             pluginId = label,
                         )

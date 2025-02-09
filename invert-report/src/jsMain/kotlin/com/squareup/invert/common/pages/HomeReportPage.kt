@@ -120,25 +120,25 @@ fun HomeComposable(
       moduleCount,
       AllModulesReportPage.navPage,
       AllModulesNavRoute(),
-    ) { navRouteRepo.updateNavRoute(it) }
+    ) { navRouteRepo.pushNavRoute(it) }
 
     HomeCountComposable(
       artifactCount,
       ArtifactsReportPage.navPage,
       AllModulesNavRoute()
-    ) { navRouteRepo.updateNavRoute(ArtifactsNavRoute()) }
+    ) { navRouteRepo.pushNavRoute(ArtifactsNavRoute()) }
 
     HomeCountComposable(
       pluginIdsCount,
       GradlePluginsReportPage.navPage,
       AllModulesNavRoute()
-    ) { navRouteRepo.updateNavRoute(GradlePluginsNavRoute(null)) }
+    ) { navRouteRepo.pushNavRoute(GradlePluginsNavRoute(null)) }
 
     HomeCountComposable(
       ownersCount,
       OwnersReportPage.navPage,
       AllModulesNavRoute()
-    ) { navRouteRepo.updateNavRoute(OwnersNavRoute) }
+    ) { navRouteRepo.pushNavRoute(OwnersNavRoute) }
 
     statTotals.statTotals.values.forEach { statTotalAndMetadata ->
       BootstrapColumn(3) {
@@ -159,7 +159,7 @@ fun HomeComposable(
           }
           A(href = destRoute.toQueryString(), {
             onClick {
-              navRouteRepo.updateNavRoute(destRoute)
+              navRouteRepo.pushNavRoute(destRoute)
             }
           }) {
             Small {
@@ -177,7 +177,7 @@ fun HomeComposable(
     "View All",
     BootstrapButtonType.PRIMARY,
     onClick = {
-      navRouteRepo.updateNavRoute(
+      navRouteRepo.pushNavRoute(
         AllStatsNavRoute()
       )
     }

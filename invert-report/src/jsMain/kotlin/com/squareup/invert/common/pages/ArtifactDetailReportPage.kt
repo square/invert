@@ -118,7 +118,7 @@ fun ArtifactDetailComposable(
             types = listOf(String::class, String::class),
             maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
             onItemClickCallback = {
-                navRouteRepo.updateNavRoute(ModuleDetailNavRoute(it[0]))
+                navRouteRepo.pushNavRoute(ModuleDetailNavRoute(it[0]))
             }
         )
     }

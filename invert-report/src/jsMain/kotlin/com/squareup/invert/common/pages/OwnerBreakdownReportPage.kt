@@ -188,7 +188,7 @@ fun ByOwnerComposable(
               owner = null,
               statKey = null,
             ),
-            navRouteRepo::updateNavRoute
+            navRouteRepo::pushNavRoute
           ) {
             Text("View All")
           }
@@ -207,7 +207,7 @@ fun ByOwnerComposable(
             currentValue = ownerParamValue,
             options = allOwnerNames!!.map { BootstrapSelectOption(it, it) }
           ) {
-            navRouteRepo.updateNavRoute(
+            navRouteRepo.pushNavRoute(
               navRoute.copy(
                 owner = it?.value
               )
@@ -229,7 +229,7 @@ fun ByOwnerComposable(
             )
           }
         ) {
-          navRouteRepo.updateNavRoute(
+          navRouteRepo.pushNavRoute(
             navRoute.copy(
               statKey = it?.value
             )
@@ -263,7 +263,7 @@ fun ByOwnerComposable(
           Li {
             NavRouteLink(
               navRoute.copy(statKey = statMetadata.key),
-              navRouteRepo::updateNavRoute
+              navRouteRepo::pushNavRoute
             ) {
               Text(statMetadata.description + " (" + statMetadata.key + ")")
             }
@@ -328,7 +328,7 @@ fun ByOwnerComposable(
                   )
                 ),
                 onClick = { label, value ->
-                  navRouteRepo.updateNavRoute(
+                  navRouteRepo.pushNavRoute(
                     CodeReferencesNavRoute(
                       statKey = statKey,
                       owner = label,
@@ -355,7 +355,7 @@ fun ByOwnerComposable(
                   )
                 ),
                 onClick = { label, value ->
-                  navRouteRepo.updateNavRoute(
+                  navRouteRepo.pushNavRoute(
                     CodeReferencesNavRoute(
                       statKey = statKey,
                       owner = label,
@@ -403,7 +403,7 @@ fun ByOwnerComposable(
               "Code References in Modules",
             ),
             onItemClickCallback = {
-              navRouteRepo.updateNavRoute(
+              navRouteRepo.pushNavRoute(
                 CodeReferencesNavRoute(
                   statKey = statKey,
                   owner = it[0]

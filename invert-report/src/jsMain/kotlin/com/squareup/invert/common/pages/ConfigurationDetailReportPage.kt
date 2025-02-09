@@ -97,7 +97,7 @@ fun ConfigurationDetailComposable(
         types = listOf(String::class),
         maxResultsLimitConstant = MAX_RESULTS,
         onItemClickCallback = {
-            navRouteRepo.updateNavRoute(
+            navRouteRepo.pushNavRoute(
                 ModuleDetailNavRoute(
                     it[0]
                 )

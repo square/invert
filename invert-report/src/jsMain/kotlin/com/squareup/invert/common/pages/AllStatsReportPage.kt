@@ -101,7 +101,7 @@ fun AllStatsComposable(
     val statsOfType = statTotals.statTotals.values.filter { it.metadata.dataType == statDataType }
     if (statsOfType.isNotEmpty()) {
       H1 { Text("${statDataType.displayName} Stats") }
-      StatTiles(statsOfType, navRouteRepo::updateNavRoute)
+      StatTiles(statsOfType, navRouteRepo::pushNavRoute)
     }
   }
 
@@ -129,7 +129,7 @@ fun AllStatsComposable(
     onItemClickCallback = { cellValues ->
       val statKey = cellValues[0]
       val statDataType = StatDataType.fromString(cellValues[2])
-      navRouteRepo.updateNavRoute(
+      navRouteRepo.pushNavRoute(
         if (statDataType == StatDataType.CODE_REFERENCES) {
           CodeReferencesNavRoute(
             statKey = statKey,
@@ -149,7 +149,7 @@ fun AllStatsComposable(
     "View All, Grouped By Module",
     BootstrapButtonType.SECONDARY,
     onClick = {
-      navRouteRepo.updateNavRoute(
+      navRouteRepo.pushNavRoute(
         StatDetailNavRoute(
           pluginIds = listOf(),
           statKeys = statInfos.map { it.metadata.key }

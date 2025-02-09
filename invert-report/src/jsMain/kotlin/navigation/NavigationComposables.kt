@@ -23,6 +23,7 @@ import com.squareup.invert.common.pages.GradleRepositoriesReportPage
 import com.squareup.invert.common.pages.KotlinCompilerPluginsReportPage
 import com.squareup.invert.common.pages.PluginDetailNavRoute
 import com.squareup.invert.common.utils.FormattingUtils.dateDisplayStr
+import history.PushOrReplaceState
 import org.jetbrains.compose.web.attributes.ATarget.Blank
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.dom.A
@@ -45,7 +46,10 @@ fun LeftNavigationComposable(
   navGroupsRepo: NavGroupsRepo,
 ) {
   val currentNavRoute by navRouteRepo.navRoute.collectAsState(
-    NavRouteRepo.NavChangeEvent(initialRoute)
+    NavRouteRepo.NavChangeEvent(
+      initialRoute,
+      PushOrReplaceState.PUSH
+    )
   )
   val metadataOrig by reportDataRepo.reportMetadata.collectAsState(null)
 
@@ -118,7 +122,7 @@ fun LeftNavigationComposable(
                           })
                       onClick {
                         it.preventDefault()
-                        navRouteRepo.updateNavRoute(rootNavItem.destinationNavRoute)
+                        navRouteRepo.pushNavRoute(rootNavItem.destinationNavRoute)
                       }
                     }) {
 
