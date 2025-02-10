@@ -16,7 +16,6 @@ import com.squareup.invert.models.js.MetadataJsReportModel
 import com.squareup.invert.models.js.StatTotalAndMetadata
 import com.squareup.invert.models.js.StatsJsReportModel
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.SetSerializer
 import java.io.File
 

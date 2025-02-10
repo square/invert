@@ -4,6 +4,7 @@ typealias DependencyId = String
 typealias ConfigurationName = String
 typealias GradlePluginId = String
 typealias ModulePath = String
+typealias FileKey = String
 typealias OwnerName = String
 typealias GitSha = String
 typealias GitBranch = String

@@ -16,6 +16,7 @@ enum class JsReportFileKey(
   OWNERS("owners", "Owners"),
   METADATA("metadata", "Metadata"),
   CONFIGURATIONS("configurations", "Configurations"),
+  STAT("stat", "Stat"),
   STATS("stats", "Stats"),
   STAT_TOTALS("stat_totals", "Stat Totals");
 

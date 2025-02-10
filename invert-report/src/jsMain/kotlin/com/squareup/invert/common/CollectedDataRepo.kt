@@ -1,5 +1,7 @@
 package com.squareup.invert.common
 
+import com.squareup.invert.models.FileKey
+import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import com.squareup.invert.models.js.ConfigurationsJsReportModel
 import com.squareup.invert.models.js.DependenciesJsReportModel
@@ -10,6 +12,7 @@ import com.squareup.invert.models.js.JsReportFileKey
 import com.squareup.invert.models.js.MetadataJsReportModel
 import com.squareup.invert.models.js.OwnershipJsReportModel
 import com.squareup.invert.models.js.PluginsJsReportModel
+import com.squareup.invert.models.js.StatJsReportModel
 import com.squareup.invert.models.js.StatsJsReportModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -25,22 +28,30 @@ import kotlinx.coroutines.withContext
  */
 class CollectedDataRepo(
   private val coroutineDispatcher: CoroutineDispatcher,
-  private val loadFileData: suspend (JsReportFileKey, CollectedDataRepo) -> Unit = { _, _ -> },
+  private val loadFileData: suspend (FileKey, CollectedDataRepo) -> Unit = { _, _ -> },
 ) {
 
-  private val hasLoadedFile = mutableMapOf<JsReportFileKey, Boolean>()
+  private val hasLoadedFile = mutableMapOf<FileKey, Boolean>()
 
-  private suspend fun loadJsOfType(fileKey: JsReportFileKey) = withContext(coroutineDispatcher) {
+  private suspend fun loadJsOfType(fileKey: FileKey) = withContext(coroutineDispatcher) {
     if (!hasLoadedFile.contains(fileKey)) {
       hasLoadedFile[fileKey] = true
       loadFileData(fileKey, this@CollectedDataRepo)
     }
   }
 
+  private suspend fun loadJsOfType(jsReportFileKey: JsReportFileKey) = withContext(coroutineDispatcher) {
+    loadJsOfType(jsReportFileKey.key)
+  }
+
   private val _collectedPluginInfoReport: MutableStateFlow<PluginsJsReportModel?> =
     MutableStateFlow(null)
   val collectedPluginInfoReport: Flow<PluginsJsReportModel?> = _collectedPluginInfoReport
-    .onEach { loadJsOfType(JsReportFileKey.PLUGINS) }
+    .onEach { loadJsOfType(JsReportFileKey.PLUGINS.key) }
+
+  private val _statData = MutableStateFlow<Map<StatKey, StatJsReportModel>>(mapOf())
+  fun statData(statKey: StatKey): Flow<Map<StatKey, StatJsReportModel>?> = _statData
+    .onEach { loadJsOfType(JsReportFileKey.STAT.key + "_$statKey") }
 
   private val _statsData = MutableStateFlow<StatsJsReportModel?>(null)
   val statsData: Flow<StatsJsReportModel?> = _statsData
@@ -125,6 +136,12 @@ class CollectedDataRepo(
 
   fun historicalDataUpdated(historicalData: List<HistoricalData>) {
     this._historicalData.value = historicalData
+  }
+
+  fun statUpdated(statJsReportModel: StatJsReportModel)  {
+    this._statData.value = this._statData.value.toMutableMap().apply {
+      put(statJsReportModel.statInfo.key, statJsReportModel)
+    }
   }
 
   fun homeUpdated(data: HomeJsReportModel) {
