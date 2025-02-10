@@ -1,6 +1,5 @@
 package com.squareup.invert.models.js
 
-import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata

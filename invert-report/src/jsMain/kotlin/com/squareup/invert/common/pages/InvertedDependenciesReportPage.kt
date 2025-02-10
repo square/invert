@@ -92,13 +92,13 @@ object InvertedDependenciesReportPage : InvertReportPage<InvertedDependenciesNav
     override val navRouteKClass: KClass<InvertedDependenciesNavRoute> = InvertedDependenciesNavRoute::class
 
     override val composableContent: @Composable (InvertedDependenciesNavRoute) -> Unit = { navRoute ->
-        InverteDependenciesComposable(navRoute)
+        InvertDependenciesComposable(navRoute)
     }
 }
 
 
 @Composable
-fun InverteDependenciesComposable(
+fun InvertDependenciesComposable(
     navRoute: InvertedDependenciesNavRoute,
     reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
     navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
@@ -111,7 +111,6 @@ fun InverteDependenciesComposable(
         BootstrapLoadingMessageWithSpinner()
         return
     }
-    println("1")
     if (allConfigurationNames!!.isEmpty()) {
         H1 { Text("No analyzed configurations found.") }
         return
@@ -123,7 +122,6 @@ fun InverteDependenciesComposable(
                 if (navRoute.pluginGroupByFilter.isEmpty() || navRoute.configurations.isEmpty()) {
                     BootstrapJumbotron(
                         headerContent = {
-//                            BootstrapIcon("exclamation-triangle", 48)
                             Text(" Inverted Dependency Search")
                         }
                     ) {

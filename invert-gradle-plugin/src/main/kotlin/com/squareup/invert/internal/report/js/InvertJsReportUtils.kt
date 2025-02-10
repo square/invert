@@ -19,6 +19,7 @@ import com.squareup.invert.models.js.DependenciesJsReportModel
 import com.squareup.invert.models.js.DirectDependenciesJsReportModel
 import com.squareup.invert.models.js.OwnershipJsReportModel
 import com.squareup.invert.models.js.PluginsJsReportModel
+import com.squareup.invert.models.js.StatJsReportModel
 import com.squareup.invert.models.js.StatTotalAndMetadata
 import com.squareup.invert.models.js.StatsJsReportModel
 
@@ -111,6 +112,21 @@ object InvertJsReportUtils {
     }
 
     return globalTotals
+  }
+
+  fun buildStatJsReportModelList(statsJsReportModel: StatsJsReportModel): Set<StatJsReportModel> {
+    val map = mutableMapOf<StatKey, Map<ModulePath, Stat>>()
+    statsJsReportModel.statsByModule.entries.forEach { (modulePath, statMap: Map<StatKey, Stat>) ->
+      statMap.entries.forEach { (statKey, stat) ->
+        map[statKey] = map.getOrDefault(statKey, emptyMap()) + (modulePath to stat)
+      }
+    }
+    return statsJsReportModel.statInfos.values.map { statMetadata ->
+      StatJsReportModel(
+        statInfo = statMetadata,
+        statsByModule = map[statMetadata.key] ?: emptyMap()
+      )
+    }.toSet()
   }
 
   /**
