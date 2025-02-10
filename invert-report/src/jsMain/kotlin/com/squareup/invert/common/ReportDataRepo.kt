@@ -136,7 +136,6 @@ class ReportDataRepo(
       }
     }
 
-
   fun moduleDirectlyUsedBy(path: ModulePath): Flow<Map<ModulePath, List<ConfigurationName>>?> =
     collectedDataRepo.directDependenciesData.mapLatest { directDependenciesData ->
       val directDependencies = directDependenciesData?.directDependencies
@@ -163,13 +162,13 @@ class ReportDataRepo(
     }
 
   fun statsForKey(statKey: StatKey): Flow<MutableList<ModuleOwnerAndCodeReference>> =
-    statsData.mapLatest { statsJsReportModel ->
+    statForKey(statKey).mapLatest { statsJsReportModel: StatJsReportModel? ->
       val allForKey = mutableListOf<ModuleOwnerAndCodeReference>()
-      moduleToOwnerMap.first().also { moduleToOwnerMap ->
-        statsJsReportModel?.statsByModule?.map { moduleToStatsMap ->
-          moduleToStatsMap.value[statKey]?.let { stat: Stat ->
-            val moduleName = moduleToStatsMap.key
-
+      if (statsJsReportModel != null) {
+        val statInfo = statsJsReportModel.statInfo
+        moduleToOwnerMap.first().also { moduleToOwnerMap ->
+          val moduleToStatsMap = statsJsReportModel.statsByModule
+          moduleToStatsMap.forEach { (moduleName, stat) ->
             if (stat is Stat.CodeReferencesStat) {
               stat.value.forEach { codeReference ->
                 allForKey.add(
@@ -177,7 +176,7 @@ class ReportDataRepo(
                     codeReference = codeReference,
                     module = moduleName,
                     owner = codeReference.owner ?: moduleToOwnerMap?.get(moduleName) ?: "",
-                    metadata = statsJsReportModel.statInfos[statKey]!!
+                    metadata = statInfo
                   )
                 )
               }

@@ -243,7 +243,6 @@ fun CodeReferencesComposable(
     }
   }
 
-
   if (moduleToOwnerMapFlowValue == null || metadata == null) {
     BootstrapLoadingSpinner()
     return
