@@ -31,6 +31,7 @@ import ui.BootstrapJumbotron
 import ui.BootstrapLoadingMessageWithSpinner
 import ui.BootstrapLoadingSpinner
 import ui.BootstrapRow
+import ui.NavRouteLink
 import kotlin.reflect.KClass
 
 object HomeReportPage : InvertReportPage<HomeReportPage.HomeNavRoute> {
@@ -153,15 +154,10 @@ fun HomeComposable(
             CodeReferencesNavRoute(statKey = statTotalAndMetadata.metadata.key)
           } else {
             StatDetailNavRoute(
-              pluginIds = listOf(),
-              statKeys = listOf(statTotalAndMetadata.metadata.key)
+              statKey = statTotalAndMetadata.metadata.key
             )
           }
-          A(href = destRoute.toQueryString(), {
-            onClick {
-              navRouteRepo.pushNavRoute(destRoute)
-            }
-          }) {
+          NavRouteLink(destRoute, navRouteRepo::pushNavRoute) {
             Small {
               Text(statTotalAndMetadata.metadata.description)
             }

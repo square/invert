@@ -182,7 +182,7 @@ fun CodeReferencesComposable(
           Ul {
             Li {
               NavRouteLink(
-                StatDetailNavRoute(statKeys = listOf(statKey)),
+                StatDetailNavRoute(statKey = statKey),
                 navRouteRepo::pushNavRoute
               ) {
                 Text("View Grouped by Module")

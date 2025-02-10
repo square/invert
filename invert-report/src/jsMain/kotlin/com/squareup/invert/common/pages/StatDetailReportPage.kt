@@ -10,18 +10,17 @@ import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.httpsUrlForCommit
 import com.squareup.invert.common.navigation.NavPage
+import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.StatDetailNavRoute.Companion.parser
-import com.squareup.invert.models.GradlePluginId
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatKey
-import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.MetadataJsReportModel
-import kotlinx.browser.window
+import com.squareup.invert.models.js.StatJsReportModel
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.Text
@@ -35,15 +34,13 @@ import ui.MarkdownCellContent
 import kotlin.reflect.KClass
 
 data class StatDetailNavRoute(
-  val pluginIds: List<GradlePluginId> = emptyList(),
-  val statKeys: List<String>,
+  val statKey: StatKey,
   val moduleQuery: String? = null
 ) : BaseNavRoute(StatDetailReportPage.navPage) {
 
   override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
     .also { params ->
-      params[PLUGIN_IDS_PARAM] = pluginIds.joinToString(separator = ",")
-      params[STATKEYS_PARAM] = statKeys.joinToString(separator = ",")
+      params[STATKEY_PARAM] = statKey
       moduleQuery?.let {
         params[MODULE_QUERY_PARAM] = it
       }
@@ -51,17 +48,16 @@ data class StatDetailNavRoute(
 
   companion object {
 
-    private const val PLUGIN_IDS_PARAM = "plugins"
-    private const val STATKEYS_PARAM = "statkeys"
-    private const val MODULE_QUERY_PARAM = "modulequery"
+    private const val STATKEY_PARAM = "stat_key"
+    private const val MODULE_QUERY_PARAM = "module_query"
 
-    fun parser(params: Map<String, String?>): StatDetailNavRoute {
-      val pluginIds = params[PLUGIN_IDS_PARAM]?.split(",")?.filter { it.isNotBlank() } ?: listOf()
-      val statKeys = params[STATKEYS_PARAM]?.split(",")?.filter { it.isNotBlank() } ?: listOf()
+    fun parser(params: Map<String, String?>): NavRoute {
+      val statKey = params[STATKEY_PARAM] ?: run {
+        return AllStatsNavRoute()
+      }
       val moduleQuery = params[MODULE_QUERY_PARAM]
       return StatDetailNavRoute(
-        pluginIds = pluginIds,
-        statKeys = statKeys,
+        statKey = statKey,
         moduleQuery = moduleQuery
       )
     }
@@ -112,30 +108,21 @@ fun StatDetailComposable(
   reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
   navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
-  val allPluginIds by reportDataRepo.allPluginIds.collectAsState(null)
-  val statsData by reportDataRepo.statsData.collectAsState(null)
-  val allModulesOrig by reportDataRepo.allModules.collectAsState(null)
   val moduleToOwnerMapFlowValue: Map<ModulePath, OwnerName>? by reportDataRepo.moduleToOwnerMap.collectAsState(null)
 
   val metadata by reportDataRepo.reportMetadata.collectAsState(null)
 
-  val statKeys: List<String> = statsNavRoute.statKeys.ifEmpty {
-    statsData?.statInfos?.map { it.key } ?: listOf()
-  }
+  val statKey = statsNavRoute.statKey
+  val statsData: StatJsReportModel? by reportDataRepo.statForKey(statKey).collectAsState(null)
 
   if (moduleToOwnerMapFlowValue == null || metadata == null || statsData == null) {
     BootstrapLoadingSpinner()
     return
   }
 
-
-  val statKey = statKeys.first()
-
-  val statInfo = statsData?.statInfos?.get(statKey) ?: run {
-    window.alert("Invalid stat key: $statKeys")
-    return
-  }
-
+  val statInfo = statsData!!.statInfo
+  val statsByModule = statsData!!.statsByModule
+  val allModules1: Set<ModulePath> = statsByModule.keys
 
   H1 {
     Text(buildString {
@@ -144,11 +131,6 @@ fun StatDetailComposable(
   }
 
   val query = statsNavRoute.moduleQuery
-
-  if (allModulesOrig == null) {
-    return
-  }
-  val allModules1 = allModulesOrig!!
 
   val allModules = if (query != null && query != ":" && query.isNotEmpty()) {
     allModules1.filter { it.contains(query) }
@@ -160,7 +142,7 @@ fun StatDetailComposable(
     query = query ?: "",
     placeholderText = "Module Filter...",
   ) {
-    navRouteRepo.pushNavRoute(statsNavRoute.copy(moduleQuery = it))
+    navRouteRepo.replaceNavRoute(statsNavRoute.copy(moduleQuery = it))
   }
 
   val SUPPORTED_TYPES = listOf(
@@ -171,79 +153,63 @@ fun StatDetailComposable(
   )
   val resultsTab = BootstrapTabData("Results") {
     val statsColumns = mutableListOf<List<String>>().apply {
-      statKeys.forEach { statKey ->
-        val statInfo = statsData?.statInfos?.get(statKey)
-        statInfo?.let { statMetadata: StatMetadata ->
-          if (SUPPORTED_TYPES.contains(statMetadata.dataType)) {
-            val value = allModules.map { gradlePath ->
-              val statsDataForModule: Map<StatKey, Stat>? = statsData?.statsByModule?.get(gradlePath)
-              val stat = statsDataForModule?.get(statKey)
-              when (stat) {
-                is Stat.BooleanStat -> {
-                  stat.value.toString()
-                }
+      if (SUPPORTED_TYPES.contains(statInfo.dataType)) {
+        val value = allModules.map { gradlePath ->
+          val statDataForModule = statsByModule[gradlePath]
+          when (statDataForModule) {
+            is Stat.BooleanStat -> {
+              statDataForModule.value.toString()
+            }
 
-                is Stat.StringStat -> {
-                  stat.value
-                }
+            is Stat.StringStat -> {
+              statDataForModule.value
+            }
 
-                is Stat.NumericStat -> {
-                  stat.value.toString()
-                }
+            is Stat.NumericStat -> {
+              statDataForModule.value.toString()
+            }
 
-                is Stat.CodeReferencesStat -> {
-                  if (metadata != null) {
-                    stat.value.toMarkdown(metadata!!)
-                  } else {
-                    stat.value.toString()
-                  }
-                }
-
-                else -> ""
+            is Stat.CodeReferencesStat -> {
+              if (metadata != null) {
+                statDataForModule.value.toMarkdown(metadata!!)
+              } else {
+                statDataForModule.value.toString()
               }
             }
-            add(
-              allModules.map { gradlePath ->
-                val statsForModule = statsData?.statsByModule?.get(gradlePath)?.get(statKey)
-                if (statsForModule != null) {
-                  val owner = moduleToOwnerMapFlowValue?.get(gradlePath) ?: ""
-                  owner
-                } else {
-                  ""
-                }
-              }
-            )
-            add(value)
-            add(
-              allModules.map { gradlePath ->
-                val statsDataForModule: Map<StatKey, Stat>? = statsData?.statsByModule?.get(gradlePath)
-                val stat = statsDataForModule?.get(statKey)
-                statToDetailsString(stat)
-              }
-            )
 
+            else -> ""
           }
         }
+        add(
+          allModules.map { gradlePath ->
+            moduleToOwnerMapFlowValue?.get(gradlePath) ?: ""
+          }
+        )
+        add(value)
+        add(
+          allModules.map { gradlePath ->
+            val stat: Stat? = statsByModule[gradlePath]
+            statToDetailsString(stat)
+          }
+        )
+
       }
     }
 
     val headers = mutableListOf("Module")
       .apply {
-        statKeys.forEach {
-          val thisStatMetadata = statsData?.statInfos?.get(it)
-          if (SUPPORTED_TYPES.contains(thisStatMetadata?.dataType)) {
-            if (!moduleToOwnerMapFlowValue.isNullOrEmpty()) {
-              add("Owner")
-            }
-            val statDescription = statsData?.statInfos?.get(it)?.description ?: it
-            add(statDescription)
-            add("$statDescription Details")
+        if (SUPPORTED_TYPES.contains(statInfo.dataType)) {
+          if (!moduleToOwnerMapFlowValue.isNullOrEmpty()) {
+            add("Owner")
           }
+          val statDescription = statInfo.description
+          add(statDescription)
+          add("$statDescription Details")
         }
       }
     val values: List<List<String>> = allModules.mapIndexed { idx, modulePath ->
       mutableListOf(
-        allModules[idx]
+        modulePath
       ).apply {
         statsColumns.forEach {
           add(it[idx])
@@ -272,7 +238,7 @@ fun StatDetailComposable(
           navRouteRepo.pushNavRoute(ModuleDetailNavRoute(cellValues[0]))
         }
       } else {
-        H3 { Text("No Collected Stats of Type(s) ${statsNavRoute.statKeys}") }
+        H3 { Text("No Collected Stats of Type(s) ${statsNavRoute.statKey}") }
       }
     }
   }

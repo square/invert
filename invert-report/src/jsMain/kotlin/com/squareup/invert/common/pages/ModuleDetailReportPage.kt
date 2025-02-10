@@ -148,7 +148,7 @@ fun ModuleDetailComposable(
           onItemClickCallback = {
             navRouteRepo.pushNavRoute(
               StatDetailNavRoute(
-                statKeys = listOf(statInfos!!.first { statInfo -> statInfo.description == it[0] }).map { it.key }
+                statKey = statInfos!!.first { statInfo -> statInfo.description == it[0] }.key
               )
             )
           },
@@ -202,7 +202,7 @@ fun ModuleDetailComposable(
   )
 
   val moduleDirectUsageCollected by reportDataRepo.moduleDirectlyUsedBy(modulePath).collectAsState(null)
-  moduleDirectUsageCollected?.let {moduleUsage ->
+  moduleDirectUsageCollected?.let { moduleUsage ->
     pageTabs.add(BootstrapTabData(tabName = "Used Directly By") {
       BootstrapTable(
         headers = listOf("Module", "Used in Configurations"),
@@ -285,7 +285,7 @@ fun ModuleDetailComposable(
     })
   }
 
-  pluginsForModule?.let {pluginsForModuleNonNull ->
+  pluginsForModule?.let { pluginsForModuleNonNull ->
     pageTabs.add(BootstrapTabData(tabName = "Gradle Plugins") {
       BootstrapClickableList("Gradle Plugins", pluginsForModuleNonNull, MAX_RESULTS) {
         navRouteRepo.pushNavRoute(

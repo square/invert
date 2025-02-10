@@ -136,24 +136,9 @@ fun AllStatsComposable(
           )
         } else {
           StatDetailNavRoute(
-            pluginIds = listOf(),
-            statKeys = listOf(statKey)
+            statKey = statKey
           )
         }
-      )
-
-    }
-  )
-
-  BootstrapButton(
-    "View All, Grouped By Module",
-    BootstrapButtonType.SECONDARY,
-    onClick = {
-      navRouteRepo.pushNavRoute(
-        StatDetailNavRoute(
-          pluginIds = listOf(),
-          statKeys = statInfos.map { it.metadata.key }
-        )
       )
     }
   )
@@ -179,8 +164,7 @@ fun StatTiles(codeReferenceStatTotals: List<StatTotalAndMetadata>, onClick: (Nav
               )
             } else {
               StatDetailNavRoute(
-                pluginIds = listOf(),
-                statKeys = listOf(statMetadata.key)
+                statKey = statMetadata.key
               )
             },
             onClick,
