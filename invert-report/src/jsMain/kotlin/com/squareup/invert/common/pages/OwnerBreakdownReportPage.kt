@@ -20,6 +20,7 @@ import com.squareup.invert.models.Stat
 import com.squareup.invert.models.Stat.CodeReferencesStat.CodeReference
 import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatKey
+import com.squareup.invert.models.StatMetadata
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.px
@@ -35,6 +36,7 @@ import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.Ul
 import ui.BootstrapColumn
 import ui.BootstrapLoadingMessageWithSpinner
+import ui.BootstrapLoadingSpinner
 import ui.BootstrapRow
 import ui.BootstrapSelectDropdown
 import ui.BootstrapSelectOption
@@ -100,17 +102,15 @@ object OwnerBreakdownReportPage : InvertReportPage<OwnerBreakdownNavRoute> {
 }
 
 private fun getCodeReferenceOwnerToModulePlusCodeReferencesList(
-  statKey: StatKey,
+  statMetadata: StatMetadata,
   moduleToOwnerMap: Map<ModulePath, OwnerName>,
-  statsByModuleParam: Map<ModulePath, Map<StatKey, Stat>>
+  moduleToStat: Map<ModulePath, Stat>,
 ): Map<OwnerName, Map<ModulePath, Set<CodeReference>>> {
   val toReturnOwnerNameToModuleAndCodeReferencesMap = mutableMapOf<OwnerName, Map<ModulePath, Set<CodeReference>>>()
 
-  statsByModuleParam.entries.forEach { (modulePath: ModulePath, moduleStatsByKey: Map<StatKey, Stat>) ->
+  moduleToStat.entries.forEach { (modulePath: ModulePath, stat: Stat) ->
     val moduleOwner = moduleToOwnerMap[modulePath] ?: ""
-    val codeReferences =
-      (moduleStatsByKey.entries.firstOrNull { it.key == statKey }?.value as? Stat.CodeReferencesStat)?.value
-
+    val codeReferences = (stat as? Stat.CodeReferencesStat)?.value
 
     codeReferences?.forEach { newCodeReference: CodeReference ->
       val owner = newCodeReference.owner ?: moduleOwner
@@ -136,7 +136,6 @@ fun ByOwnerComposable(
   reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
   navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo
 ) {
-  val statsOrig by reportDataRepo.statsData.collectAsState(null)
   val statInfosOrig by reportDataRepo.statInfos.collectAsState(null)
   val moduleToOwnerMapOrig by reportDataRepo.moduleToOwnerMap.collectAsState(null)
   val allOwnerNames by reportDataRepo.allOwnerNames.collectAsState(null)
@@ -146,7 +145,6 @@ fun ByOwnerComposable(
       allOwnerNames,
       moduleToOwnerMapOrig,
       statInfosOrig,
-      statsOrig
     ).any { it == null }
   ) {
     BootstrapLoadingMessageWithSpinner()
@@ -277,12 +275,18 @@ fun ByOwnerComposable(
   BootstrapTabPane(
     codeReferenceStatTypesFilteredByNavParams
       .mapNotNull { statKey ->
+        val statInfoForKey by reportDataRepo.statForKey(statKey).collectAsState(null)
+        if (statInfoForKey == null) {
+          BootstrapLoadingSpinner()
+          return
+        }
+
         val statMetadata = statInfosOrig!!.firstOrNull { it.key == statKey }
         val ownerToModulePathToCodeReferences: Map<OwnerName, Map<ModulePath, Set<CodeReference>>> =
           getCodeReferenceOwnerToModulePlusCodeReferencesList(
-            statKey = statKey,
+            statMetadata = statMetadata!!,
             moduleToOwnerMap = moduleToOwnerMapOrig!!,
-            statsByModuleParam = statsOrig!!.statsByModule
+            moduleToStat = statInfoForKey!!.statsByModule
           )
         val filteredByOwners = ownerToModulePathToCodeReferences.filter {
           if (!ownerParamValue.isNullOrBlank()) {

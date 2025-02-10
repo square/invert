@@ -16,6 +16,7 @@ import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import com.squareup.invert.models.js.HistoricalData
 import com.squareup.invert.models.js.MetadataJsReportModel
 import com.squareup.invert.models.js.PluginsJsReportModel
+import com.squareup.invert.models.js.StatJsReportModel
 import com.squareup.invert.models.js.StatsJsReportModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -45,9 +46,9 @@ class ReportDataRepo(
 
   val historicalData: Flow<List<HistoricalData>?> = collectedDataRepo.historicalData.mapLatest { it }
 
-  val statInfos: Flow<Collection<StatMetadata>?> = collectedDataRepo.statsData.mapLatest { it?.statInfos?.values }
-
   val statTotals: Flow<CollectedStatTotalsJsReportModel?> = collectedDataRepo.statTotals
+
+  val statInfos: Flow<Collection<StatMetadata>?> = statTotals.mapLatest { it?.statTotals?.values?.map { it.metadata } }
 
   val collectedPluginInfoReport: Flow<PluginsJsReportModel?> = collectedDataRepo.collectedPluginInfoReport
 
@@ -100,6 +101,9 @@ class ReportDataRepo(
   val allAvailableConfigurationNames: Flow<Set<String>?> = collectedDataRepo.configurations.mapLatest {
     it?.allConfigurationNames
   }
+
+  fun statForKey(statKey: StatKey): Flow<StatJsReportModel?> =
+    collectedDataRepo.statData(statKey).mapLatest { it?.get(statKey) }
 
   val pluginIdToAllModulesMap: Flow<Map<GradlePluginId, List<ModulePath>>?> =
     collectedDataRepo.collectedPluginInfoReport

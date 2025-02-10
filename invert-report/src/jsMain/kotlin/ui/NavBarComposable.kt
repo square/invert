@@ -14,20 +14,28 @@ import org.jetbrains.compose.web.dom.Text
 
 @Composable
 fun NavBarComposable(loadingProgressFlow: Flow<List<FileKey>>) {
-    val outstandingCalls by loadingProgressFlow.collectAsState(listOf())
-    if (outstandingCalls.isNotEmpty()) {
-        H4 {
-            Span({ classes("pe-4") }) { Text("Loading... ${outstandingCalls.map { it }}") }
-            Div({
-                classes("spinner-border text-light".split(" "))
-                attr("role", "status")
-            }) {
-                Span({
-                    classes("visually-hidden")
-                }) {
-                    Text("Loading...")
-                }
+  val outstandingCalls by loadingProgressFlow.collectAsState(listOf())
+  if (outstandingCalls.isNotEmpty()) {
+    H4 {
+      Span({ classes("pe-4") }) {
+        Text(
+          "Loading... ${
+            outstandingCalls.map { fileKey ->
+              JsReportFileKey.entries.firstOrNull { it.key == fileKey }?.description ?: fileKey
             }
+          }"
+        )
+      }
+      Div({
+        classes("spinner-border text-light".split(" "))
+        attr("role", "status")
+      }) {
+        Span({
+          classes("visually-hidden")
+        }) {
+          Text("Loading...")
         }
+      }
     }
+  }
 }
