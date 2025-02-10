@@ -23,102 +23,102 @@ import ui.TitleRow
 import kotlin.reflect.KClass
 
 data class GradlePluginsNavRoute(
-    val query: String?,
+  val query: String? = null,
 ) : BaseNavRoute(GradlePluginsReportPage.navPage) {
 
-    override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
-        .also { params ->
-            query?.let {
-                params[QUERY_PARAM] = query
-            }
-        }
-
-    companion object {
-
-        private const val QUERY_PARAM = "query"
-
-        fun parser(params: Map<String, String?>): ArtifactsNavRoute {
-            return ArtifactsNavRoute(
-                query = params[QUERY_PARAM]
-            )
-        }
+  override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
+    .also { params ->
+      query?.let {
+        params[QUERY_PARAM] = query
+      }
     }
+
+  companion object {
+
+    private const val QUERY_PARAM = "query"
+
+    fun parser(params: Map<String, String?>): ArtifactsNavRoute {
+      return ArtifactsNavRoute(
+        query = params[QUERY_PARAM]
+      )
+    }
+  }
 }
 
 object GradlePluginsReportPage : InvertReportPage<GradlePluginsNavRoute> {
-    override val navPage: NavPage = NavPage(
-        pageId = "plugins",
-        displayName = "Gradle Plugins",
-        navIconSlug = "plugin",
-        navRouteParser = { GradlePluginsNavRoute.parser(it) }
-    )
+  override val navPage: NavPage = NavPage(
+    pageId = "plugins",
+    displayName = "Plugins",
+    navIconSlug = "plugin",
+    navRouteParser = { GradlePluginsNavRoute.parser(it) }
+  )
 
-    override val navRouteKClass: KClass<GradlePluginsNavRoute> = GradlePluginsNavRoute::class
+  override val navRouteKClass: KClass<GradlePluginsNavRoute> = GradlePluginsNavRoute::class
 
-    override val composableContent: @Composable (GradlePluginsNavRoute) -> Unit = { navRoute ->
-        PluginsComposable(navRoute)
-    }
+  override val composableContent: @Composable (GradlePluginsNavRoute) -> Unit = { navRoute ->
+    PluginsComposable(navRoute)
+  }
 }
 
 @Composable
 fun PluginsComposable(
-    navRoute: GradlePluginsNavRoute,
-    reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
-    navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
+  navRoute: GradlePluginsNavRoute,
+  reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
+  navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
-    val allPluginIds: List<GradlePluginId>? by reportDataRepo.allPluginIds.collectAsState(null)
+  val allPluginIds: List<GradlePluginId>? by reportDataRepo.allPluginIds.collectAsState(null)
 
-    val pluginIdToModulesMap by reportDataRepo.pluginIdToAllModulesMap.collectAsState(mapOf())
+  val pluginIdToModulesMap by reportDataRepo.pluginIdToAllModulesMap.collectAsState(mapOf())
 
-    if (allPluginIds == null || pluginIdToModulesMap == null) {
-        BootstrapLoadingSpinner()
-        return
+  if (allPluginIds == null || pluginIdToModulesMap == null) {
+    BootstrapLoadingSpinner()
+    return
+  }
+
+  val pluginIdToCount = allPluginIds!!
+    .associateWith { pluginIdToModulesMap!!.getValue(it).size }
+    .entries
+    .sortedByDescending { it.value }
+
+  val count = allPluginIds!!.size
+  TitleRow("Applied Plugins ($count Total)")
+
+  BootstrapSearchBox(
+    navRoute.query ?: "",
+    "Search For Artifact..."
+  ) {
+    navRouteRepo.pushNavRoute(
+      ArtifactsNavRoute(it)
+    )
+  }
+  BootstrapRow {
+    BootstrapColumn(6) {
+      BootstrapClickableList("Plugins", allPluginIds!!, MAX_RESULTS) { gradlePluginId ->
+        navRouteRepo.pushNavRoute(PluginDetailNavRoute(gradlePluginId))
+      }
     }
-
-    val pluginIdToCount = allPluginIds!!
-        .associateWith { pluginIdToModulesMap!!.getValue(it).size }
-        .entries
-        .sortedByDescending { it.value }
-
-    val count = allPluginIds!!.size
-    TitleRow("Applied Plugins ($count Total)")
-
-    BootstrapSearchBox(
-        navRoute.query ?: "",
-        "Search For Artifact..."
-    ) {
-        navRouteRepo.pushNavRoute(
-            ArtifactsNavRoute(it)
-        )
-    }
-    BootstrapRow {
-        BootstrapColumn(6) {
-            BootstrapClickableList("Plugins", allPluginIds!!, MAX_RESULTS) { gradlePluginId ->
-                navRouteRepo.pushNavRoute(PluginDetailNavRoute(gradlePluginId))
-            }
-        }
-        BootstrapColumn(6) {
-            ChartJsChartComposable(
-                type = "bar",
-                data = ChartsJs.ChartJsData(
-                    labels = pluginIdToCount.map { it.key },
-                    datasets = listOf(
-                        ChartsJs.ChartJsDataset(
-                            label = "Plugin",
-                            data = pluginIdToCount.map { it.value }
-                        )
-                    )
-                ),
-                onClick = { label, value ->
-                    navRouteRepo.pushNavRoute(
-                        PluginDetailNavRoute(
-                            pluginId = label,
-                        )
-                    )
-                }
+    BootstrapColumn(6) {
+      ChartJsChartComposable(
+        type = "bar",
+        data = ChartsJs.ChartJsData(
+          labels = pluginIdToCount.map { it.key },
+          datasets = listOf(
+            ChartsJs.ChartJsDataset(
+              label = "Plugin",
+              data = pluginIdToCount.map { it.value }
             )
+          )
+        ),
+        onClick = { label, value ->
+          navRouteRepo.pushNavRoute(
+            PluginDetailNavRoute(
+              pluginId = label,
+            )
+          )
         }
+      )
     }
+  }
 }
 
 

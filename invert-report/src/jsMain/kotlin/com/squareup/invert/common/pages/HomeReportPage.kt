@@ -10,7 +10,6 @@ import com.squareup.invert.common.navigation.NavPage
 import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
-import com.squareup.invert.common.navigation.routes.toQueryString
 import com.squareup.invert.common.utils.FormattingUtils.dateDisplayStr
 import com.squareup.invert.common.utils.FormattingUtils.formatDecimalSeparator
 import com.squareup.invert.models.StatDataType
@@ -126,19 +125,19 @@ fun HomeComposable(
     HomeCountComposable(
       artifactCount,
       ArtifactsReportPage.navPage,
-      AllModulesNavRoute()
+      ArtifactsNavRoute()
     ) { navRouteRepo.pushNavRoute(ArtifactsNavRoute()) }
 
     HomeCountComposable(
       pluginIdsCount,
       GradlePluginsReportPage.navPage,
-      AllModulesNavRoute()
-    ) { navRouteRepo.pushNavRoute(GradlePluginsNavRoute(null)) }
+      GradlePluginsNavRoute()
+    ) { navRouteRepo.pushNavRoute(GradlePluginsNavRoute()) }
 
     HomeCountComposable(
       ownersCount,
       OwnersReportPage.navPage,
-      AllModulesNavRoute()
+      OwnersNavRoute,
     ) { navRouteRepo.pushNavRoute(OwnersNavRoute) }
 
     statTotals.statTotals.values.forEach { statTotalAndMetadata ->
@@ -167,8 +166,6 @@ fun HomeComposable(
     }
   }
 
-
-
   BootstrapButton(
     "View All",
     BootstrapButtonType.PRIMARY,
@@ -191,11 +188,7 @@ fun HomeCountComposable(count: Int?, navItem: NavPage, destNavRoute: NavRoute, o
           Text(count.formatDecimalSeparator())
         }
       ) {
-        A(href = destNavRoute.toQueryString(), {
-          onClick {
-            onClick(destNavRoute)
-          }
-        }) {
+        NavRouteLink(destNavRoute, onClick) {
           Small { Text(navItem.displayName) }
         }
       }
