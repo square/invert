@@ -120,8 +120,13 @@ fun LeftNavigationComposable(
                               it.add("active")
                             }
                           })
-                      onClick {
-                        it.preventDefault()
+                      onClick { event ->
+                        if (event.ctrlKey || event.metaKey) {
+                          // If it's a ctrl-click, allow user to open in new tab
+                          return@onClick
+                        }
+
+                        event.preventDefault()
                         navRouteRepo.pushNavRoute(rootNavItem.destinationNavRoute)
                       }
                     }) {
