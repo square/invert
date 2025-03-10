@@ -27,13 +27,13 @@ class InvertJsReportUtilsTest {
 
     val codeRefStatInfo = StatMetadata(
       key = "code_reference_stat",
-      description = "Code Reference Stat",
+      title = "Code Reference Stat",
       dataType = StatDataType.CODE_REFERENCES,
     )
 
     val numericStatInfo = StatMetadata(
       key = "numeric_stat",
-      description = "Numeric Stat",
+      title = "Numeric Stat",
       dataType = StatDataType.NUMERIC,
     )
 

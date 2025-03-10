@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class StatMetadata(
   val key: StatKey,
-  val description: String,
+  val title: String,
   val dataType: StatDataType,
   val category: String = "Stats",
   val extras: List<ExtraMetadata> = emptyList(),
