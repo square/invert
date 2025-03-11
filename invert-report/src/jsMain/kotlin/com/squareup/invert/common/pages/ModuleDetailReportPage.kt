@@ -141,14 +141,14 @@ fun ModuleDetailComposable(
           headers = listOf("Stat", "Value"),
           rows = statsForModuleMap.filter { it.key != null && it.value is Stat.NumericStat }
             .map { (key, value) ->
-              listOf(key!!.description, (value as Stat.NumericStat).value.toString())
+              listOf(key!!.title, (value as Stat.NumericStat).value.toString())
             },
           types = listOf(String::class, Int::class),
           maxResultsLimitConstant = MAX_RESULTS,
           onItemClickCallback = {
             navRouteRepo.pushNavRoute(
               StatDetailNavRoute(
-                statKey = statInfos!!.first { statInfo -> statInfo.description == it[0] }.key
+                statKey = statInfos!!.first { statInfo -> statInfo.title == it[0] }.key
               )
             )
           },
