@@ -24,14 +24,14 @@ open class LinesOfCodeStatCollector(
 
   private val fileCountStatMetadata: StatMetadata = StatMetadata(
     key = "file_count_$keySuffix",
-    title = "File Count - $name",
+    description = "File Count - $name",
     dataType = StatDataType.NUMERIC,
     category = STAT_CATEGORY_LINES_OF_CODE,
   )
 
   private val linesOfCodeStatMetadata: StatMetadata = StatMetadata(
     key = "lines_of_code_$keySuffix",
-    title = "Lines of Code - $name",
+    description = "Lines of Code - $name",
     dataType = StatDataType.NUMERIC,
     category = STAT_CATEGORY_LINES_OF_CODE,
   )

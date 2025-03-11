@@ -9,12 +9,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class StatMetadata(
   val key: StatKey,
-  val title: String,
-  /**
-   * Use this field to give context on what this [Stat] is and why it's important.
-   */
+  val description: String,
   val dataType: StatDataType,
-  val description: Markdown? = null,
   val category: String = "Stats",
   val extras: List<ExtraMetadata> = emptyList(),
 )

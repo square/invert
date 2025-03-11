@@ -20,6 +20,8 @@ import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.StatTotalAndMetadata
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Text
+import ui.BootstrapButton
+import ui.BootstrapButtonType
 import ui.BootstrapColumn
 import ui.BootstrapJumbotron
 import ui.BootstrapLoadingMessageWithSpinner
@@ -115,7 +117,7 @@ fun AllStatsComposable(
       .map { statMetadata: StatMetadata ->
         mutableListOf<String>(
           statMetadata.key,
-          statMetadata.title,
+          statMetadata.description,
           statMetadata.dataType.name,
           statMetadata.category
         ).apply {
@@ -145,7 +147,7 @@ fun AllStatsComposable(
 @Composable
 fun StatTiles(codeReferenceStatTotals: List<StatTotalAndMetadata>, onClick: (NavRoute) -> Unit) {
   BootstrapRow {
-    codeReferenceStatTotals.sortedBy { it.metadata.title }.forEach { statTotalAndMetadata ->
+    codeReferenceStatTotals.sortedBy { it.metadata.description }.forEach { statTotalAndMetadata ->
       val statMetadata = statTotalAndMetadata.metadata
       BootstrapColumn(4) {
         BootstrapJumbotron(
@@ -167,7 +169,7 @@ fun StatTiles(codeReferenceStatTotals: List<StatTotalAndMetadata>, onClick: (Nav
             },
             onClick,
           ) {
-            Text(statTotalAndMetadata.metadata.title)
+            Text(statTotalAndMetadata.metadata.description)
           }
         }
       }

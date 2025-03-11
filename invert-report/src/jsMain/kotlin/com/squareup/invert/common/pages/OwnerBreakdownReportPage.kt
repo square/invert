@@ -166,14 +166,14 @@ fun ByOwnerComposable(
   }
 
   fun getStatDescription(statKey: StatKey): String {
-    return statInfosOrig?.first { it.key == statKey }?.title ?: statKey
+    return statInfosOrig?.first { it.key == statKey }?.description ?: statKey
   }
 
   val ownerParamValue = navRoute.owner
 
   val codeReferenceStatTypes = statInfosOrig!!
     .filter { it.dataType == StatDataType.CODE_REFERENCES }
-    .sortedBy { it.title }
+    .sortedBy { it.description }
 
   BootstrapRow {
     BootstrapColumn(classes = listOf("text-center")) {
@@ -223,7 +223,7 @@ fun ByOwnerComposable(
           options = codeReferenceStatTypes.map {
             BootstrapSelectOption(
               value = it.key,
-              displayText = "${it.title} (${it.key})"
+              displayText = "${it.description} (${it.key})"
             )
           }
         ) {
@@ -263,7 +263,7 @@ fun ByOwnerComposable(
               navRoute.copy(statKey = statMetadata.key),
               navRouteRepo::pushNavRoute
             ) {
-              Text(statMetadata.title + " (" + statMetadata.key + ")")
+              Text(statMetadata.description + " (" + statMetadata.key + ")")
             }
           }
         }
@@ -326,7 +326,7 @@ fun ByOwnerComposable(
                   labels = bySize.keys,
                   datasets = listOf(
                     ChartsJs.ChartJsDataset(
-                      label = "References of ${statMetadata?.title}",
+                      label = "References of ${statMetadata?.description}",
                       data = bySize.values
                     )
                   )
@@ -353,7 +353,7 @@ fun ByOwnerComposable(
                   labels = bySize.keys,
                   datasets = listOf(
                     ChartsJs.ChartJsDataset(
-                      label = "References Count of ${statMetadata?.title}",
+                      label = "References Count of ${statMetadata?.description}",
                       data = bySize.values
                     )
                   )

@@ -158,7 +158,7 @@ fun HomeComposable(
           }
           NavRouteLink(destRoute, navRouteRepo::pushNavRoute) {
             Small {
-              Text(statTotalAndMetadata.metadata.title)
+              Text(statTotalAndMetadata.metadata.description)
             }
           }
         }
