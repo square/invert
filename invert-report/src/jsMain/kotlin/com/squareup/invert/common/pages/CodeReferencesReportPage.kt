@@ -172,7 +172,7 @@ fun CodeReferencesComposable(
       H4 {
         Text(buildString {
           append("Code References")
-          append(" for ${currentStatMetadata.title} (${codeReferencesNavRoute.statKey})")
+          append(" for ${currentStatMetadata.description} (${codeReferencesNavRoute.statKey})")
         })
       }
     }
@@ -317,7 +317,7 @@ fun CodeReferencesComposable(
           val remainingStat = currentHistoricalData.statTotalsAndMetadata.statTotals[remainingStatKey]!!.metadata
           datasets.add(
             ChartsJs.ChartJsDataset(
-              label = remainingStat.title,
+              label = remainingStat.description,
               data = values
             )
           )

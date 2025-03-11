@@ -43,7 +43,7 @@ sealed interface Stat {
       val startLine: Int,
       val endLine: Int,
       val extras: Map<ExtraKey, String> = emptyMap(),
-      val code: Markdown? = null,
+      val code: String? = null,
       val owner: OwnerName? = null,
     )
   }

@@ -27,13 +27,13 @@ class InvertJsReportUtilsTest {
 
     val codeRefStatInfo = StatMetadata(
       key = "code_reference_stat",
-      title = "Code Reference Stat",
+      description = "Code Reference Stat",
       dataType = StatDataType.CODE_REFERENCES,
     )
 
     val numericStatInfo = StatMetadata(
       key = "numeric_stat",
-      title = "Numeric Stat",
+      description = "Numeric Stat",
       dataType = StatDataType.NUMERIC,
     )
 
@@ -89,7 +89,7 @@ class InvertJsReportUtilsTest {
     "code_reference_stat": {
         "metadata": {
             "key": "code_reference_stat",
-            "title": "Code Reference Stat",
+            "description": "Code Reference Stat",
             "dataType": "CODE_REFERENCES"
         },
         "total": 6,
@@ -101,7 +101,7 @@ class InvertJsReportUtilsTest {
     "numeric_stat": {
         "metadata": {
             "key": "numeric_stat",
-            "title": "Numeric Stat",
+            "description": "Numeric Stat",
             "dataType": "NUMERIC"
         },
         "total": 62,

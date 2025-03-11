@@ -126,7 +126,7 @@ fun StatDetailComposable(
 
   H1 {
     Text(buildString {
-      append(statInfo.title)
+      append(statInfo.description)
     })
   }
 
@@ -202,7 +202,7 @@ fun StatDetailComposable(
           if (!moduleToOwnerMapFlowValue.isNullOrEmpty()) {
             add("Owner")
           }
-          val statDescription = statInfo.title
+          val statDescription = statInfo.description
           add(statDescription)
           add("$statDescription Details")
         }

@@ -46,7 +46,7 @@ open class InvertContainsStatCollector(
         CollectedStat(
           metadata = StatMetadata(
             key = statKey,
-            title = statDescription,
+            description = statDescription,
             dataType = StatDataType.CODE_REFERENCES,
           ),
           stat = Stat.CodeReferencesStat(codeReferences)
