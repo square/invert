@@ -89,7 +89,7 @@ class InvertJsReportUtilsTest {
     "code_reference_stat": {
         "metadata": {
             "key": "code_reference_stat",
-            "description": "Code Reference Stat",
+            "title": "Code Reference Stat",
             "dataType": "CODE_REFERENCES"
         },
         "total": 6,
@@ -101,7 +101,7 @@ class InvertJsReportUtilsTest {
     "numeric_stat": {
         "metadata": {
             "key": "numeric_stat",
-            "description": "Numeric Stat",
+            "title": "Numeric Stat",
             "dataType": "NUMERIC"
         },
         "total": 62,
