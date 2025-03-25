@@ -54,7 +54,7 @@ class InvertJsReportWriter(
 
     val collectedDependencies = HomeJsReportModel(
       modules = modulesList.sorted(),
-      artifacts = invertedDependencies.getAllArtifactIds().sorted(),
+      artifacts = invertedDependencies.getAllArtifactIds(reportMetadata.buildSystem).sorted(),
       plugins = pluginsReport.plugins.keys.toList().sorted()
     )
 

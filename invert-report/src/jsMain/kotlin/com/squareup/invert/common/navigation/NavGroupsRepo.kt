@@ -8,8 +8,6 @@ import com.squareup.invert.common.pages.AnnotationProcessorsReportPage
 import com.squareup.invert.common.pages.ArtifactDetailNavRoute
 import com.squareup.invert.common.pages.ArtifactsNavRoute
 import com.squareup.invert.common.pages.ArtifactsReportPage
-import com.squareup.invert.common.pages.OwnerBreakdownReportPage
-import com.squareup.invert.common.pages.CodeReferencesReportPage
 import com.squareup.invert.common.pages.ConfigurationDetailNavRoute
 import com.squareup.invert.common.pages.ConfigurationsNavRoute
 import com.squareup.invert.common.pages.DependencyDiffReportPage
@@ -22,22 +20,32 @@ import com.squareup.invert.common.pages.KotlinCompilerPluginsReportPage
 import com.squareup.invert.common.pages.LeafModulesNavRoute
 import com.squareup.invert.common.pages.ModuleDependencyGraphReportPage
 import com.squareup.invert.common.pages.ModuleDetailNavRoute
+import com.squareup.invert.common.pages.OwnerBreakdownReportPage
 import com.squareup.invert.common.pages.OwnerDetailNavRoute
 import com.squareup.invert.common.pages.OwnersNavRoute
 import com.squareup.invert.common.pages.OwnersReportPage
 import com.squareup.invert.common.pages.PluginDetailNavRoute
 import com.squareup.invert.common.pages.UnusedModulesReportPage
+import com.squareup.invert.models.js.BuildSystem
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.mapLatest
 
 /**
  * Source of truth for the current [NavPageGroup]s and [NavPage.NavItem]s
  */
 class NavGroupsRepo(additionalGroups: Set<NavPageGroup>) {
 
-  private val _navGroups = MutableStateFlow(DefaultNavItems.ROOT_NAV_ITEMS.toSet() + additionalGroups)
+  private val _navGroups: MutableStateFlow<Set<NavPageGroup>> =
+    MutableStateFlow(DefaultNavItems.ROOT_NAV_ITEMS.toSet() + additionalGroups)
 
-  val navGroups: Flow<Set<NavPageGroup>> = _navGroups
+  @OptIn(ExperimentalCoroutinesApi::class)
+  fun navGroups(buildSystem: BuildSystem): Flow<Set<NavPageGroup>> = _navGroups.mapLatest { navGroups ->
+    navGroups.filter { navGroup ->
+      navGroup.buildSystem == null || buildSystem == navGroup.buildSystem
+    }.toSet()
+  }
 
   fun add(item: NavPageGroup) {
     this._navGroups.value = this._navGroups.value.plus(item)
@@ -75,17 +83,46 @@ object DefaultNavItems {
         )
       ),
       NavPageGroup(
-        "Insights", setOf(
-          LeafModulesNavRoute.navPage.toNavItem(),
-          UnusedModulesReportPage.navPage.toNavItem(),
-        )
+        groupTitle = "Gradle",
+        navItems = setOf(
+          GradlePluginsReportPage.navPage.toNavItem().copy(
+            matchesCurrentNavRoute = {
+              it is GradlePluginsNavRoute || it is PluginDetailNavRoute
+            },
+            destinationNavRoute = GradlePluginsNavRoute(null)
+          ),
+          ArtifactsReportPage.navPage.toNavItem().copy(
+            matchesCurrentNavRoute = {
+              it is ArtifactsNavRoute || it is ArtifactDetailNavRoute
+            }
+          ),
+          GradleRepositoriesReportPage.navPage.toNavItem(),
+          ConfigurationsNavRoute.navPage.toNavItem().copy(
+            matchesCurrentNavRoute = {
+              it is ConfigurationsNavRoute || it is ConfigurationDetailNavRoute
+            }
+          ),
+          AnnotationProcessorsReportPage.navPage.toNavItem(),
+          KotlinCompilerPluginsReportPage.navPage.toNavItem(),
+        ),
+        buildSystem = BuildSystem.GRADLE
       ),
       NavPageGroup(
-        "Explore", setOf(
+        groupTitle = "Insights",
+        navItems = setOf(
+          LeafModulesNavRoute.navPage.toNavItem(),
+          UnusedModulesReportPage.navPage.toNavItem(),
+        ),
+        buildSystem = BuildSystem.GRADLE
+      ),
+      NavPageGroup(
+        groupTitle = "Explore",
+        navItems = setOf(
           InvertedDependenciesReportPage.navPage.toNavItem(),
           DependencyDiffReportPage.navPage.toNavItem(),
           ModuleDependencyGraphReportPage.navPage.toNavItem(),
-        )
+        ),
+        buildSystem = BuildSystem.GRADLE
       )
     )
 }
