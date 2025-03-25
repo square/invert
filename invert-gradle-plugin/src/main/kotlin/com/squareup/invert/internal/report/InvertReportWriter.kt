@@ -39,7 +39,7 @@ class InvertReportWriter(
     assertModuleMatch(
       logger = invertLogger,
       modulesList = collectedDependencies.map { it.path },
-      invertedModulesList = invertedDependenciesJsReportModel.getAllModulePaths()
+      invertedModulesList = invertedDependenciesJsReportModel.getAllModulePaths(reportMetadata.buildSystem)
     )
 
     val globalStats = computeGlobalTotals(allProjectsStatsData, collectedOwnershipInfo)

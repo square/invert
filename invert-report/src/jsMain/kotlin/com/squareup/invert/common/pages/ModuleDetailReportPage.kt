@@ -20,6 +20,7 @@ import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
+import com.squareup.invert.models.utils.BuildSystemUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -90,6 +91,7 @@ fun ModuleDetailComposable(
   navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
   val modulePath = navRoute.path
+  val reportMetadataOrig by reportDataRepo.reportMetadata.collectAsState(null)
 
   val pluginsForModule by reportDataRepo.allPlugins.mapLatest { it?.get(navRoute.path) }.collectAsState(null)
 
@@ -97,12 +99,13 @@ fun ModuleDetailComposable(
   val moduleToOwnerMapCollected by reportDataRepo.moduleToOwnerMap.collectAsState(null)
   val statInfos by reportDataRepo.statInfos.collectAsState(null)
 
-  if (moduleToOwnerMapCollected == null || statInfos == null) {
+  if (listOf(moduleToOwnerMapCollected, statInfos, reportMetadataOrig).any { it == null }) {
     H2 {
       BootstrapLoadingMessageWithSpinner()
     }
     return
   }
+  val reportMetadata = reportMetadataOrig!!
   val moduleToOwnerMap = moduleToOwnerMapCollected!!
   val ownerName: OwnerName? = moduleToOwnerMap[modulePath]
   ownerName?.let {
@@ -158,13 +161,13 @@ fun ModuleDetailComposable(
       }
 
     })
+
   pageTabs.add(
     BootstrapTabData(tabName = "Direct Dependencies") {
-
       val allDirectDependencyToConfigurationEntries = mutableSetOf<DependencyIdAndConfiguration>()
       directDependenciesMap.entries.forEach {
         it.value
-          .filter { it.startsWith(":") }
+          .filter { BuildSystemUtils.isSourceModule(reportMetadata.buildSystem, it) }
           .forEach { depId: DependencyId ->
             allDirectDependencyToConfigurationEntries.add(
               DependencyIdAndConfiguration(
@@ -227,7 +230,7 @@ fun ModuleDetailComposable(
       val allTransitiveDependencyToConfigurationEntries = mutableSetOf<DependencyIdAndConfiguration>()
       configurationToDependencyMap.entries.forEach {
         it.value
-          .filter { it.startsWith(":") }
+          .filter { BuildSystemUtils.isSourceModule(reportMetadata.buildSystem, it) }
           .forEach { depId: DependencyId ->
             allTransitiveDependencyToConfigurationEntries.add(
               DependencyIdAndConfiguration(

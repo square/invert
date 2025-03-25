@@ -14,6 +14,7 @@ import com.squareup.invert.common.pages.ModuleDependencyGraphNavRoute.Companion.
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.InvertSerialization
+import com.squareup.invert.models.utils.BuildSystemUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -119,12 +120,14 @@ fun ModuleDependencyGraphComposable(
   val rootModulePath = dependencyGraphNavRoute.module ?: ":api:sales-report:impl"
   val allDirectDeps by reportDataRepo.allDirectDependencies.collectAsState(null)
   val allModules by reportDataRepo.allModules.collectAsState(null)
+  val reportMetadataOrig by reportDataRepo.reportMetadata.collectAsState(null)
   val allAnalyzedConfigurationNames by reportDataRepo.allAnalyzedConfigurationNames.collectAsState(null)
 
-  if (allDirectDeps == null || allAnalyzedConfigurationNames == null) {
+  if (listOf(allDirectDeps, allAnalyzedConfigurationNames, reportMetadataOrig).any { it == null }) {
     BootstrapLoadingMessageWithSpinner()
     return
   }
+  val reportMetadata = reportMetadataOrig!!
 
   val DEPENDENCY_GRAPH_MODULES_DATALIST_ID = "dependency_graph_modules_datalist"
   Datalist({ id(DEPENDENCY_GRAPH_MODULES_DATALIST_ID) }) {
@@ -172,7 +175,9 @@ fun ModuleDependencyGraphComposable(
   val width = 1200
   val height = 768
 
-  fun pullModulesOnDebugRuntimeClasspathDeps(direct: Map<ConfigurationName, Set<DependencyId>>?): List<DependencyId> {
+  fun pullModulesOnDebugRuntimeClasspathDeps(
+    direct: Map<ConfigurationName, Set<DependencyId>>?
+  ): List<DependencyId> {
     return direct
       ?.filterKeys { it == selectedConfiguration }
       ?.values
@@ -181,13 +186,13 @@ fun ModuleDependencyGraphComposable(
       ?: listOf()
   }
 
-  val directDepsForModuleListFiltered = pullModulesOnDebugRuntimeClasspathDeps(directDepsForModuleMap)
+  val directDepsForModuleListFiltered =
+    pullModulesOnDebugRuntimeClasspathDeps(directDepsForModuleMap)
 
   println(dependencyGraphNavRoute.module)
   println(allModules)
-  val isValidModule = allModules?.contains(dependencyGraphNavRoute.module) ?: false
+  val isValidModule = allModules?.contains(dependencyGraphNavRoute.module) == true
   if (isValidModule) {
-
     if (directDepsForModuleListFiltered.isEmpty()) {
       H1 { Text("${dependencyGraphNavRoute.module} has 0 direct dependencies on the $selectedConfiguration") }
       return

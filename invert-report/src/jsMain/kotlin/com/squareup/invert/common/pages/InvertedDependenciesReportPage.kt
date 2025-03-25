@@ -11,13 +11,15 @@ import com.squareup.invert.common.DependencyGraph
 import com.squareup.invert.common.InvertReportPage
 import com.squareup.invert.common.ReportDataRepo
 import com.squareup.invert.common.navigation.NavPage
+import com.squareup.invert.common.navigation.NavRoute
 import com.squareup.invert.common.navigation.NavRouteRepo
 import com.squareup.invert.common.navigation.routes.BaseNavRoute
 import com.squareup.invert.common.pages.InvertedDependenciesNavRoute.Companion.parser
 import com.squareup.invert.common.utils.DependencyComputations
 import com.squareup.invert.models.ConfigurationName
-import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.GradlePluginId
+import com.squareup.invert.models.ModulePath
+import com.squareup.invert.models.utils.BuildSystemUtils
 import kotlinx.browser.window
 import org.jetbrains.compose.web.dom.Br
 import org.jetbrains.compose.web.dom.Button
@@ -46,343 +48,357 @@ import kotlin.reflect.KClass
 
 
 data class InvertedDependenciesNavRoute(
-    val pluginGroupByFilter: List<GradlePluginId> = listOf(),
-    val configurations: List<ConfigurationName> = listOf(),
-    val moduleQuery: String? = null,
+  val pluginGroupByFilter: List<GradlePluginId> = listOf(),
+  val configurations: List<ConfigurationName> = listOf(),
+  val moduleQuery: String? = null,
 ) : BaseNavRoute(InvertedDependenciesReportPage.navPage) {
-    override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
-        .apply {
-            if (pluginGroupByFilter.isNotEmpty()) {
-                this[PLUGIN_GROUP_BY_FILTER_QUERY_PARAM_NAME] =
-                    pluginGroupByFilter.joinToString(separator = ",")
-            }
-            if (configurations.isNotEmpty()) {
-                this[CONFIGURATIONS_QUERY_PARAM_NAME] = configurations.joinToString(separator = ",")
-            }
-            moduleQuery?.let {
-                this[MODULE_QUERY_PARAM_NAME] = moduleQuery
-            }
-        }
-
-    companion object {
-
-        private const val MODULE_QUERY_PARAM_NAME = "module"
-        private const val PLUGIN_GROUP_BY_FILTER_QUERY_PARAM_NAME = "plugin_id"
-        private const val CONFIGURATIONS_QUERY_PARAM_NAME = "configurations"
-        fun parser(params: Map<String, String?>): InvertedDependenciesNavRoute = InvertedDependenciesNavRoute(
-            pluginGroupByFilter = params[PLUGIN_GROUP_BY_FILTER_QUERY_PARAM_NAME]?.split(",")
-                ?.filter { it.isNotBlank() } ?: listOf(),
-            configurations = params[CONFIGURATIONS_QUERY_PARAM_NAME]?.split(",")
-                ?.filter { it.isNotBlank() }
-                ?: listOf(),
-            moduleQuery = params[MODULE_QUERY_PARAM_NAME]
-        )
+  override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
+    .apply {
+      if (pluginGroupByFilter.isNotEmpty()) {
+        this[PLUGIN_GROUP_BY_FILTER_QUERY_PARAM_NAME] =
+          pluginGroupByFilter.joinToString(separator = ",")
+      }
+      if (configurations.isNotEmpty()) {
+        this[CONFIGURATIONS_QUERY_PARAM_NAME] = configurations.joinToString(separator = ",")
+      }
+      moduleQuery?.let {
+        this[MODULE_QUERY_PARAM_NAME] = moduleQuery
+      }
     }
+
+  companion object {
+
+    private const val MODULE_QUERY_PARAM_NAME = "module"
+    private const val PLUGIN_GROUP_BY_FILTER_QUERY_PARAM_NAME = "plugin_id"
+    private const val CONFIGURATIONS_QUERY_PARAM_NAME = "configurations"
+    fun parser(params: Map<String, String?>): InvertedDependenciesNavRoute = InvertedDependenciesNavRoute(
+      pluginGroupByFilter = params[PLUGIN_GROUP_BY_FILTER_QUERY_PARAM_NAME]?.split(",")
+        ?.filter { it.isNotBlank() } ?: listOf(),
+      configurations = params[CONFIGURATIONS_QUERY_PARAM_NAME]?.split(",")
+        ?.filter { it.isNotBlank() }
+        ?: listOf(),
+      moduleQuery = params[MODULE_QUERY_PARAM_NAME]
+    )
+  }
 }
 
 
 object InvertedDependenciesReportPage : InvertReportPage<InvertedDependenciesNavRoute> {
-    override val navPage: NavPage = NavPage(
-        pageId = "inverted",
-        displayName = "Inverted Dependencies",
-        navIconSlug = "bar-chart",
-        navRouteParser = { parser(it) }
-    )
+  override val navPage: NavPage = NavPage(
+    pageId = "inverted",
+    displayName = "Inverted Dependencies",
+    navIconSlug = "bar-chart",
+    navRouteParser = { parser(it) }
+  )
 
-    override val navRouteKClass: KClass<InvertedDependenciesNavRoute> = InvertedDependenciesNavRoute::class
+  override val navRouteKClass: KClass<InvertedDependenciesNavRoute> = InvertedDependenciesNavRoute::class
 
-    override val composableContent: @Composable (InvertedDependenciesNavRoute) -> Unit = { navRoute ->
-        InvertDependenciesComposable(navRoute)
-    }
+  override val composableContent: @Composable (InvertedDependenciesNavRoute) -> Unit = { navRoute ->
+    InvertDependenciesComposable(navRoute)
+  }
 }
 
 
 @Composable
 fun InvertDependenciesComposable(
-    navRoute: InvertedDependenciesNavRoute,
-    reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
-    navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
+  navRoute: InvertedDependenciesNavRoute,
+  reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
+  navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
-    val allModules by reportDataRepo.allModules.collectAsState(null)
-    val allConfigurationNames by reportDataRepo.allAnalyzedConfigurationNames.collectAsState(listOf())
-    val allPluginIds by reportDataRepo.allPluginIds.collectAsState(listOf())
+  val allModules by reportDataRepo.allModules.collectAsState(null)
+  val allConfigurationNames by reportDataRepo.allAnalyzedConfigurationNames.collectAsState(listOf())
+  val allPluginIds by reportDataRepo.allPluginIds.collectAsState(listOf())
 
-    if (allModules == null || allConfigurationNames == null || allPluginIds == null) {
-        BootstrapLoadingMessageWithSpinner()
-        return
-    }
-    if (allConfigurationNames!!.isEmpty()) {
-        H1 { Text("No analyzed configurations found.") }
-        return
-    }
+  if (listOf(allModules, allConfigurationNames, allPluginIds).any { it == null }) {
+    BootstrapLoadingMessageWithSpinner()
+    return
+  }
+  if (allConfigurationNames!!.isEmpty()) {
+    H1 { Text("No analyzed configurations found.") }
+    return
+  }
 
-    BootstrapTabPane(
-        listOf(
-            BootstrapTabData("Results") {
-                if (navRoute.pluginGroupByFilter.isEmpty() || navRoute.configurations.isEmpty()) {
-                    BootstrapJumbotron(
-                        headerContent = {
-                            Text(" Inverted Dependency Search")
-                        }
-                    ) {
-                        Br()
-                        P({
-//                            classes("text-center")
-                        }) {
-                            MarkdownText(
-                                """
+  BootstrapTabPane(
+    listOf(
+      BootstrapTabData("Results") {
+        if (navRoute.pluginGroupByFilter.isEmpty() || navRoute.configurations.isEmpty()) {
+          BootstrapJumbotron(
+            headerContent = {
+              Text(" Inverted Dependency Search")
+            }
+          ) {
+            Br()
+            P {
+              MarkdownText(
+                """
                                 ## Find modules that depend on your selected module(s)
                                 1. Click the 'Settings' tab, select the scanned configurations you are interested in.
                                 1. Selected the Gradle configuration(s) you are interested in
                                 1. Select the Plugin(s) to group the search results from.
                                 1. Click the 'Results' tab, and then find you target module using the search box.
                                 """.trimIndent()
-                            )
-                            Br()
-                            Text("or... ")
-                            Br()
-                            BootstrapButton("Start by Searching Everything") {
-                                navRouteRepo.pushNavRoute(
-                                    InvertedDependenciesNavRoute(
-                                        pluginGroupByFilter = allPluginIds!!,
-                                        configurations = allConfigurationNames!!.toList(),
-                                        moduleQuery = ":"
-                                    )
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    TitleRow("Inverted Dependency Search (Grouped By Plugin Type)")
-                    val query by reportDataRepo.moduleQuery.collectAsState(null)
-                    BootstrapSearchBox(query ?: "", "Search For Module...") {
-                        navRouteRepo.replaceNavRoute(
-                            navRoute.copy(
-                                moduleQuery = it
-                            )
-                        )
-                    }
-                    BootstrapRow {
-                        BootstrapColumn(6) {
-                            val matching by reportDataRepo.allModulesMatchingQuery.collectAsState(null)
-                            val totalCount = allModules?.size
-                            GenericList(
-                                "Matching ${matching?.size} of $totalCount",
-                                matching ?: listOf(),
-                                onItemClick = {
-                                    navRouteRepo.pushNavRoute(
-                                        navRoute.copy(
-                                            moduleQuery = it
-                                        )
-                                    )
-                                }
-                            )
-                        }
-                        BootstrapColumn(6) {
-                            RightColumn(reportDataRepo, navRoute)
-                        }
-                    }
-                }
-            },
-            BootstrapTabData("Settings") {
-                SettingsComposable(
-                    reportDataRepo = reportDataRepo,
-                    navRouteRepo = navRouteRepo,
-                    allConfigurationNames = allConfigurationNames?.toList() ?: emptyList(),
-                    allPluginIds = allPluginIds?.toList() ?: emptyList()
+              )
+              Br()
+              Text("or... ")
+              Br()
+              BootstrapButton("Start by Searching Everything") {
+                navRouteRepo.pushNavRoute(
+                  InvertedDependenciesNavRoute(
+                    pluginGroupByFilter = allPluginIds!!,
+                    configurations = allConfigurationNames!!.toList(),
+                    moduleQuery = ":"
+                  )
                 )
-            },
+              }
+            }
+          }
+        } else {
+          TitleRow("Inverted Dependency Search (Grouped By Plugin Type)")
+          val query by reportDataRepo.moduleQuery.collectAsState(null)
+          BootstrapSearchBox(query ?: "", "Search For Module...") {
+            navRouteRepo.replaceNavRoute(
+              navRoute.copy(
+                moduleQuery = it
+              )
+            )
+          }
+          BootstrapRow {
+            BootstrapColumn(6) {
+              val matching by reportDataRepo.allModulesMatchingQuery.collectAsState(null)
+              val totalCount = allModules?.size
+              GenericList(
+                "Matching ${matching?.size} of $totalCount",
+                matching ?: listOf(),
+                onItemClick = {
+                  navRouteRepo.pushNavRoute(
+                    navRoute.copy(
+                      moduleQuery = it
+                    )
+                  )
+                }
+              )
+            }
+            BootstrapColumn(6) {
+              RightColumn(reportDataRepo, navRoute)
+            }
+          }
+        }
+      },
+      BootstrapTabData("Settings") {
+        InvertedDependenciesSettingsComposable(
+          navRoute = navRoute,
+          reportDataRepo = reportDataRepo,
+          navRouteRepo = navRouteRepo,
+          allConfigurationNames = allConfigurationNames?.toList() ?: emptyList(),
+          allPluginIds = allPluginIds?.toList() ?: emptyList()
         )
+      },
     )
+  )
 }
 
 @Composable
-fun SettingsComposable(
-    reportDataRepo: ReportDataRepo,
-    navRouteRepo: NavRouteRepo,
-    allConfigurationNames: List<ConfigurationName>,
-    allPluginIds: List<GradlePluginId>,
+fun InvertedDependenciesSettingsComposable(
+  navRoute: NavRoute,
+  reportDataRepo: ReportDataRepo,
+  navRouteRepo: NavRouteRepo,
+  allConfigurationNames: List<ConfigurationName>,
+  allPluginIds: List<GradlePluginId>,
 ) {
-    val navRoute by navRouteRepo.navRoute.collectAsState(null)
-    if (navRoute == null) {
-        return
-    } else {
-        val invertedDependenciesNavRoute = navRoute!! as InvertedDependenciesNavRoute
-        H1 {
-            Text("Inverted Transitive Dependency Search Settings")
+  val invertedDependenciesNavRoute = navRoute!! as InvertedDependenciesNavRoute
+  H1 {
+    Text("Inverted Transitive Dependency Search Settings")
+  }
+  Br {}
+  BootstrapRow {
+    BootstrapColumn(6) {
+      H5 { Text("Configurations") }
+      BootstrapButton("Select All") {
+        navRouteRepo.pushNavRoute(
+          invertedDependenciesNavRoute.copy(configurations = allConfigurationNames)
+        )
+      }
+      BootstrapButton("Unselect All") {
+        navRouteRepo.pushNavRoute(
+          invertedDependenciesNavRoute.copy(configurations = listOf())
+        )
+      }
+      allConfigurationNames.sorted().forEach { configurationName ->
+        BootstrapSettingsCheckbox(
+          labelText = configurationName,
+          initialIsChecked = invertedDependenciesNavRoute.configurations.contains(configurationName)
+        ) { shouldAdd ->
+          navRouteRepo.pushNavRoute(
+            invertedDependenciesNavRoute.copy(
+              configurations = invertedDependenciesNavRoute.configurations
+                .toMutableList()
+                .apply {
+                  remove(configurationName)
+                  if (shouldAdd) {
+                    add(configurationName)
+                  }
+                }
+            )
+          )
         }
-        Br {}
-        BootstrapRow {
-            BootstrapColumn(6) {
-                H5 { Text("Configurations") }
-                BootstrapButton("Select All") {
-                    navRouteRepo.pushNavRoute(
-                        invertedDependenciesNavRoute.copy(configurations = allConfigurationNames)
-                    )
-                }
-                BootstrapButton("Unselect All") {
-                    navRouteRepo.pushNavRoute(
-                        invertedDependenciesNavRoute.copy(configurations = listOf())
-                    )
-                }
-                allConfigurationNames.sorted().forEach { configurationName ->
-                    BootstrapSettingsCheckbox(
-                        labelText = configurationName,
-                        initialIsChecked = invertedDependenciesNavRoute.configurations.contains(configurationName)
-                    ) { shouldAdd ->
-                        navRouteRepo.pushNavRoute(
-                            invertedDependenciesNavRoute.copy(
-                                configurations = invertedDependenciesNavRoute.configurations
-                                    .toMutableList()
-                                    .apply {
-                                        remove(configurationName)
-                                        if (shouldAdd) {
-                                            add(configurationName)
-                                        }
-                                    }
-                            )
-                        )
-                    }
-                }
-            }
-            BootstrapColumn(6) {
-                H5 { Text("Plugins") }
-                BootstrapButton("Select All") {
-                    navRouteRepo.pushNavRoute(
-                        invertedDependenciesNavRoute.copy(
-                            pluginGroupByFilter = allPluginIds ?: listOf()
-                        )
-                    )
-                }
-                BootstrapButton("Unselect All") {
-                    navRouteRepo.pushNavRoute(
-                        invertedDependenciesNavRoute.copy(
-                            pluginGroupByFilter = listOf()
-                        )
-                    )
-                }
-                allPluginIds?.sorted()?.forEach { gradlePluginId ->
-                    val groupByFilterItems = invertedDependenciesNavRoute.pluginGroupByFilter
-                    BootstrapSettingsCheckbox(
-                        labelText = gradlePluginId,
-                        initialIsChecked = groupByFilterItems.contains(gradlePluginId)
-                    ) { shouldAdd ->
-                        navRouteRepo.pushNavRoute(
-                            invertedDependenciesNavRoute.copy(
-                                pluginGroupByFilter = invertedDependenciesNavRoute.pluginGroupByFilter.toMutableList()
-                                    .apply {
-                                        remove(gradlePluginId)
-                                        if (shouldAdd) {
-                                            add(gradlePluginId)
-                                        }
-                                    }
-                            )
-                        )
-                    }
-                }
-            }
-        }
+      }
     }
+    BootstrapColumn(6) {
+      H5 { Text("Plugins") }
+      BootstrapButton("Select All") {
+        navRouteRepo.pushNavRoute(
+          invertedDependenciesNavRoute.copy(
+            pluginGroupByFilter = allPluginIds ?: listOf()
+          )
+        )
+      }
+      BootstrapButton("Unselect All") {
+        navRouteRepo.pushNavRoute(
+          invertedDependenciesNavRoute.copy(
+            pluginGroupByFilter = listOf()
+          )
+        )
+      }
+      allPluginIds?.sorted()?.forEach { gradlePluginId ->
+        val groupByFilterItems = invertedDependenciesNavRoute.pluginGroupByFilter
+        BootstrapSettingsCheckbox(
+          labelText = gradlePluginId,
+          initialIsChecked = groupByFilterItems.contains(gradlePluginId)
+        ) { shouldAdd ->
+          navRouteRepo.pushNavRoute(
+            invertedDependenciesNavRoute.copy(
+              pluginGroupByFilter = invertedDependenciesNavRoute.pluginGroupByFilter.toMutableList()
+                .apply {
+                  remove(gradlePluginId)
+                  if (shouldAdd) {
+                    add(gradlePluginId)
+                  }
+                }
+            )
+          )
+        }
+      }
+    }
+  }
+
 }
 
 
 @Composable
 fun RightColumn(
-    reportDataRepo: ReportDataRepo,
-    invertedDependenciesNavRoute: InvertedDependenciesNavRoute
+  reportDataRepo: ReportDataRepo,
+  invertedDependenciesNavRoute: InvertedDependenciesNavRoute
 ) {
-    val pluginIdToAllAppsMap: Map<GradlePluginId, List<ModulePath>>? by reportDataRepo.pluginIdToAllModulesMap.collectAsState(
-        null
-    )
-    val invertedDeps by reportDataRepo.allInvertedDependencies.collectAsState(null)
-    val allModulesMatchingQuery by reportDataRepo.allModulesMatchingQuery.collectAsState(null)
-    val collectedPlugins by reportDataRepo.collectedPluginInfoReport.collectAsState(null)
-    val pluginIdToGradlePathsMatchingQuery = DependencyComputations.computePluginIdToGradlePathsMatchingQuery(
-        matchingQueryModulesList = allModulesMatchingQuery?.filter { it.startsWith(":") } ?: listOf(),
-        pluginGroupByFilter = invertedDependenciesNavRoute.pluginGroupByFilter,
-        configurations = invertedDependenciesNavRoute.configurations,
-        invertedDeps = invertedDeps,
-        collectedPlugins = collectedPlugins,
-    )
+  val pluginIdToAllAppsMap: Map<GradlePluginId, List<ModulePath>>? by reportDataRepo.pluginIdToAllModulesMap.collectAsState(
+    null
+  )
+  val invertedDeps by reportDataRepo.allInvertedDependencies.collectAsState(null)
+  val reportMetadataOrig by reportDataRepo.reportMetadata.collectAsState(null)
+  val allModulesMatchingQuery by reportDataRepo.allModulesMatchingQuery.collectAsState(null)
+  val collectedPlugins by reportDataRepo.collectedPluginInfoReport.collectAsState(null)
 
-    val limit = 10
-    pluginIdToGradlePathsMatchingQuery
-        .forEach { (pluginId: GradlePluginId, matchingModules: Map<ModulePath, Map<ModulePath, List<DependencyComputations.PathAndConfigurations>>>) ->
-            val totalCount = pluginIdToAllAppsMap?.get(pluginId)?.size ?: 0
-            val matchingCount = pluginIdToGradlePathsMatchingQuery[pluginId]?.size ?: 0
+  if (listOf(
+      pluginIdToAllAppsMap,
+      invertedDeps,
+      reportMetadataOrig,
+      allModulesMatchingQuery,
+      collectedPlugins
+    ).any { it == null }
+  ) {
+    BootstrapLoadingMessageWithSpinner()
+    return
+  }
 
-            val headerText = "$pluginId ($matchingCount of $totalCount) "
-            var showAll by remember { mutableStateOf(false) }
-            val matchingModulePaths = matchingModules.keys.toList()
-            val expanded = false
-            BoostrapExpandingCard(
-                header = {
-                    Text(headerText)
-                },
-                headerRight = {
-                    Button({
-                        classes("btn")
-                    }) {
-                        BootstrapIcon("copy", 16) {
-                            window.navigator.clipboard.writeText(
-                                matchingModulePaths.joinToString(
-                                    separator = " "
-                                )
-                            )
-                        }
-                    }
-                },
-                expanded = expanded
-            ) {
-                var displayIndex = 1
-                val matchingModulePathsLimited = matchingModulePaths
-                    .sorted()
-                    .subList(
-                        0, minOf(
-                            if (showAll) {
-                                Int.MAX_VALUE
-                            } else {
-                                limit
-                            }, matchingModules.size
-                        )
-                    )
-                matchingModulePathsLimited
-                    .forEach { matchingModulePath: ModulePath ->
-                        BootstrapAccordion({
-                            val accordionSubHeaderText = "$displayIndex $matchingModulePath"
-                            Text(accordionSubHeaderText)
-                            displayIndex++
-                        }) {
-                            val matchingUsages: List<DependencyComputations.PathAndConfigurations> =
-                                matchingModules[matchingModulePath]?.get(matchingModulePath) ?: listOf()
-                            BootstrapTable(
-                                headers = listOf(
-                                    "Referenced in",
-                                    "in Configuration(s)"
-                                ),
-                                rows = matchingUsages.map { (gradlePath, configurationNames) ->
-                                    listOf(
-                                        gradlePath,
-                                        configurationNames.toString()
-                                    )
-                                },
-                                types = matchingModulePathsLimited.map { String::class },
-                                maxResultsLimitConstant = 10,
-                                onItemClickCallback = null
-                            )
-                        }
-                    }
-                if (!showAll) {
-                    Hr { }
-                    Button({
-                        classes("btn")
-                        onClick {
-                            showAll = !showAll
-                        }
-                    }) {
-                        Text("Show All")
-                    }
-                }
+  val reportMetadata = reportMetadataOrig!!
+
+  val pluginIdToGradlePathsMatchingQuery = DependencyComputations.computePluginIdToGradlePathsMatchingQuery(
+    matchingQueryModulesList = allModulesMatchingQuery?.filter {
+      BuildSystemUtils.isSourceModule(reportMetadata.buildSystem, it)
+    } ?: listOf(),
+    pluginGroupByFilter = invertedDependenciesNavRoute.pluginGroupByFilter,
+    configurations = invertedDependenciesNavRoute.configurations,
+    invertedDeps = invertedDeps,
+    collectedPlugins = collectedPlugins,
+  )
+
+  val limit = 10
+  pluginIdToGradlePathsMatchingQuery
+    .forEach { (pluginId: GradlePluginId, matchingModules: Map<ModulePath, Map<ModulePath, List<DependencyComputations.PathAndConfigurations>>>) ->
+      val totalCount = pluginIdToAllAppsMap?.get(pluginId)?.size ?: 0
+      val matchingCount = pluginIdToGradlePathsMatchingQuery[pluginId]?.size ?: 0
+
+      val headerText = "$pluginId ($matchingCount of $totalCount) "
+      var showAll by remember { mutableStateOf(false) }
+      val matchingModulePaths = matchingModules.keys.toList()
+      val expanded = false
+      BoostrapExpandingCard(
+        header = {
+          Text(headerText)
+        },
+        headerRight = {
+          Button({
+            classes("btn")
+          }) {
+            BootstrapIcon("copy", 16) {
+              window.navigator.clipboard.writeText(
+                matchingModulePaths.joinToString(
+                  separator = " "
+                )
+              )
             }
+          }
+        },
+        expanded = expanded
+      ) {
+        var displayIndex = 1
+        val matchingModulePathsLimited = matchingModulePaths
+          .sorted()
+          .subList(
+            0, minOf(
+              if (showAll) {
+                Int.MAX_VALUE
+              } else {
+                limit
+              }, matchingModules.size
+            )
+          )
+        matchingModulePathsLimited
+          .forEach { matchingModulePath: ModulePath ->
+            BootstrapAccordion({
+              val accordionSubHeaderText = "$displayIndex $matchingModulePath"
+              Text(accordionSubHeaderText)
+              displayIndex++
+            }) {
+              val matchingUsages: List<DependencyComputations.PathAndConfigurations> =
+                matchingModules[matchingModulePath]?.get(matchingModulePath) ?: listOf()
+              BootstrapTable(
+                headers = listOf(
+                  "Referenced in",
+                  "in Configuration(s)"
+                ),
+                rows = matchingUsages.map { (gradlePath, configurationNames) ->
+                  listOf(
+                    gradlePath,
+                    configurationNames.toString()
+                  )
+                },
+                types = matchingModulePathsLimited.map { String::class },
+                maxResultsLimitConstant = 10,
+                onItemClickCallback = null
+              )
+            }
+          }
+        if (!showAll) {
+          Hr { }
+          Button({
+            classes("btn")
+            onClick {
+              showAll = !showAll
+            }
+          }) {
+            Text("Show All")
+          }
         }
+      }
+    }
 }
