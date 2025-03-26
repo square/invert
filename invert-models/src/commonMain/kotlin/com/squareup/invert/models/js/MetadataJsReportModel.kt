@@ -22,4 +22,5 @@ data class MetadataJsReportModel(
   val timezoneId: String,
   val remoteRepoGit: String,
   val remoteRepoUrl: String,
+  val owners: AllOwners,
 )
