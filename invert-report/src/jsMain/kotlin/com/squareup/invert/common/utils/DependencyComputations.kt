@@ -2,8 +2,8 @@ package com.squareup.invert.common.utils
 
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.GradlePluginId
+import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.js.DependenciesJsReportModel
 import com.squareup.invert.models.js.PluginsJsReportModel
 

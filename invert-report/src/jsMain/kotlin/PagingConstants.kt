@@ -1,3 +1,3 @@
 object PagingConstants {
-    const val MAX_RESULTS = 100
+  const val MAX_RESULTS = 100
 }

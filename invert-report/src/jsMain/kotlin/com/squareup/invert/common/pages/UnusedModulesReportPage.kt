@@ -24,88 +24,88 @@ import ui.BootstrapTable
 import kotlin.reflect.KClass
 
 class UnusedModulesNavRoute : BaseNavRoute(UnusedModulesReportPage.navPage) {
-    override fun toSearchParams() = toParamsWithOnlyPageId(this)
+  override fun toSearchParams() = toParamsWithOnlyPageId(this)
 
-    companion object {
-        fun parser(params: Map<String, String?>): NavRoute {
-            return UnusedModulesNavRoute()
-        }
+  companion object {
+    fun parser(params: Map<String, String?>): NavRoute {
+      return UnusedModulesNavRoute()
     }
+  }
 }
 
 object UnusedModulesReportPage : InvertReportPage<UnusedModulesNavRoute> {
-    override val navPage: NavPage =
-        NavPage(
-            pageId = "unused_modules",
-            displayName = "Unused Modules",
-            navIconSlug = "trash",
-            navRouteParser = {
-                UnusedModulesNavRoute.parser(it)
-            }
-        )
+  override val navPage: NavPage =
+    NavPage(
+      pageId = "unused_modules",
+      displayName = "Unused Modules",
+      navIconSlug = "trash",
+      navRouteParser = {
+        UnusedModulesNavRoute.parser(it)
+      }
+    )
 
-    override val navRouteKClass: KClass<UnusedModulesNavRoute> = UnusedModulesNavRoute::class
+  override val navRouteKClass: KClass<UnusedModulesNavRoute> = UnusedModulesNavRoute::class
 
-    override val composableContent: @Composable (UnusedModulesNavRoute) -> Unit = { navRoute ->
-        UnusedModulesComposable(navRoute)
-    }
+  override val composableContent: @Composable (UnusedModulesNavRoute) -> Unit = { navRoute ->
+    UnusedModulesComposable(navRoute)
+  }
 }
 
 
 @Composable
 fun UnusedModulesComposable(
-    navRoute: UnusedModulesNavRoute,
-    reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
-    navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
+  navRoute: UnusedModulesNavRoute,
+  reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
+  navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
 
-    val moduleToInvertedDependenciesMapOrig: Map<DependencyId, Map<ModulePath, List<ConfigurationName>>>? by reportDataRepo.allInvertedDependencies.collectAsState(
-        null
+  val moduleToInvertedDependenciesMapOrig: Map<DependencyId, Map<ModulePath, List<ConfigurationName>>>? by reportDataRepo.allInvertedDependencies.collectAsState(
+    null
+  )
+
+  val ownersMapOrig by reportDataRepo.moduleToOwnerMap.collectAsState(null)
+
+  val allAnalyzedConfigurationNamesOrig by reportDataRepo.allAnalyzedConfigurationNames.collectAsState(null)
+
+  val modulesWithAppPluginOrig by reportDataRepo.modulesWithPlugin("com.android.build.gradle.AppPlugin")
+    .collectAsState(
+      null
     )
 
-    val ownersMapOrig by reportDataRepo.moduleToOwnerMap.collectAsState(null)
+  val allModulesOrig: List<ModulePath>? by reportDataRepo.allModules.collectAsState(
+    null
+  )
 
-    val allAnalyzedConfigurationNamesOrig by reportDataRepo.allAnalyzedConfigurationNames.collectAsState(null)
+  if (moduleToInvertedDependenciesMapOrig == null || allModulesOrig == null) {
+    BootstrapLoadingMessageWithSpinner()
+    return
+  }
 
-    val modulesWithAppPluginOrig by reportDataRepo.modulesWithPlugin("com.android.build.gradle.AppPlugin")
-        .collectAsState(
-            null
-        )
+  val moduleToInvertedDependenciesMap = moduleToInvertedDependenciesMapOrig ?: mapOf()
 
-    val allModulesOrig: List<ModulePath>? by reportDataRepo.allModules.collectAsState(
-        null
-    )
+  val modulesWithAppPlugin = modulesWithAppPluginOrig?.toSet() ?: setOf()
 
-    if (moduleToInvertedDependenciesMapOrig == null || allModulesOrig == null) {
-        BootstrapLoadingMessageWithSpinner()
-        return
-    }
+  val allModules: List<String> = allModulesOrig ?: listOf()
 
-    val moduleToInvertedDependenciesMap = moduleToInvertedDependenciesMapOrig ?: mapOf()
+  val allAnalyzedConfigurationNames = allAnalyzedConfigurationNamesOrig ?: setOf()
 
-    val modulesWithAppPlugin = modulesWithAppPluginOrig?.toSet() ?: setOf()
+  val rows = allModules.filterNot { modulesWithAppPlugin.contains(it) }.map {
+    val a = moduleToInvertedDependenciesMap[it]
+    Pair(it, a?.keys?.size ?: 0)
+  }
 
-    val allModules: List<String> = allModulesOrig ?: listOf()
+  val unused = rows.filter { it.second == 0 }
 
-    val allAnalyzedConfigurationNames = allAnalyzedConfigurationNamesOrig ?: setOf()
-
-    val rows = allModules.filterNot { modulesWithAppPlugin.contains(it) }.map {
-        val a = moduleToInvertedDependenciesMap[it]
-        Pair(it, a?.keys?.size ?: 0)
-    }
-
-    val unused = rows.filter { it.second == 0 }
-
-    H1 { Text("Unused Modules (${unused.size} Total)") }
-    P {
-        Text("* Android Apps are Excluded")
-        Br { }
-        Text("* Scanned Configurations: $allAnalyzedConfigurationNames")
-    }
-    BootstrapTable(
-        headers = listOf("Module", "Owner"),
-        rows = unused.map { listOf(it.first, ownersMapOrig?.get(it.first) ?: "") },
-        types = listOf(String::class, String::class),
-        maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
-    ) {}
+  H1 { Text("Unused Modules (${unused.size} Total)") }
+  P {
+    Text("* Android Apps are Excluded")
+    Br { }
+    Text("* Scanned Configurations: $allAnalyzedConfigurationNames")
+  }
+  BootstrapTable(
+    headers = listOf("Module", "Owner"),
+    rows = unused.map { listOf(it.first, ownersMapOrig?.get(it.first) ?: "") },
+    types = listOf(String::class, String::class),
+    maxResultsLimitConstant = PagingConstants.MAX_RESULTS,
+  ) {}
 }

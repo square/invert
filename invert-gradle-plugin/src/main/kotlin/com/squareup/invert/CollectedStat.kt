@@ -10,6 +10,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class CollectedStat(
-    val metadata: StatMetadata,
-    val stat: Stat?
+  val metadata: StatMetadata,
+  val stat: Stat?
 )

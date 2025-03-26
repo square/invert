@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class CollectedStatsForProject(
-    val path: ModulePath,
-    val statInfos: Map<StatKey, StatMetadata>,
-    val stats: Map<StatKey, Stat>
+  val path: ModulePath,
+  val statInfos: Map<StatKey, StatMetadata>,
+  val stats: Map<StatKey, Stat>
 )

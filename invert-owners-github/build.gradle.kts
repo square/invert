@@ -1,17 +1,17 @@
 plugins {
-    kotlin("jvm")
-    id("java-gradle-plugin")
-    alias(libs.plugins.vanniktech.maven.publish)
-    alias(libs.plugins.dokka)
+  kotlin("jvm")
+  id("java-gradle-plugin")
+  alias(libs.plugins.vanniktech.maven.publish)
+  alias(libs.plugins.dokka)
 }
 
 java {
-    withSourcesJar()
+  withSourcesJar()
 }
 
 dependencies {
-    implementation(project(":invert-gradle-plugin"))
+  implementation(project(":invert-gradle-plugin"))
 
-    testImplementation(libs.truth)
-    testImplementation(libs.kotlin.test)
+  testImplementation(libs.truth)
+  testImplementation(libs.kotlin.test)
 }

@@ -36,154 +36,154 @@ import org.gradle.api.tasks.TaskAction
  */
 internal abstract class InvertCollectDependenciesTask : DefaultTask() {
 
-    companion object {
-        const val TASK_NAME = "invertCollectDependencies"
+  companion object {
+    const val TASK_NAME = "invertCollectDependencies"
 
-        /**
-         * Resolve all configurations ending in "RuntimeClasspath"
-         */
-        private fun resolveMonitoredConfigurationsMap(
-            filteredConfigurationNames: Collection<ConfigurationName>,
-            project: Project,
-        ): Map<ConfigurationName, Provider<ResolvedComponentResult>> {
-            return mutableMapOf<ConfigurationName, Provider<ResolvedComponentResult>>()
-                .also { resolvedConfigurationsMap ->
-                    filteredConfigurationNames.forEach { monitoredConfigurationName: String ->
-                        val resolvedComponentResultForConfiguration = project.projectConfigurations
-                            .getResolvedComponentResult(monitoredConfigurationName)
-                        if (resolvedComponentResultForConfiguration != null) {
-                            resolvedConfigurationsMap[monitoredConfigurationName] =
-                                resolvedComponentResultForConfiguration
-                        }
-                    }
-                }
+    /**
+     * Resolve all configurations ending in "RuntimeClasspath"
+     */
+    private fun resolveMonitoredConfigurationsMap(
+      filteredConfigurationNames: Collection<ConfigurationName>,
+      project: Project,
+    ): Map<ConfigurationName, Provider<ResolvedComponentResult>> {
+      return mutableMapOf<ConfigurationName, Provider<ResolvedComponentResult>>()
+        .also { resolvedConfigurationsMap ->
+          filteredConfigurationNames.forEach { monitoredConfigurationName: String ->
+            val resolvedComponentResultForConfiguration = project.projectConfigurations
+              .getResolvedComponentResult(monitoredConfigurationName)
+            if (resolvedComponentResultForConfiguration != null) {
+              resolvedConfigurationsMap[monitoredConfigurationName] =
+                resolvedComponentResultForConfiguration
+            }
+          }
         }
     }
+  }
 
-    @get:Input
-    abstract val analyzedConfigurationNames: SetProperty<String>
+  @get:Input
+  abstract val analyzedConfigurationNames: SetProperty<String>
 
-    @get:Input
-    abstract val allConfigurationNames: SetProperty<String>
+  @get:Input
+  abstract val allConfigurationNames: SetProperty<String>
 
-    @get:Input
-    abstract val projectPath: Property<String>
+  @get:Input
+  abstract val projectPath: Property<String>
 
-    @get:Input
-    abstract val directDependencies: MapProperty<ConfigurationName, Set<DependencyId>>
+  @get:Input
+  abstract val directDependencies: MapProperty<ConfigurationName, Set<DependencyId>>
 
-    @get:Input
-    abstract val monitoredConfigurationsMap: MapProperty<
-            ConfigurationName,
-            Provider<ResolvedComponentResult>
-            >
+  @get:Input
+  abstract val monitoredConfigurationsMap: MapProperty<
+      ConfigurationName,
+      Provider<ResolvedComponentResult>
+      >
 
-    @get:OutputFile
-    abstract val projectBuildReportDependenciesFile: RegularFileProperty
+  @get:OutputFile
+  abstract val projectBuildReportDependenciesFile: RegularFileProperty
 
-    @get:OutputFile
-    abstract val projectBuildReportConfigurationsFile: RegularFileProperty
+  @get:OutputFile
+  abstract val projectBuildReportConfigurationsFile: RegularFileProperty
 
-    private fun invertLogger(): InvertLogger = GradleInvertLogger(logger)
+  private fun invertLogger(): InvertLogger = GradleInvertLogger(logger)
 
-    @TaskAction
-    internal fun execute() {
-        val computeCollectedFlattenedDependencyData = computeCollectedDependenciesForProject(
-            directDependencies = this.directDependencies.get(),
-            projectPath = projectPath.get(),
-            transitiveDeps = monitoredConfigurationsMap.getOrElse(mapOf())
-                .mapValues { it.value.get() }
-                .toTransitiveDeps(),
-        )
-        val collectedConfigurations = CollectedConfigurationsForProject(
-            modulePath = projectPath.get(),
-            allConfigurationNames = allConfigurationNames.get(),
-            analyzedConfigurationNames = analyzedConfigurationNames.get(),
-        )
-        InvertJsonReportWriter.writeJsonFile(
-            logger = invertLogger(),
-            jsonFileKey = InvertPluginFileKey.DEPENDENCIES,
-            jsonOutputFile = projectBuildReportDependenciesFile.get().asFile,
-            serializer = CollectedDependenciesForProject.serializer(),
-            value = computeCollectedFlattenedDependencyData,
-        )
-        InvertJsonReportWriter.writeJsonFile(
-            logger = invertLogger(),
-            jsonFileKey = InvertPluginFileKey.CONFIGURATIONS,
-            jsonOutputFile = projectBuildReportConfigurationsFile.get().asFile,
-            serializer = CollectedConfigurationsForProject.serializer(),
-            value = collectedConfigurations,
-        )
+  @TaskAction
+  internal fun execute() {
+    val computeCollectedFlattenedDependencyData = computeCollectedDependenciesForProject(
+      directDependencies = this.directDependencies.get(),
+      projectPath = projectPath.get(),
+      transitiveDeps = monitoredConfigurationsMap.getOrElse(mapOf())
+        .mapValues { it.value.get() }
+        .toTransitiveDeps(),
+    )
+    val collectedConfigurations = CollectedConfigurationsForProject(
+      modulePath = projectPath.get(),
+      allConfigurationNames = allConfigurationNames.get(),
+      analyzedConfigurationNames = analyzedConfigurationNames.get(),
+    )
+    InvertJsonReportWriter.writeJsonFile(
+      logger = invertLogger(),
+      jsonFileKey = InvertPluginFileKey.DEPENDENCIES,
+      jsonOutputFile = projectBuildReportDependenciesFile.get().asFile,
+      serializer = CollectedDependenciesForProject.serializer(),
+      value = computeCollectedFlattenedDependencyData,
+    )
+    InvertJsonReportWriter.writeJsonFile(
+      logger = invertLogger(),
+      jsonFileKey = InvertPluginFileKey.CONFIGURATIONS,
+      jsonOutputFile = projectBuildReportConfigurationsFile.get().asFile,
+      serializer = CollectedConfigurationsForProject.serializer(),
+      value = collectedConfigurations,
+    )
+  }
+
+  fun setParams(
+    project: Project,
+    extension: InvertExtension,
+  ) {
+    if (project.isRootProject()) {
+      throw IllegalArgumentException("$TASK_NAME cannot be registered on a root project.")
     }
 
-    fun setParams(
-        project: Project,
-        extension: InvertExtension,
-    ) {
-        if (project.isRootProject()) {
-            throw IllegalArgumentException("$TASK_NAME cannot be registered on a root project.")
+    projectPath.set(project.path)
+
+    val allConfigurationNames: List<String> = project.projectConfigurations.map { it.name }
+    this.allConfigurationNames.set(allConfigurationNames.toSortedSet())
+
+    val filteredConfigurationNames = extension.getConfigurationsForProjectCalculator()
+      .invoke(
+        project = project,
+        configurationNames = allConfigurationNames
+      )
+    this.analyzedConfigurationNames.set(filteredConfigurationNames.toSortedSet())
+
+    val resolvedMonitoredConfigurationsMap = resolveMonitoredConfigurationsMap(
+      filteredConfigurationNames = filteredConfigurationNames,
+      project = project,
+    )
+    monitoredConfigurationsMap.set(resolvedMonitoredConfigurationsMap)
+
+    val annotationProcessors = setOf("kapt", "ksp", "annotationProcessor")
+
+    directDependencies.set(
+      project.configurations
+        .toSet()
+        .filter {
+          filteredConfigurationNames.contains(it.name)
+              || annotationProcessors.contains(it.name)
+              || it.name.contains("kotlinCompilerPluginClasspath")
         }
+        .associate { configuration ->
+          configuration.name to configuration.allDependencies.mapNotNull { dependency: Dependency ->
+            when (dependency) {
+              is ExternalDependency -> {
+                "${dependency.group}:${dependency.name}:${dependency.version}"
+              }
 
-        projectPath.set(project.path)
+              is DefaultProjectDependency -> {
+                dependency.dependencyProject.path
+              }
 
-        val allConfigurationNames: List<String> = project.projectConfigurations.map { it.name }
-        this.allConfigurationNames.set(allConfigurationNames.toSortedSet())
+              else -> {
+                null
+              }
+            }
+          }.toSortedSet()
+        }
+        .filter { it.value.isNotEmpty() }
+    )
 
-        val filteredConfigurationNames = extension.getConfigurationsForProjectCalculator()
-            .invoke(
-                project = project,
-                configurationNames = allConfigurationNames
-            )
-        this.analyzedConfigurationNames.set(filteredConfigurationNames.toSortedSet())
+    projectBuildReportDependenciesFile.set(
+      project.layout.buildDirectory.file(
+        InvertFileUtils.REPORTS_SLASH_INVERT_PATH
+          .addSlashAnd(InvertPluginFileKey.DEPENDENCIES.filename)
+      )
+    )
 
-        val resolvedMonitoredConfigurationsMap = resolveMonitoredConfigurationsMap(
-            filteredConfigurationNames = filteredConfigurationNames,
-            project = project,
-        )
-        monitoredConfigurationsMap.set(resolvedMonitoredConfigurationsMap)
-
-        val annotationProcessors = setOf("kapt", "ksp", "annotationProcessor")
-
-        directDependencies.set(
-            project.configurations
-                .toSet()
-                .filter {
-                    filteredConfigurationNames.contains(it.name)
-                            || annotationProcessors.contains(it.name)
-                            || it.name.contains("kotlinCompilerPluginClasspath")
-                }
-                .associate { configuration ->
-                    configuration.name to configuration.allDependencies.mapNotNull { dependency: Dependency ->
-                        when (dependency) {
-                            is ExternalDependency -> {
-                                "${dependency.group}:${dependency.name}:${dependency.version}"
-                            }
-
-                            is DefaultProjectDependency -> {
-                                dependency.dependencyProject.path
-                            }
-
-                            else -> {
-                                null
-                            }
-                        }
-                    }.toSortedSet()
-                }
-                .filter { it.value.isNotEmpty() }
-        )
-
-        projectBuildReportDependenciesFile.set(
-            project.layout.buildDirectory.file(
-                InvertFileUtils.REPORTS_SLASH_INVERT_PATH
-                    .addSlashAnd(InvertPluginFileKey.DEPENDENCIES.filename)
-            )
-        )
-
-        projectBuildReportConfigurationsFile.set(
-            project.layout.buildDirectory.file(
-                InvertFileUtils.REPORTS_SLASH_INVERT_PATH
-                    .addSlashAnd(InvertPluginFileKey.CONFIGURATIONS.filename)
-            )
-        )
-    }
+    projectBuildReportConfigurationsFile.set(
+      project.layout.buildDirectory.file(
+        InvertFileUtils.REPORTS_SLASH_INVERT_PATH
+          .addSlashAnd(InvertPluginFileKey.CONFIGURATIONS.filename)
+      )
+    )
+  }
 }

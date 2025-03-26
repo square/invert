@@ -138,7 +138,7 @@ class CollectedDataRepo(
     this._historicalData.value = historicalData
   }
 
-  fun statUpdated(statJsReportModel: StatJsReportModel)  {
+  fun statUpdated(statJsReportModel: StatJsReportModel) {
     this._statData.value = this._statData.value.toMutableMap().apply {
       put(statJsReportModel.statInfo.key, statJsReportModel)
     }

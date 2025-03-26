@@ -10,6 +10,7 @@ class GradleInvertLogger(private val logger: Logger) : InvertLogger {
   override fun lifecycle(message: String) {
     logger.lifecycle(message)
   }
+
   override fun warn(message: String) {
     logger.warn(message)
   }

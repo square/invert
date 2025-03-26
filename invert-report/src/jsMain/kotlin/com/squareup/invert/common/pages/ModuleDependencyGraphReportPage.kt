@@ -14,7 +14,6 @@ import com.squareup.invert.common.pages.ModuleDependencyGraphNavRoute.Companion.
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.InvertSerialization
-import com.squareup.invert.models.utils.BuildSystemUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

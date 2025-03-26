@@ -17,11 +17,12 @@ enum class StatDataType(
     }
   }
 
-  val displayName get() = when(this){
-    BOOLEAN -> "Boolean"
-    NUMERIC -> "Numeric"
-    STRING -> "String"
-    CODE_REFERENCES -> "Code References"
-  }
+  val displayName
+    get() = when (this) {
+      BOOLEAN -> "Boolean"
+      NUMERIC -> "Numeric"
+      STRING -> "String"
+      CODE_REFERENCES -> "Code References"
+    }
 
 }

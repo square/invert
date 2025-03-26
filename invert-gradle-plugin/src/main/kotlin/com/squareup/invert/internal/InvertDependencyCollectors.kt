@@ -61,7 +61,7 @@ internal object InvertDependencyCollectors {
  * dependencies for this given [ConfigurationName] ("runtimeClasspath")
  */
 fun Map<ConfigurationName, ResolvedComponentResult>.toTransitiveDeps():
-  Map<ConfigurationName, Set<DependencyId>> {
+    Map<ConfigurationName, Set<DependencyId>> {
   val transitiveDeps = mutableMapOf<ConfigurationName, Set<DependencyId>>()
   this.forEach { (configurationName, resolvedComponentResult) ->
     val collectedDependenciesForConfiguration = DependencyVisitor.traverseComponentDependencies(
