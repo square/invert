@@ -115,7 +115,7 @@ fun AllStatsComposable(
       .map { statMetadata: StatMetadata ->
         mutableListOf<String>(
           statMetadata.key,
-          statMetadata.description,
+          statMetadata.title,
           statMetadata.dataType.name,
           statMetadata.category
         ).apply {
@@ -145,7 +145,7 @@ fun AllStatsComposable(
 @Composable
 fun StatTiles(codeReferenceStatTotals: List<StatTotalAndMetadata>, onClick: (NavRoute) -> Unit) {
   BootstrapRow {
-    codeReferenceStatTotals.sortedBy { it.metadata.description }.forEach { statTotalAndMetadata ->
+    codeReferenceStatTotals.sortedBy { it.metadata.title }.forEach { statTotalAndMetadata ->
       val statMetadata = statTotalAndMetadata.metadata
       BootstrapColumn(4) {
         BootstrapJumbotron(
@@ -167,7 +167,7 @@ fun StatTiles(codeReferenceStatTotals: List<StatTotalAndMetadata>, onClick: (Nav
             },
             onClick,
           ) {
-            Text(statTotalAndMetadata.metadata.description)
+            Text(statTotalAndMetadata.metadata.title)
           }
         }
       }
