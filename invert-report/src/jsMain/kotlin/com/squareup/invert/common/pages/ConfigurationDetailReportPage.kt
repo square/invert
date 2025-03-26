@@ -24,84 +24,84 @@ import ui.BootstrapTable
 import kotlin.reflect.KClass
 
 data class ConfigurationDetailNavRoute(
-    val configurationName: ConfigurationName,
+  val configurationName: ConfigurationName,
 ) : BaseNavRoute(ConfigurationDetailReportPage.navPage) {
-    override fun toSearchParams() = toParamsWithOnlyPageId(this)
-        .also { map ->
-            map[CONFIGURATION_PARAM] = configurationName
-        }
-
-    companion object {
-
-        private const val CONFIGURATION_PARAM = "configuration"
-        fun parser(params: Map<String, String?>): NavRoute {
-            val configurationName = params[CONFIGURATION_PARAM]
-            return if (!configurationName.isNullOrEmpty()) {
-                ConfigurationDetailNavRoute(
-                    configurationName = configurationName
-                )
-            } else {
-                ConfigurationsNavRoute
-            }
-        }
+  override fun toSearchParams() = toParamsWithOnlyPageId(this)
+    .also { map ->
+      map[CONFIGURATION_PARAM] = configurationName
     }
+
+  companion object {
+
+    private const val CONFIGURATION_PARAM = "configuration"
+    fun parser(params: Map<String, String?>): NavRoute {
+      val configurationName = params[CONFIGURATION_PARAM]
+      return if (!configurationName.isNullOrEmpty()) {
+        ConfigurationDetailNavRoute(
+          configurationName = configurationName
+        )
+      } else {
+        ConfigurationsNavRoute
+      }
+    }
+  }
 }
 
 object ConfigurationDetailReportPage : InvertReportPage<ConfigurationDetailNavRoute> {
-    override val navPage: NavPage = NavPage(
-        pageId = "configuration_detail",
-        navRouteParser = { ConfigurationDetailNavRoute.parser(it) }
-    )
-    override val navRouteKClass: KClass<ConfigurationDetailNavRoute> = ConfigurationDetailNavRoute::class
+  override val navPage: NavPage = NavPage(
+    pageId = "configuration_detail",
+    navRouteParser = { ConfigurationDetailNavRoute.parser(it) }
+  )
+  override val navRouteKClass: KClass<ConfigurationDetailNavRoute> = ConfigurationDetailNavRoute::class
 
-    override val composableContent: @Composable (ConfigurationDetailNavRoute) -> Unit = { navRoute ->
-        ConfigurationDetailComposable(navRoute)
-    }
+  override val composableContent: @Composable (ConfigurationDetailNavRoute) -> Unit = { navRoute ->
+    ConfigurationDetailComposable(navRoute)
+  }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun ConfigurationDetailComposable(
-    navRoute: ConfigurationDetailNavRoute,
-    reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
-    collectedDataRepo: CollectedDataRepo = DependencyGraph.collectedDataRepo,
-    navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
+  navRoute: ConfigurationDetailNavRoute,
+  reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
+  collectedDataRepo: CollectedDataRepo = DependencyGraph.collectedDataRepo,
+  navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
-    val configurationName = navRoute.configurationName
+  val configurationName = navRoute.configurationName
 
-    val modulesUsingConfiguration by collectedDataRepo.configurations.mapLatest {
+  val modulesUsingConfiguration by collectedDataRepo.configurations.mapLatest {
 
-        val list = mutableListOf<ModulePath>()
+    val list = mutableListOf<ModulePath>()
 
-        it?.moduleToAllConfigurationNames?.entries?.forEach { (moduleName, allConfigurationNames) ->
-            if (allConfigurationNames.contains(configurationName)) {
-                list.add(moduleName)
-            }
-        }
-        list
-    }.collectAsState(null)
-
-    if (modulesUsingConfiguration == null) {
-        H1 {
-            BootstrapLoadingMessageWithSpinner("Loading Configuration Usage...")
-        }
-        return
+    it?.moduleToAllConfigurationNames?.entries?.forEach { (moduleName, allConfigurationNames) ->
+      if (allConfigurationNames.contains(configurationName)) {
+        list.add(moduleName)
+      }
     }
+    list
+  }.collectAsState(null)
+
+  if (modulesUsingConfiguration == null) {
     H1 {
-        Text("Modules with Configuration: $configurationName")
+      BootstrapLoadingMessageWithSpinner("Loading Configuration Usage...")
     }
-    val configurationUsages = modulesUsingConfiguration ?: emptyList()
-    BootstrapTable(
-        headers = listOf("Module"),
-        rows = configurationUsages.map { listOf(it) },
-        types = listOf(String::class),
-        maxResultsLimitConstant = MAX_RESULTS,
-        onItemClickCallback = {
-            navRouteRepo.pushNavRoute(
-                ModuleDetailNavRoute(
-                    it[0]
-                )
-            )
-        }
-    )
+    return
+  }
+  H1 {
+    Text("Modules with Configuration: $configurationName")
+  }
+  val configurationUsages = modulesUsingConfiguration ?: emptyList()
+  BootstrapTable(
+    headers = listOf("Module"),
+    rows = configurationUsages.map { listOf(it) },
+    types = listOf(String::class),
+    maxResultsLimitConstant = MAX_RESULTS,
+    onItemClickCallback = {
+      navRouteRepo.pushNavRoute(
+        ModuleDetailNavRoute(
+          it[0]
+        )
+      )
+    }
+  )
 }

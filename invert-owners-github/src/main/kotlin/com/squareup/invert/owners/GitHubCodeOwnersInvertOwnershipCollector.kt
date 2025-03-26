@@ -47,7 +47,7 @@ object GitHubCodeOwnersInvertOwnershipCollector : InvertOwnershipCollector {
   ): AllOwners {
     val ownersResolver = getOwnersResolver(gitRootDir)
     val allOwners = ownersResolver?.ownerships?.map { it.owners }?.toSet() ?: emptySet()
-    val ownerToDetails = allOwners.associate { it.joinToString(",") to OwnerDetails()  }
+    val ownerToDetails = allOwners.associate { it.joinToString(",") to OwnerDetails() }
     return AllOwners(ownerToDetails = ownerToDetails)
   }
 }

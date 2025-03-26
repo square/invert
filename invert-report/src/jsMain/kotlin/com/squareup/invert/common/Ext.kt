@@ -11,4 +11,5 @@ private fun String.plusExamplesForInvertRepo(): String = if (this.contains("squa
 
 fun MetadataJsReportModel.httpsUrlForBranch() = "${remoteRepoUrl}/tree/${branchName}".plusExamplesForInvertRepo()
 
-fun MetadataJsReportModel.httpsUrlForCommit() = "${remoteRepoUrl}/blob/${latestCommitGitSha}".plusExamplesForInvertRepo()
+fun MetadataJsReportModel.httpsUrlForCommit() =
+  "${remoteRepoUrl}/blob/${latestCommitGitSha}".plusExamplesForInvertRepo()

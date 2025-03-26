@@ -5,19 +5,19 @@ import org.junit.Test
 
 class OwnersResolverTest {
 
-    @Test
-    fun `docs-sample project`() {
-        val ownersResolver = CODEOWNERS.split("\n")
-            .filter(String::isNotEmpty)
-            .parseCodeOwners()
-            .let(::OwnersResolver)
+  @Test
+  fun `docs-sample project`() {
+    val ownersResolver = CODEOWNERS.split("\n")
+      .filter(String::isNotEmpty)
+      .parseCodeOwners()
+      .let(::OwnersResolver)
 
-        val fileToOwners = FILE_TO_OWNER.keys
-            .map { it to ownersResolver.resolveOwnership(it) }
-            .toMap()
+    val fileToOwners = FILE_TO_OWNER.keys
+      .map { it to ownersResolver.resolveOwnership(it) }
+      .toMap()
 
-        assertThat(fileToOwners).isEqualTo(FILE_TO_OWNER)
-    }
+    assertThat(fileToOwners).isEqualTo(FILE_TO_OWNER)
+  }
 }
 
 private const val CODEOWNERS = """
@@ -30,14 +30,14 @@ dir/*.md          maintainer
 """
 
 private val FILE_TO_OWNER = mapOf(
-    "dir/alice/report.txt" to listOf("alice"),
-    "dir/bob/notes.md" to listOf("bob"),
-    "dir/f3.txt" to null,
-    "dir/docs.md" to listOf("maintainer"),
-    "dir/read.md" to listOf("maintainer"),
-    "charlie.md" to listOf("charlie"),
-    "CODEOWNERS" to listOf("boss"),
-    "f1.txt" to null,
-    "f2.txt" to null,
-    "sf.md" to listOf("boss")
+  "dir/alice/report.txt" to listOf("alice"),
+  "dir/bob/notes.md" to listOf("bob"),
+  "dir/f3.txt" to null,
+  "dir/docs.md" to listOf("maintainer"),
+  "dir/read.md" to listOf("maintainer"),
+  "charlie.md" to listOf("charlie"),
+  "CODEOWNERS" to listOf("boss"),
+  "f1.txt" to null,
+  "f2.txt" to null,
+  "sf.md" to listOf("boss")
 )

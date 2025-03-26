@@ -4,8 +4,8 @@
 package com.github.pgreze.kowners
 
 class OwnersResolver(
-    val ownerships: List<CodeOwnership>
+  val ownerships: List<CodeOwnership>
 ) {
-    fun resolveOwnership(path: String): List<String>? =
-        ownerships.lastOrNull { it.pattern.matches(path) }?.owners
+  fun resolveOwnership(path: String): List<String>? =
+    ownerships.lastOrNull { it.pattern.matches(path) }?.owners
 }

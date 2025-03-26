@@ -62,6 +62,7 @@ object ChartsJs {
     val data: ChartJsData,
     val options: ChartJsOptions,
   )
+
   @Serializable
   data class ChartJsLineChartParam(
     val type: String,

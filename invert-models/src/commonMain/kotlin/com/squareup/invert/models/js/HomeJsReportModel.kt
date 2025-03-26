@@ -1,8 +1,8 @@
 package com.squareup.invert.models.js
 
 import com.squareup.invert.models.DependencyId
-import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.GradlePluginId
+import com.squareup.invert.models.ModulePath
 import kotlinx.serialization.Serializable
 
 /**

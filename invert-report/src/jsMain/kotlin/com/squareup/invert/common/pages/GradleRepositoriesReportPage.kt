@@ -22,43 +22,43 @@ import kotlin.reflect.KClass
 object GradleRepositoriesNavRoute : BaseNavRoute(GradleRepositoriesReportPage.navPage)
 
 object GradleRepositoriesReportPage : InvertReportPage<GradleRepositoriesNavRoute> {
-    override val navPage: NavPage = NavPage(
-        pageId = "gradle_repos",
-        displayName = "Gradle Repositories",
-        navIconSlug = "database",
-        navRouteParser = { GradleRepositoriesNavRoute }
-    )
-    override val navRouteKClass: KClass<GradleRepositoriesNavRoute> = GradleRepositoriesNavRoute::class
+  override val navPage: NavPage = NavPage(
+    pageId = "gradle_repos",
+    displayName = "Gradle Repositories",
+    navIconSlug = "database",
+    navRouteParser = { GradleRepositoriesNavRoute }
+  )
+  override val navRouteKClass: KClass<GradleRepositoriesNavRoute> = GradleRepositoriesNavRoute::class
 
-    override val composableContent: @Composable (GradleRepositoriesNavRoute) -> Unit = { navRoute ->
-        GradleRepositoriesComposable(navRoute)
-    }
+  override val composableContent: @Composable (GradleRepositoriesNavRoute) -> Unit = { navRoute ->
+    GradleRepositoriesComposable(navRoute)
+  }
 }
 
 @Composable
 fun GradleRepositoriesComposable(
-    navRoute: GradleRepositoriesNavRoute,
-    reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
-    navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo
+  navRoute: GradleRepositoriesNavRoute,
+  reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
+  navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo
 ) {
-    val metadata by reportDataRepo.reportMetadata.collectAsState(null)
+  val metadata by reportDataRepo.reportMetadata.collectAsState(null)
 
-    if (metadata == null) {
-        BootstrapLoadingSpinner()
-        return
-    }
+  if (metadata == null) {
+    BootstrapLoadingSpinner()
+    return
+  }
 
-    H4 {
-        Text("Remote Repositories")
-    }
-    Br()
-    Ul({ classes("fs-6") }) {
-        metadata!!.artifactRepositories.forEach { mavenRepoUrl ->
-            Li {
-                A(href = mavenRepoUrl) {
-                    Text(mavenRepoUrl)
-                }
-            }
+  H4 {
+    Text("Remote Repositories")
+  }
+  Br()
+  Ul({ classes("fs-6") }) {
+    metadata!!.artifactRepositories.forEach { mavenRepoUrl ->
+      Li {
+        A(href = mavenRepoUrl) {
+          Text(mavenRepoUrl)
         }
+      }
     }
+  }
 }

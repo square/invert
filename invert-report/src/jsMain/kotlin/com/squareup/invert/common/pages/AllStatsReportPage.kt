@@ -20,8 +20,6 @@ import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.StatTotalAndMetadata
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Text
-import ui.BootstrapButton
-import ui.BootstrapButtonType
 import ui.BootstrapColumn
 import ui.BootstrapJumbotron
 import ui.BootstrapLoadingMessageWithSpinner

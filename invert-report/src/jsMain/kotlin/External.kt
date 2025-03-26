@@ -24,7 +24,15 @@ external fun render3dGraph(domElementId: String, graphDataJson: String, width: I
 external fun renderChartJs(domElementId: String, graphDataJson: String, onClick: (label: String, value: Int) -> Unit)
 
 /** Render Line Charts with Chart.js */
-external fun renderLineChartJs(domElementId: String, graphDataJson: String, onClick: (label: String, value: Int) -> Unit)
+external fun renderLineChartJs(
+  domElementId: String,
+  graphDataJson: String,
+  onClick: (label: String, value: Int) -> Unit
+)
 
 /** Render Tree Map with Plotly */
-external fun renderPlotlyTreeMap(domElementId: String, graphDataJson: String, onClick: (label: String, value: Int) -> Unit)
+external fun renderPlotlyTreeMap(
+  domElementId: String,
+  graphDataJson: String,
+  onClick: (label: String, value: Int) -> Unit
+)

@@ -23,66 +23,66 @@ import kotlin.reflect.KClass
 object ConfigurationsNavRoute : BaseNavRoute(ConfigurationsReportPage.navPage)
 
 object ConfigurationsReportPage : InvertReportPage<ConfigurationsNavRoute> {
-    override val navPage: NavPage = NavPage(
-        pageId = "configurations",
-        displayName = "Configurations",
-        navIconSlug = "gear",
-        navRouteParser = { ConfigurationsNavRoute }
-    )
-    override val navRouteKClass: KClass<ConfigurationsNavRoute> = ConfigurationsNavRoute::class
+  override val navPage: NavPage = NavPage(
+    pageId = "configurations",
+    displayName = "Configurations",
+    navIconSlug = "gear",
+    navRouteParser = { ConfigurationsNavRoute }
+  )
+  override val navRouteKClass: KClass<ConfigurationsNavRoute> = ConfigurationsNavRoute::class
 
-    override val composableContent: @Composable (ConfigurationsNavRoute) -> Unit = { navRoute ->
-        ConfigurationsComposable(navRoute)
-    }
+  override val composableContent: @Composable (ConfigurationsNavRoute) -> Unit = { navRoute ->
+    ConfigurationsComposable(navRoute)
+  }
 
 }
 
 
 @Composable
 fun ConfigurationsComposable(
-    navRoute: ConfigurationsNavRoute,
-    reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
-    navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
+  navRoute: ConfigurationsNavRoute,
+  reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
+  navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
-    val allAvailableConfigurationNamesOrig by reportDataRepo.allAvailableConfigurationNames.collectAsState(null)
-    val allAvailableConfigurationNames = allAvailableConfigurationNamesOrig
-    val listOrig by reportDataRepo.allAnalyzedConfigurationNames.collectAsState(null)
-    val list = listOrig
-    if (list == null || allAvailableConfigurationNames == null) {
-        BootstrapLoadingMessageWithSpinner()
-        return
+  val allAvailableConfigurationNamesOrig by reportDataRepo.allAvailableConfigurationNames.collectAsState(null)
+  val allAvailableConfigurationNames = allAvailableConfigurationNamesOrig
+  val listOrig by reportDataRepo.allAnalyzedConfigurationNames.collectAsState(null)
+  val list = listOrig
+  if (list == null || allAvailableConfigurationNames == null) {
+    BootstrapLoadingMessageWithSpinner()
+    return
+  }
+
+  val count = list.size
+  TitleRow("Analyzed Gradle Configurations ($count of ${allAvailableConfigurationNames.size} Total)")
+
+
+  BootstrapRow {
+    BootstrapColumn(12) {
+      BootstrapClickableList("Analyzed Configurations", list, MAX_RESULTS) { item ->
+        navRouteRepo.pushNavRoute(ConfigurationDetailNavRoute(item))
+      }
     }
+  }
 
-    val count = list.size
-    TitleRow("Analyzed Gradle Configurations ($count of ${allAvailableConfigurationNames.size} Total)")
-
-
-    BootstrapRow {
-        BootstrapColumn(12) {
-            BootstrapClickableList("Analyzed Configurations", list, MAX_RESULTS) { item ->
-                navRouteRepo.pushNavRoute(ConfigurationDetailNavRoute(item))
-            }
+  BootstrapTable(
+    headers = listOf("Other (Not Analyzed) Configurations"),
+    rows = mutableListOf<List<String>>().also { rows ->
+      allAvailableConfigurationNames.forEach { availableConfigurationName ->
+        val wasScanned = list.contains(availableConfigurationName)
+        if (!wasScanned) {
+          rows.add(
+            mutableListOf(
+              availableConfigurationName,
+            )
+          )
         }
+      }
+    },
+    types = listOf<KClass<*>>(String::class),
+    maxResultsLimitConstant = MAX_RESULTS,
+    onItemClickCallback = {
+      window.alert("Clicked ${it[0]}")
     }
-
-    BootstrapTable(
-        headers = listOf("Other (Not Analyzed) Configurations"),
-        rows = mutableListOf<List<String>>().also { rows ->
-            allAvailableConfigurationNames.forEach { availableConfigurationName ->
-                val wasScanned = list.contains(availableConfigurationName)
-                if (!wasScanned) {
-                    rows.add(
-                        mutableListOf(
-                            availableConfigurationName,
-                        )
-                    )
-                }
-            }
-        },
-        types = listOf<KClass<*>>(String::class),
-        maxResultsLimitConstant = MAX_RESULTS,
-        onItemClickCallback = {
-            window.alert("Clicked ${it[0]}")
-        }
-    )
+  )
 }

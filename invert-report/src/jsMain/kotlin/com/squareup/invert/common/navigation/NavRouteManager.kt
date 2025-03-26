@@ -9,43 +9,43 @@ import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
 class NavRouteManager {
-    private val routes = mutableMapOf<KClass<out NavRoute>, @Composable (NavRoute) -> Unit>()
+  private val routes = mutableMapOf<KClass<out NavRoute>, @Composable (NavRoute) -> Unit>()
 
-    private val navRouteParsers = mutableMapOf<NavPageId, NavPage>()
+  private val navRouteParsers = mutableMapOf<NavPageId, NavPage>()
 
 
-    fun <T : NavRoute> registerRoute(
-        clazz: KClass<T>,
-        content: @Composable (T) -> Unit
-    ) {
-        routes[clazz] = { navRoute ->
-            content(clazz.cast(navRoute))
-        }
+  fun <T : NavRoute> registerRoute(
+    clazz: KClass<T>,
+    content: @Composable (T) -> Unit
+  ) {
+    routes[clazz] = { navRoute ->
+      content(clazz.cast(navRoute))
     }
+  }
 
-    fun registerParser(navPage: NavPage) {
-        navRouteParsers[navPage.pageId] = navPage
+  fun registerParser(navPage: NavPage) {
+    navRouteParsers[navPage.pageId] = navPage
+  }
+
+  fun parseUrlToRoute(url: String): NavRoute {
+    val params = URL(url).searchParams.toMap()
+    return parseParamsToRoute(params)
+  }
+
+  fun parseParamsToRoute(params: Map<String, String?>): NavRoute {
+    val pageId = params[BaseNavRoute.PAGE_ID_PARAM]
+    pageId?.let {
+      navRouteParsers[pageId]?.navRouteParser?.invoke(params)?.let {
+        return it
+      }
     }
-
-    fun parseUrlToRoute(url: String): NavRoute {
-        val params = URL(url).searchParams.toMap()
-        return parseParamsToRoute(params)
-    }
-
-    fun parseParamsToRoute(params: Map<String, String?>): NavRoute {
-        val pageId = params[BaseNavRoute.PAGE_ID_PARAM]
-        pageId?.let {
-            navRouteParsers[pageId]?.navRouteParser?.invoke(params)?.let {
-                return it
-            }
-        }
-        return HomeReportPage.HomeNavRoute
-    }
+    return HomeReportPage.HomeNavRoute
+  }
 
 
-    @Composable
-    fun renderContentForRoute(navRoute: NavRoute) {
-        routes[navRoute::class]!!.invoke(navRoute)
-    }
+  @Composable
+  fun renderContentForRoute(navRoute: NavRoute) {
+    routes[navRoute::class]!!.invoke(navRoute)
+  }
 
 }

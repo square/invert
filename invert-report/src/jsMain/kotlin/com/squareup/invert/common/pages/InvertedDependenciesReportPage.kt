@@ -46,7 +46,6 @@ import ui.MarkdownText
 import ui.TitleRow
 import kotlin.reflect.KClass
 
-
 data class InvertedDependenciesNavRoute(
   val pluginGroupByFilter: List<GradlePluginId> = listOf(),
   val configurations: List<ConfigurationName> = listOf(),

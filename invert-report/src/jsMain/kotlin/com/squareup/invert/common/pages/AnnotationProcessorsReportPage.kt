@@ -26,98 +26,98 @@ import ui.BootstrapTable
 import kotlin.reflect.KClass
 
 object AnnotationProcessorsReportPage : InvertReportPage<AnnotationProcessorsReportPage.AnnotationProcessorsNavRoute> {
-    override val navPage: NavPage = NavPage(
-        pageId = "annotation_processors",
-        displayName = "Annotation Processors",
-        navIconSlug = "cpu",
-        navRouteParser = { AnnotationProcessorsNavRoute }
-    )
-    override val navRouteKClass: KClass<AnnotationProcessorsNavRoute> = AnnotationProcessorsNavRoute::class
+  override val navPage: NavPage = NavPage(
+    pageId = "annotation_processors",
+    displayName = "Annotation Processors",
+    navIconSlug = "cpu",
+    navRouteParser = { AnnotationProcessorsNavRoute }
+  )
+  override val navRouteKClass: KClass<AnnotationProcessorsNavRoute> = AnnotationProcessorsNavRoute::class
 
-    override val composableContent: @Composable (AnnotationProcessorsNavRoute) -> Unit = { navRoute ->
-        AnnotationProcessorsComposable(navRoute)
-    }
+  override val composableContent: @Composable (AnnotationProcessorsNavRoute) -> Unit = { navRoute ->
+    AnnotationProcessorsComposable(navRoute)
+  }
 
-    object AnnotationProcessorsNavRoute : BaseNavRoute(navPage)
+  object AnnotationProcessorsNavRoute : BaseNavRoute(navPage)
 }
 
 @Composable
 fun AnnotationProcessorsComposable(
-    annotationProcessorsNavRoute: AnnotationProcessorsReportPage.AnnotationProcessorsNavRoute,
-    reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
-    navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
+  annotationProcessorsNavRoute: AnnotationProcessorsReportPage.AnnotationProcessorsNavRoute,
+  reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
+  navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
-    val allDirectDependenciesCollected by reportDataRepo.allDirectDependencies.collectAsState(null)
+  val allDirectDependenciesCollected by reportDataRepo.allDirectDependencies.collectAsState(null)
 
-    if (allDirectDependenciesCollected == null) {
-        BootstrapLoadingSpinner()
-        return
-    }
+  if (allDirectDependenciesCollected == null) {
+    BootstrapLoadingSpinner()
+    return
+  }
 
-    val allDirectDependencies = allDirectDependenciesCollected!!
-
-
-    val configNameToAnnotationProcessorMap = mutableMapOf<ConfigurationName, MutableSet<DependencyId>>()
+  val allDirectDependencies = allDirectDependenciesCollected!!
 
 
-    val configurationNameToDependencyIdAndModulePaths =
-        mutableMapOf<ConfigurationName, MutableMap<DependencyId, MutableSet<ModulePath>>>()
+  val configNameToAnnotationProcessorMap = mutableMapOf<ConfigurationName, MutableSet<DependencyId>>()
 
-    val annotationProcessorConfigs = setOf("kapt", "ksp", "annotationProcessor")
 
-    allDirectDependencies.forEach { (gradlePath, configNameToDepIds) ->
-        configNameToDepIds.filterKeys { annotationProcessorConfigs.contains(it) }
-            .forEach { (configName, dependencyIds) ->
-                //
-                val curr = configNameToAnnotationProcessorMap[configName] ?: mutableSetOf()
-                configNameToAnnotationProcessorMap[configName] = curr.apply { addAll(dependencyIds) }
+  val configurationNameToDependencyIdAndModulePaths =
+    mutableMapOf<ConfigurationName, MutableMap<DependencyId, MutableSet<ModulePath>>>()
 
-                // -----
-                dependencyIds.forEach { dependencyId ->
-                    val currOne = configurationNameToDependencyIdAndModulePaths[configName] ?: mutableMapOf()
-                    currOne[dependencyId] = (currOne[dependencyId] ?: mutableSetOf()).apply { add(gradlePath) }
-                    configurationNameToDependencyIdAndModulePaths[configName] = currOne
-                }
-            }
-    }
+  val annotationProcessorConfigs = setOf("kapt", "ksp", "annotationProcessor")
 
-    H1 {
-        Text("Annotation Processors")
-    }
+  allDirectDependencies.forEach { (gradlePath, configNameToDepIds) ->
+    configNameToDepIds.filterKeys { annotationProcessorConfigs.contains(it) }
+      .forEach { (configName, dependencyIds) ->
+        //
+        val curr = configNameToAnnotationProcessorMap[configName] ?: mutableSetOf()
+        configNameToAnnotationProcessorMap[configName] = curr.apply { addAll(dependencyIds) }
 
-    if (configurationNameToDependencyIdAndModulePaths.isEmpty()) {
-        H3 {
-            Text("None found for 'kapt', 'ksp' or 'annotationProcessor'.")
+        // -----
+        dependencyIds.forEach { dependencyId ->
+          val currOne = configurationNameToDependencyIdAndModulePaths[configName] ?: mutableMapOf()
+          currOne[dependencyId] = (currOne[dependencyId] ?: mutableSetOf()).apply { add(gradlePath) }
+          configurationNameToDependencyIdAndModulePaths[configName] = currOne
         }
-    }
+      }
+  }
 
-    val expanded = true
-    configurationNameToDependencyIdAndModulePaths.forEach { (configurationName, dependencyIdPaths) ->
-        BoostrapExpandingCard(
-            header = {
-                H4 { Text(configurationName) }
-            },
-            expanded = expanded
-        ) {
-            dependencyIdPaths.forEach { (dependencyId, gradlePaths) ->
-                BootstrapAccordion({
-                    Text("$dependencyId (${gradlePaths.size} Modules)")
-                }) {
-                    BootstrapTable(
-                        headers = listOf("Gradle Module"),
-                        rows = gradlePaths.map { listOf(it) },
-                        types = listOf(String::class),
-                        maxResultsLimitConstant = PagingConstants.MAX_RESULTS
-                    ) {
-                        navRouteRepo.pushNavRoute(
-                            ModuleDetailNavRoute(
-                                path = it[0]
-                            )
-                        )
-                    }
-                }
-            }
-        }
-        Br { }
+  H1 {
+    Text("Annotation Processors")
+  }
+
+  if (configurationNameToDependencyIdAndModulePaths.isEmpty()) {
+    H3 {
+      Text("None found for 'kapt', 'ksp' or 'annotationProcessor'.")
     }
+  }
+
+  val expanded = true
+  configurationNameToDependencyIdAndModulePaths.forEach { (configurationName, dependencyIdPaths) ->
+    BoostrapExpandingCard(
+      header = {
+        H4 { Text(configurationName) }
+      },
+      expanded = expanded
+    ) {
+      dependencyIdPaths.forEach { (dependencyId, gradlePaths) ->
+        BootstrapAccordion({
+          Text("$dependencyId (${gradlePaths.size} Modules)")
+        }) {
+          BootstrapTable(
+            headers = listOf("Gradle Module"),
+            rows = gradlePaths.map { listOf(it) },
+            types = listOf(String::class),
+            maxResultsLimitConstant = PagingConstants.MAX_RESULTS
+          ) {
+            navRouteRepo.pushNavRoute(
+              ModuleDetailNavRoute(
+                path = it[0]
+              )
+            )
+          }
+        }
+      }
+    }
+    Br { }
+  }
 }

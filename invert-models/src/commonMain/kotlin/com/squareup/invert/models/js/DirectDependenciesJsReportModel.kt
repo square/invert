@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class DirectDependenciesJsReportModel(
   val directDependencies: Map<
-    ModulePath,
-    Map<ConfigurationName, Set<DependencyId>>
-    >
+      ModulePath,
+      Map<ConfigurationName, Set<DependencyId>>
+      >
 )

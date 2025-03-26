@@ -26,96 +26,96 @@ import ui.BootstrapTable
 import kotlin.reflect.KClass
 
 object KotlinCompilerPluginsReportPage :
-    InvertReportPage<KotlinCompilerPluginsReportPage.KotlinCompilerPluginsNavRoute> {
-    override val navPage: NavPage = NavPage(
-        pageId = "kotlin_compiler_plugins",
-        displayName = "Kotlin Compiler Plugins",
-        navIconSlug = "cpu",
-        navRouteParser = { KotlinCompilerPluginsNavRoute }
-    )
-    override val navRouteKClass: KClass<KotlinCompilerPluginsNavRoute> = KotlinCompilerPluginsNavRoute::class
+  InvertReportPage<KotlinCompilerPluginsReportPage.KotlinCompilerPluginsNavRoute> {
+  override val navPage: NavPage = NavPage(
+    pageId = "kotlin_compiler_plugins",
+    displayName = "Kotlin Compiler Plugins",
+    navIconSlug = "cpu",
+    navRouteParser = { KotlinCompilerPluginsNavRoute }
+  )
+  override val navRouteKClass: KClass<KotlinCompilerPluginsNavRoute> = KotlinCompilerPluginsNavRoute::class
 
-    override val composableContent: @Composable (KotlinCompilerPluginsNavRoute) -> Unit = { navRoute ->
-        KotlinCompilerPluginsComposable(navRoute)
-    }
+  override val composableContent: @Composable (KotlinCompilerPluginsNavRoute) -> Unit = { navRoute ->
+    KotlinCompilerPluginsComposable(navRoute)
+  }
 
-    object KotlinCompilerPluginsNavRoute : BaseNavRoute(navPage)
+  object KotlinCompilerPluginsNavRoute : BaseNavRoute(navPage)
 }
 
 @Composable
 fun KotlinCompilerPluginsComposable(
-    KotlinCompilerPluginsNavRoute: KotlinCompilerPluginsReportPage.KotlinCompilerPluginsNavRoute,
-    reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
-    navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
+  KotlinCompilerPluginsNavRoute: KotlinCompilerPluginsReportPage.KotlinCompilerPluginsNavRoute,
+  reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
+  navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo,
 ) {
-    val allDirectDependenciesCollected by reportDataRepo.allDirectDependencies.collectAsState(null)
+  val allDirectDependenciesCollected by reportDataRepo.allDirectDependencies.collectAsState(null)
 
-    if (allDirectDependenciesCollected == null) {
-        BootstrapLoadingSpinner()
-        return
-    }
+  if (allDirectDependenciesCollected == null) {
+    BootstrapLoadingSpinner()
+    return
+  }
 
-    val allDirectDependencies = allDirectDependenciesCollected!!
-
-
-    val configNameToAnnotationProcessorMap = mutableMapOf<ConfigurationName, MutableSet<DependencyId>>()
+  val allDirectDependencies = allDirectDependenciesCollected!!
 
 
-    val configurationNameToDependencyIdAndModulePaths =
-        mutableMapOf<ConfigurationName, MutableMap<DependencyId, MutableSet<ModulePath>>>()
+  val configNameToAnnotationProcessorMap = mutableMapOf<ConfigurationName, MutableSet<DependencyId>>()
 
-    allDirectDependencies.forEach { (gradlePath, configNameToDepIds) ->
-        configNameToDepIds
-            .filterKeys { it.contains("kotlinCompilerPluginClasspath") }
-            .forEach { (configName, dependencyIds) ->
-                val curr = configNameToAnnotationProcessorMap[configName] ?: mutableSetOf()
-                configNameToAnnotationProcessorMap[configName] = curr.apply { addAll(dependencyIds) }
 
-                dependencyIds.forEach { dependencyId ->
-                    val currOne = configurationNameToDependencyIdAndModulePaths[configName] ?: mutableMapOf()
-                    currOne[dependencyId] = (currOne[dependencyId] ?: mutableSetOf()).apply { add(gradlePath) }
-                    configurationNameToDependencyIdAndModulePaths[configName] = currOne
-                }
-            }
-    }
+  val configurationNameToDependencyIdAndModulePaths =
+    mutableMapOf<ConfigurationName, MutableMap<DependencyId, MutableSet<ModulePath>>>()
 
-    H1 {
-        Text("Kotlin Compiler Plugins")
-    }
+  allDirectDependencies.forEach { (gradlePath, configNameToDepIds) ->
+    configNameToDepIds
+      .filterKeys { it.contains("kotlinCompilerPluginClasspath") }
+      .forEach { (configName, dependencyIds) ->
+        val curr = configNameToAnnotationProcessorMap[configName] ?: mutableSetOf()
+        configNameToAnnotationProcessorMap[configName] = curr.apply { addAll(dependencyIds) }
 
-    if (configurationNameToDependencyIdAndModulePaths.isEmpty()) {
-        H3 {
-            Text("None found.")
+        dependencyIds.forEach { dependencyId ->
+          val currOne = configurationNameToDependencyIdAndModulePaths[configName] ?: mutableMapOf()
+          currOne[dependencyId] = (currOne[dependencyId] ?: mutableSetOf()).apply { add(gradlePath) }
+          configurationNameToDependencyIdAndModulePaths[configName] = currOne
         }
-    }
+      }
+  }
 
-    val expanded = true
-    configurationNameToDependencyIdAndModulePaths.forEach { (configurationName, dependencyIdPaths) ->
-        BoostrapExpandingCard(
-            header = {
-                H4 { Text(configurationName) }
-            },
-            expanded = expanded
-        ) {
-            dependencyIdPaths.forEach { (dependencyId, gradlePaths) ->
-                BootstrapAccordion({
-                    Text("$dependencyId (${gradlePaths.size} Modules)")
-                }) {
-                    BootstrapTable(
-                        headers = listOf("Gradle Module"),
-                        rows = gradlePaths.map { listOf(it) },
-                        types = listOf(String::class),
-                        maxResultsLimitConstant = PagingConstants.MAX_RESULTS
-                    ) {
-                        navRouteRepo.pushNavRoute(
-                            ModuleDetailNavRoute(
-                                path = it[0]
-                            )
-                        )
-                    }
-                }
-            }
-        }
-        Br { }
+  H1 {
+    Text("Kotlin Compiler Plugins")
+  }
+
+  if (configurationNameToDependencyIdAndModulePaths.isEmpty()) {
+    H3 {
+      Text("None found.")
     }
+  }
+
+  val expanded = true
+  configurationNameToDependencyIdAndModulePaths.forEach { (configurationName, dependencyIdPaths) ->
+    BoostrapExpandingCard(
+      header = {
+        H4 { Text(configurationName) }
+      },
+      expanded = expanded
+    ) {
+      dependencyIdPaths.forEach { (dependencyId, gradlePaths) ->
+        BootstrapAccordion({
+          Text("$dependencyId (${gradlePaths.size} Modules)")
+        }) {
+          BootstrapTable(
+            headers = listOf("Gradle Module"),
+            rows = gradlePaths.map { listOf(it) },
+            types = listOf(String::class),
+            maxResultsLimitConstant = PagingConstants.MAX_RESULTS
+          ) {
+            navRouteRepo.pushNavRoute(
+              ModuleDetailNavRoute(
+                path = it[0]
+              )
+            )
+          }
+        }
+      }
+    }
+    Br { }
+  }
 }
