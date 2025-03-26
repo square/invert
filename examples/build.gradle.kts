@@ -39,17 +39,9 @@ invert {
   addStatCollector(
     com.squareup.invert.collectors.contains.InvertContainsStatCollector(
       statKey = "wildcard-imports",
-      statDescription = "Wildcard Imports",
+      statTitle = "Wildcard Imports",
       linePredicate = { it.contains("import") && it.contains("*") },
       filePredicate = { it.extension == "kt" || it.extension == "kts" },
-    )
-  )
-  addStatCollector(
-    com.squareup.invert.collectors.contains.InvertContainsStatCollector(
-      statKey = "todos",
-      statDescription = "TODOs",
-      linePredicate = { it.contains("TODO") },
-      filePredicate = { true },
     )
   )
 }

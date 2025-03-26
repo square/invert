@@ -29,7 +29,10 @@ import com.squareup.invert.common.pages.OwnerDetailReportPage
 import com.squareup.invert.common.pages.OwnersReportPage
 import com.squareup.invert.common.pages.PluginDetailReportPage
 import com.squareup.invert.common.pages.StatDetailReportPage
+import com.squareup.invert.common.pages.TechDebtReportPage
 import com.squareup.invert.common.pages.UnusedModulesReportPage
+import com.squareup.invert.common.routes.ExternalLinkReportPage
+import com.squareup.invert.common.routes.IFrameReportPage
 import invertComposeMain
 import kotlinx.browser.window
 import kotlinx.coroutines.Dispatchers
@@ -135,6 +138,9 @@ class InvertReport(
       UnusedModulesReportPage,
       GitHubMarkdownReportPage,
       GradleRepositoriesReportPage,
+      TechDebtReportPage,
+      IFrameReportPage,
+      ExternalLinkReportPage,
     )
   }
 }

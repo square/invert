@@ -4,6 +4,7 @@ import com.squareup.invert.CollectedStat
 import com.squareup.invert.InvertCollectContext
 import com.squareup.invert.StatCollector
 import com.squareup.invert.collectors.internal.wrapCodeForMarkdown
+import com.squareup.invert.models.Markdown
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatMetadata
@@ -11,7 +12,8 @@ import java.io.File
 
 open class InvertContainsStatCollector(
   private val statKey: String,
-  private val statDescription: String,
+  private val statTitle: String,
+  private val statDescription: Markdown? = null,
   private val linePredicate: (String) -> Boolean,
   private val filePredicate: (File) -> Boolean = { true },
 ) : StatCollector {
@@ -46,7 +48,8 @@ open class InvertContainsStatCollector(
         CollectedStat(
           metadata = StatMetadata(
             key = statKey,
-            description = statDescription,
+            title = statTitle,
+            description = statDescription ?: statTitle,
             dataType = StatDataType.CODE_REFERENCES,
           ),
           stat = Stat.CodeReferencesStat(codeReferences)

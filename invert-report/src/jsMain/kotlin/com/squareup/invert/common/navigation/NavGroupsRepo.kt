@@ -25,6 +25,7 @@ import com.squareup.invert.common.pages.OwnerDetailNavRoute
 import com.squareup.invert.common.pages.OwnersNavRoute
 import com.squareup.invert.common.pages.OwnersReportPage
 import com.squareup.invert.common.pages.PluginDetailNavRoute
+import com.squareup.invert.common.pages.TechDebtReportPage
 import com.squareup.invert.common.pages.UnusedModulesReportPage
 import com.squareup.invert.models.js.BuildSystem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -79,7 +80,8 @@ object DefaultNavItems {
       NavPageGroup(
         "Collected Stats", setOf(
           AllStatsNavRoute().navPage.toNavItem(),
-          OwnerBreakdownReportPage.navPage.toNavItem()
+          TechDebtReportPage.navPage.toNavItem(),
+          OwnerBreakdownReportPage.navPage.toNavItem(),
         )
       ),
       NavPageGroup(
