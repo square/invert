@@ -6,6 +6,7 @@ typealias GradlePluginId = String
 typealias Markdown = String
 typealias ModulePath = String
 typealias FileKey = String
+typealias OrgName = String
 typealias OwnerName = String
 typealias GitSha = String
 typealias GitBranch = String

@@ -1,9 +1,10 @@
 package com.squareup.invert.internal
 
 import com.squareup.invert.InvertOwnershipCollector
-import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerInfo
 import com.squareup.invert.models.OwnerName
+import com.squareup.invert.models.js.AllOwners
+import com.squareup.invert.models.js.OwnerDetails
 import java.io.File
 
 /**
@@ -14,4 +15,10 @@ object NoOpInvertOwnershipCollector : InvertOwnershipCollector {
     gitRootDir: File,
     fileWithOwnership: File
   ): OwnerName = OwnerInfo.UNOWNED
+
+  override fun collectAllOwners(
+    gitRootDir: File,
+  ): AllOwners {
+    return AllOwners(mapOf(OwnerInfo.UNOWNED to OwnerDetails(null, emptyMap())))
+  }
 }

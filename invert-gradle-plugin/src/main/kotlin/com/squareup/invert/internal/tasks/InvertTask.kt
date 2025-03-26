@@ -1,10 +1,12 @@
 package com.squareup.invert.internal.tasks
 
 import com.squareup.invert.InvertExtension
+import com.squareup.invert.InvertOwnershipCollector
 import com.squareup.invert.ReportOutputConfig
 import com.squareup.invert.StatCollector
 import com.squareup.invert.internal.CollectedStatAggregator
 import com.squareup.invert.internal.InvertFileUtils
+import com.squareup.invert.internal.NoOpInvertOwnershipCollector
 import com.squareup.invert.internal.isRootProject
 import com.squareup.invert.internal.models.InvertCombinedCollectedData
 import com.squareup.invert.internal.report.GradleProjectAnalysisCombiner
@@ -45,12 +47,18 @@ abstract class InvertTask : DefaultTask() {
   @get:Internal
   abstract var statCollectors: List<StatCollector>?
 
+  @get:Internal
+  abstract var ownershipCollector: InvertOwnershipCollector?
+
   @get:Optional
   @get:Input
   abstract val historicalDataFileProperty: Property<String?>
 
   @get:Input
   abstract val projectPath: Property<String>
+
+  @get:Internal
+  abstract val rootProjectDirPath: Property<String>
 
   @get:Input
   abstract val subprojectInvertReportDirs: ListProperty<String>
@@ -71,15 +79,17 @@ abstract class InvertTask : DefaultTask() {
     val timeZoneId = this.timeZoneId.get()
     val datePatternFormat = "MMMM dd, yyyy[ 'at' HH:mm:ss]"
     val mavenRepoUrls = this.mavenRepoUrls.get()
+    val ownershipCollector = ownershipCollector ?: NoOpInvertOwnershipCollector
     runBlocking {
       val invertReportDir = rootBuildReportsDir.get().asFile
-
+      val gitProjectDir = File(".") // TODO Pass in the root of the Git Repo
       val reportMetadata = ProjectMetadataCollector.gatherProjectMetadata(
         timeZoneId = timeZoneId,
         datePatternFormat = datePatternFormat,
         logger = invertLogger(),
         repoUrls = mavenRepoUrls,
-        gitProjectDir = File("."), // TODO Pass in the root of the Git Repo
+        gitProjectDir = gitProjectDir,
+        ownershipCollector = ownershipCollector,
       )
 
       val allCollectedDataOrig: InvertCombinedCollectedData = GradleProjectAnalysisCombiner
@@ -90,7 +100,9 @@ abstract class InvertTask : DefaultTask() {
         reportMetadata = reportMetadata,
         statCollectorsForAggregation = statCollectors,
         reportOutputConfig = ReportOutputConfig(
+          gitCloneDir = File(rootProjectDirPath.get()),
           invertReportDirectory = invertReportDir,
+          ownershipCollector = ownershipCollector,
         )
       )
 
@@ -139,8 +151,13 @@ abstract class InvertTask : DefaultTask() {
         InvertFileUtils.REPORTS_SLASH_INVERT_PATH
       )
     )
+    this.rootProjectDirPath.set(
+      project.rootProject.layout.projectDirectory.asFile.canonicalPath
+    )
+
     this.historicalDataFileProperty.set(extension.getHistoricalDataFilePath())
     this.statCollectors = extension.getStatCollectors().toList()
+    this.ownershipCollector = extension.getOwnershipCollector()
 
     this.mavenRepoUrls.set(
       project.rootProject.buildscript.repositories

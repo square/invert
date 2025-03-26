@@ -1,5 +1,6 @@
 package com.squareup.invert.internal.tasks
 
+import com.squareup.invert.InvertOwnershipCollector
 import com.squareup.invert.internal.GitDataCollector
 import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.GitBranch
@@ -16,6 +17,7 @@ import java.util.TimeZone
 object ProjectMetadataCollector {
 
   fun gatherProjectMetadata(
+    ownershipCollector: InvertOwnershipCollector,
     logger: InvertLogger,
     gitProjectDir: File,
     timeZoneId: String = "America/New_York",
@@ -63,6 +65,7 @@ object ProjectMetadataCollector {
       remoteRepoUrl = remoteRepoUrl,
       artifactRepositories = repoUrls,
       buildSystem = buildSystem,
+      owners = ownershipCollector.collectAllOwners(gitProjectDir)
     )
   }
 
