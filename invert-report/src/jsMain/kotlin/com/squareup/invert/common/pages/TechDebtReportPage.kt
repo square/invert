@@ -17,6 +17,7 @@ import com.squareup.invert.common.utils.EmbedMode
 import com.squareup.invert.common.utils.HistoricalComparison
 import com.squareup.invert.common.utils.MathUtils.formatted
 import com.squareup.invert.common.utils.MathUtils.percentage
+import com.squareup.invert.models.Markdown
 import com.squareup.invert.models.OrgName
 import com.squareup.invert.models.OwnerInfo
 import com.squareup.invert.models.OwnerName
@@ -25,7 +26,6 @@ import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.HistoricalData
 import com.squareup.invert.models.js.StatTotalAndMetadata
-import kotlinx.browser.window
 import org.jetbrains.compose.web.dom.Br
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.H1
@@ -92,17 +92,77 @@ object TechDebtReportPage : InvertReportPage<TechDebtNavRoute> {
     TechDebtNavRoute::class
 
   override val composableContent: @Composable (TechDebtNavRoute) -> Unit = { navRoute ->
-    TechDebtComposable(navRoute)
+    TechDebtPageComposable(navRoute)
   }
 }
 
 @Composable
-fun TechDebtComposable(
+fun TechDebtPageComposable(
   navRoute: TechDebtNavRoute,
   reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
   navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo
 ) {
-  val isEmbed = (navRoute.embed == true)
+  val statTotalsOrig by reportDataRepo.statTotals.collectAsState(null)
+  if (
+    listOf(
+      statTotalsOrig,
+    ).any { it == null }
+  ) {
+    BootstrapLoadingMessageWithSpinner()
+    return
+  }
+  val statToMetadata: Map<StatKey, StatMetadata> = statTotalsOrig!!.statTotals.mapValues {
+    it.value.metadata
+  }
+  val codeReferenceStatTypes: List<StatMetadata> = statToMetadata.values
+    .filter { it.dataType == StatDataType.CODE_REFERENCES }
+    .sortedBy { it.title }
+
+
+  if (navRoute.remainingKey.isNullOrBlank()) {
+    val codeReferencesByCategory = codeReferenceStatTypes.groupBy { it.category }
+    TechDebtListComposable(
+      navRoute = navRoute,
+      codeReferencesByCategory = codeReferencesByCategory,
+      navRouteUpdated = navRouteRepo::pushNavRoute
+    )
+  } else {
+    val remainingStatInfo = codeReferenceStatTypes.firstOrNull { it.key == navRoute.remainingKey }
+    if (remainingStatInfo == null) {
+      H1 { Text("Could not find ${navRoute.remainingKey}") }
+      return
+    }
+    val isEmbed = (navRoute.embed == true)
+    TechDebtDetailComposable(
+      isEmbed = isEmbed,
+      remainingStatKey = navRoute.remainingKey,
+      completedStatKey = navRoute.completedKey,
+      embedNavRoute = { embed ->
+        navRoute.copy(embed = embed)
+      },
+      reportDataRepo = reportDataRepo,
+      navRouteRepo = navRouteRepo,
+      techDebtTitle = remainingStatInfo.title,
+      techDebtDescriptionMarkdown = if (remainingStatInfo.title != remainingStatInfo.description) {
+        remainingStatInfo.description
+      } else {
+        null
+      },
+    )
+  }
+}
+
+@Composable
+fun TechDebtDetailComposable(
+  isEmbed: Boolean,
+  remainingStatKey: StatKey?,
+  completedStatKey: StatKey?,
+  techDebtTitle: String,
+  techDebtDescriptionMarkdown: Markdown?,
+  embedNavRoute: (Boolean) -> NavRoute,
+  reportDataRepo: ReportDataRepo,
+  navRouteRepo: NavRouteRepo
+) {
   if (isEmbed) {
     EmbedMode.enableEmbedMode()
   } else {
@@ -142,43 +202,34 @@ fun TechDebtComposable(
 
   val codeReferenceStatTypes = statToMetadata.values
     .filter { it.dataType == StatDataType.CODE_REFERENCES }
-    .sortedBy { it.description }
+    .sortedBy { it.title }
 
-  val remainingStatKey = navRoute.remainingKey
-  val completedStatKey = navRoute.completedKey
-  if (remainingStatKey.isNullOrBlank()) {
-    val codeReferencesByCategory = codeReferenceStatTypes.groupBy { it.category }
-    TechDebtListComposable(
-      navRoute = navRoute,
-      codeReferencesByCategory = codeReferencesByCategory,
-      navRouteUpdated = navRouteRepo::pushNavRoute
+  val remainingStatInfo = codeReferenceStatTypes.firstOrNull { it.key == remainingStatKey }
+  if (remainingStatInfo != null) {
+    InitiativeDetailComposable(
+      updateNavRoute = {
+        navRouteRepo.pushNavRoute(it)
+      },
+      historicalData = historicalData,
+      allOwnerNames = ownerData,
+      completedStatInfo = statToMetadata[completedStatKey],
+      remainingStatInfo = statToMetadata[remainingStatKey] ?: run {
+        H1 { Text("Could not find $remainingStatKey") }
+        return
+      },
+      isEmbed = isEmbed,
+      ownerToOrg = ownerToOrg,
+      techDebtTitle = techDebtTitle,
+      techDebtDescriptionMarkdown = techDebtDescriptionMarkdown,
     )
-    return
-  } else {
-    val initiative = codeReferenceStatTypes.firstOrNull { it.key == remainingStatKey }
-    if (initiative != null) {
-      InitiativeDetailComposable(
-        updateNavRoute = {
-          navRouteRepo.pushNavRoute(it)
-        },
-        historicalData = historicalData,
-        allOwnerNames = ownerData,
-        completedStatInfo = statToMetadata[completedStatKey],
-        remainingStatInfo = statToMetadata[remainingStatKey] ?: run {
-          H1 { Text("Could not find $remainingStatKey") }
-          return
-        },
-        ownerToOrg = ownerToOrg,
-      )
-      if (!isEmbed) {
-        Br()
-        NavRouteLink(navRoute.copy(embed = true), navRouteRepo::pushNavRoute) {
-          Small { Text("Get Embed Link") }
-        }
+    if (!isEmbed) {
+      Br()
+      NavRouteLink(embedNavRoute(true), navRouteRepo::pushNavRoute) {
+        Small { Text("Get Embed Link") }
       }
-    } else {
-      window.alert("Initiative $remainingStatKey not found.")
     }
+  } else {
+    H1 { Text("Initiative $remainingStatKey not found.") }
   }
 }
 
@@ -248,11 +299,14 @@ class OrgProgress(
 
 @Composable
 fun InitiativeDetailComposable(
+  isEmbed: Boolean,
   updateNavRoute: (NavRoute) -> Unit,
   historicalData: List<HistoricalData>,
   allOwnerNames: List<String>,
   completedStatInfo: StatMetadata?,
   remainingStatInfo: StatMetadata,
+  techDebtTitle: String,
+  techDebtDescriptionMarkdown: Markdown?,
   ownerToOrg: (OwnerName) -> OrgName,
 ) {
   val comparisons = mutableListOf<StatComparisonResult>()
@@ -303,10 +357,13 @@ fun InitiativeDetailComposable(
       currentNumeratorData = currentNumeratorData,
       currentDenominatorData = currentDenominatorData,
       updateNavRoute = updateNavRoute,
+      isEmbed = isEmbed,
       allOwnerProgress = allOwnerProgress.filter { entry: Map.Entry<OwnerName, OwnerProgress> ->
         // Ensuring we only show teams relevant to this initiative
         entry.value.total > 0
       },
+      techDebtTitle = techDebtTitle,
+      techDebtDescriptionMarkdown = techDebtDescriptionMarkdown,
     )
   } else {
     BurndownComposable(
@@ -314,18 +371,28 @@ fun InitiativeDetailComposable(
       currentDenominatorData = currentDenominatorData,
       updateNavRoute = updateNavRoute,
       allOwnerProgress = allOwnerProgress,
+      isEmbed = isEmbed,
+      techDebtTitle = techDebtTitle,
+      techDebtDescriptionMarkdown = techDebtDescriptionMarkdown,
     )
   }
 }
 
 @Composable
 fun BurndownComposable(
+  isEmbed: Boolean,
+  techDebtTitle: String,
+  techDebtDescriptionMarkdown: Markdown?,
   remainingStatInfo: StatMetadata,
   currentDenominatorData: StatTotalAndMetadata,
   updateNavRoute: (NavRoute) -> Unit,
   allOwnerProgress: Map<OwnerName, OwnerProgress>,
 ) {
-  InitiativeHeaderAndJumbotron(remainingStatInfo)
+  InitiativeHeaderAndJumbotron(
+    isEmbed = isEmbed,
+    techDebtTitle = techDebtTitle,
+    techDebtDescriptionMarkdown = techDebtDescriptionMarkdown,
+  )
   Hr()
   Br()
   Div({ classes("text-center") }) {
@@ -368,7 +435,7 @@ fun BurndownComposable(
   }.entries.map { (orgName, ownerProgress) ->
     OrgProgress(orgName = orgName, ownerProgressList = ownerProgress)
   }
-  allOrgProgress.sortedBy { it.orgName }.forEach { orgProgress: OrgProgress ->
+  allOrgProgress.sortedBy { it.orgName.lowercase() }.forEach { orgProgress: OrgProgress ->
     BootstrapRow {
       BootstrapColumn(4, classes = listOf("border")) {
         BootstrapRow {
@@ -381,7 +448,7 @@ fun BurndownComposable(
         }
       }
       BootstrapColumn(8, classes = listOf("border")) {
-        orgProgress.ownerProgressList.sortedBy { it.ownerName }
+        orgProgress.ownerProgressList.sortedBy { it.ownerName.lowercase() }
           .forEach { ownerProgress: OwnerProgress ->
             BootstrapRow {
               BootstrapColumn(6) {
@@ -407,16 +474,18 @@ fun BurndownComposable(
 
 @Composable
 fun InitiativeHeaderAndJumbotron(
-  remainingStatInfo: StatMetadata,
+  isEmbed: Boolean,
+  techDebtTitle: String,
+  techDebtDescriptionMarkdown: Markdown?,
 ) {
   H2({ classes("text-center") }) {
-    Text("Tech Debt: ${remainingStatInfo.title}")
+    Text("Tech Debt: $techDebtTitle")
   }
-  if (remainingStatInfo.title != remainingStatInfo.description) {
+  if (isEmbed == false && !techDebtDescriptionMarkdown.isNullOrBlank()) {
     BootstrapJumbotron(content = {
       BootstrapRow {
         BootstrapColumn(12) {
-          MarkdownText(remainingStatInfo.description)
+          MarkdownText(techDebtDescriptionMarkdown)
         }
       }
     }, headerContent = {})
@@ -425,6 +494,9 @@ fun InitiativeHeaderAndJumbotron(
 
 @Composable
 fun ProgressComposable(
+  techDebtTitle: String,
+  techDebtDescriptionMarkdown: Markdown?,
+  isEmbed: Boolean,
   completedStatInfo: StatMetadata,
   remainingStatInfo: StatMetadata,
   currentNumeratorData: StatTotalAndMetadata,
@@ -435,7 +507,11 @@ fun ProgressComposable(
   val currentNumeratorTotal = currentNumeratorData.total
   val currentDenominatorTotal = currentNumeratorTotal + (currentDenominatorData.total)
 
-  InitiativeHeaderAndJumbotron(remainingStatInfo)
+  InitiativeHeaderAndJumbotron(
+    isEmbed = isEmbed,
+    techDebtTitle = techDebtTitle,
+    techDebtDescriptionMarkdown = techDebtDescriptionMarkdown,
+  )
   Hr()
   Br()
   Div({ classes("text-center") }) {
@@ -573,7 +649,7 @@ fun TechDebtListComposable(
       H3 {
         Text("Tech Debt")
       }
-      codeReferencesByCategory.entries.sortedBy { it.key }.forEach { (category, codeReferenceStatTypes) ->
+      codeReferencesByCategory.entries.sortedBy { it.key.lowercase() }.forEach { (category, codeReferenceStatTypes) ->
         H6 {
           Text(category)
         }
