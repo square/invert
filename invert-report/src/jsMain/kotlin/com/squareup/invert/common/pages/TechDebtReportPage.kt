@@ -17,6 +17,7 @@ import com.squareup.invert.common.utils.EmbedMode
 import com.squareup.invert.common.utils.HistoricalComparison
 import com.squareup.invert.common.utils.MathUtils.formatted
 import com.squareup.invert.common.utils.MathUtils.percentage
+import com.squareup.invert.models.Markdown
 import com.squareup.invert.models.OrgName
 import com.squareup.invert.models.OwnerInfo
 import com.squareup.invert.models.OwnerName
@@ -117,6 +118,7 @@ fun TechDebtPageComposable(
     .filter { it.dataType == StatDataType.CODE_REFERENCES }
     .sortedBy { it.title }
 
+
   if (navRoute.remainingKey.isNullOrBlank()) {
     val codeReferencesByCategory = codeReferenceStatTypes.groupBy { it.category }
     TechDebtListComposable(
@@ -125,6 +127,11 @@ fun TechDebtPageComposable(
       navRouteUpdated = navRouteRepo::pushNavRoute
     )
   } else {
+    val remainingStatInfo = codeReferenceStatTypes.firstOrNull { it.key == navRoute.remainingKey }
+    if (remainingStatInfo == null) {
+      H1 { Text("Could not find ${navRoute.remainingKey}") }
+      return
+    }
     val isEmbed = (navRoute.embed == true)
     TechDebtDetailComposable(
       isEmbed = isEmbed,
@@ -135,6 +142,12 @@ fun TechDebtPageComposable(
       },
       reportDataRepo = reportDataRepo,
       navRouteRepo = navRouteRepo,
+      techDebtTitle = remainingStatInfo.title,
+      techDebtDescriptionMarkdown = if (remainingStatInfo.title != remainingStatInfo.description) {
+        remainingStatInfo.description
+      } else {
+        null
+      },
     )
   }
 }
@@ -144,6 +157,8 @@ fun TechDebtDetailComposable(
   isEmbed: Boolean,
   remainingStatKey: StatKey?,
   completedStatKey: StatKey?,
+  techDebtTitle: String,
+  techDebtDescriptionMarkdown: Markdown?,
   embedNavRoute: (Boolean) -> NavRoute,
   reportDataRepo: ReportDataRepo,
   navRouteRepo: NavRouteRepo
@@ -202,7 +217,10 @@ fun TechDebtDetailComposable(
         H1 { Text("Could not find $remainingStatKey") }
         return
       },
+      isEmbed = isEmbed,
       ownerToOrg = ownerToOrg,
+      techDebtTitle = techDebtTitle,
+      techDebtDescriptionMarkdown = techDebtDescriptionMarkdown,
     )
     if (!isEmbed) {
       Br()
@@ -281,11 +299,14 @@ class OrgProgress(
 
 @Composable
 fun InitiativeDetailComposable(
+  isEmbed: Boolean,
   updateNavRoute: (NavRoute) -> Unit,
   historicalData: List<HistoricalData>,
   allOwnerNames: List<String>,
   completedStatInfo: StatMetadata?,
   remainingStatInfo: StatMetadata,
+  techDebtTitle: String,
+  techDebtDescriptionMarkdown: Markdown?,
   ownerToOrg: (OwnerName) -> OrgName,
 ) {
   val comparisons = mutableListOf<StatComparisonResult>()
@@ -336,10 +357,13 @@ fun InitiativeDetailComposable(
       currentNumeratorData = currentNumeratorData,
       currentDenominatorData = currentDenominatorData,
       updateNavRoute = updateNavRoute,
+      isEmbed = isEmbed,
       allOwnerProgress = allOwnerProgress.filter { entry: Map.Entry<OwnerName, OwnerProgress> ->
         // Ensuring we only show teams relevant to this initiative
         entry.value.total > 0
       },
+      techDebtTitle = techDebtTitle,
+      techDebtDescriptionMarkdown = techDebtDescriptionMarkdown,
     )
   } else {
     BurndownComposable(
@@ -347,18 +371,28 @@ fun InitiativeDetailComposable(
       currentDenominatorData = currentDenominatorData,
       updateNavRoute = updateNavRoute,
       allOwnerProgress = allOwnerProgress,
+      isEmbed = isEmbed,
+      techDebtTitle = techDebtTitle,
+      techDebtDescriptionMarkdown = techDebtDescriptionMarkdown,
     )
   }
 }
 
 @Composable
 fun BurndownComposable(
+  isEmbed: Boolean,
+  techDebtTitle: String,
+  techDebtDescriptionMarkdown: Markdown?,
   remainingStatInfo: StatMetadata,
   currentDenominatorData: StatTotalAndMetadata,
   updateNavRoute: (NavRoute) -> Unit,
   allOwnerProgress: Map<OwnerName, OwnerProgress>,
 ) {
-  InitiativeHeaderAndJumbotron(remainingStatInfo)
+  InitiativeHeaderAndJumbotron(
+    isEmbed = isEmbed,
+    techDebtTitle = techDebtTitle,
+    techDebtDescriptionMarkdown = techDebtDescriptionMarkdown,
+  )
   Hr()
   Br()
   Div({ classes("text-center") }) {
@@ -440,16 +474,18 @@ fun BurndownComposable(
 
 @Composable
 fun InitiativeHeaderAndJumbotron(
-  remainingStatInfo: StatMetadata,
+  isEmbed: Boolean,
+  techDebtTitle: String,
+  techDebtDescriptionMarkdown: Markdown?,
 ) {
   H2({ classes("text-center") }) {
-    Text("Tech Debt: ${remainingStatInfo.title}")
+    Text("Tech Debt: $techDebtTitle")
   }
-  if (remainingStatInfo.title != remainingStatInfo.description) {
+  if (isEmbed == false && !techDebtDescriptionMarkdown.isNullOrBlank()) {
     BootstrapJumbotron(content = {
       BootstrapRow {
         BootstrapColumn(12) {
-          MarkdownText(remainingStatInfo.description)
+          MarkdownText(techDebtDescriptionMarkdown)
         }
       }
     }, headerContent = {})
@@ -458,6 +494,9 @@ fun InitiativeHeaderAndJumbotron(
 
 @Composable
 fun ProgressComposable(
+  techDebtTitle: String,
+  techDebtDescriptionMarkdown: Markdown?,
+  isEmbed: Boolean,
   completedStatInfo: StatMetadata,
   remainingStatInfo: StatMetadata,
   currentNumeratorData: StatTotalAndMetadata,
@@ -468,7 +507,11 @@ fun ProgressComposable(
   val currentNumeratorTotal = currentNumeratorData.total
   val currentDenominatorTotal = currentNumeratorTotal + (currentDenominatorData.total)
 
-  InitiativeHeaderAndJumbotron(remainingStatInfo)
+  InitiativeHeaderAndJumbotron(
+    isEmbed = isEmbed,
+    techDebtTitle = techDebtTitle,
+    techDebtDescriptionMarkdown = techDebtDescriptionMarkdown,
+  )
   Hr()
   Br()
   Div({ classes("text-center") }) {
