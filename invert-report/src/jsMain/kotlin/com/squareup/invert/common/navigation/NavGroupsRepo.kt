@@ -39,7 +39,7 @@ import kotlinx.coroutines.flow.mapLatest
 class NavGroupsRepo(additionalGroups: Set<NavPageGroup>) {
 
   private val _navGroups: MutableStateFlow<Set<NavPageGroup>> =
-    MutableStateFlow(DefaultNavItems.ROOT_NAV_ITEMS.toSet() + additionalGroups)
+    MutableStateFlow(DefaultNavItems.ROOT_NAV_ITEMS.toSet() + additionalGroups + DefaultNavItems.GRADLE_NAV_ITEMS)
 
   @OptIn(ExperimentalCoroutinesApi::class)
   fun navGroups(buildSystem: BuildSystem): Flow<Set<NavPageGroup>> = _navGroups.mapLatest { navGroups ->
@@ -84,6 +84,10 @@ object DefaultNavItems {
           OwnerBreakdownReportPage.navPage.toNavItem(),
         )
       ),
+    )
+
+  val GRADLE_NAV_ITEMS
+    get() = listOf(
       NavPageGroup(
         groupTitle = "Gradle",
         navItems = setOf(
