@@ -142,7 +142,7 @@ fun TechDebtComposable(
 
   val codeReferenceStatTypes = statToMetadata.values
     .filter { it.dataType == StatDataType.CODE_REFERENCES }
-    .sortedBy { it.description }
+    .sortedBy { it.title }
 
   val remainingStatKey = navRoute.remainingKey
   val completedStatKey = navRoute.completedKey
@@ -368,7 +368,7 @@ fun BurndownComposable(
   }.entries.map { (orgName, ownerProgress) ->
     OrgProgress(orgName = orgName, ownerProgressList = ownerProgress)
   }
-  allOrgProgress.sortedBy { it.orgName }.forEach { orgProgress: OrgProgress ->
+  allOrgProgress.sortedBy { it.orgName.lowercase() }.forEach { orgProgress: OrgProgress ->
     BootstrapRow {
       BootstrapColumn(4, classes = listOf("border")) {
         BootstrapRow {
@@ -381,7 +381,7 @@ fun BurndownComposable(
         }
       }
       BootstrapColumn(8, classes = listOf("border")) {
-        orgProgress.ownerProgressList.sortedBy { it.ownerName }
+        orgProgress.ownerProgressList.sortedBy { it.ownerName.lowercase() }
           .forEach { ownerProgress: OwnerProgress ->
             BootstrapRow {
               BootstrapColumn(6) {
@@ -573,7 +573,7 @@ fun TechDebtListComposable(
       H3 {
         Text("Tech Debt")
       }
-      codeReferencesByCategory.entries.sortedBy { it.key }.forEach { (category, codeReferenceStatTypes) ->
+      codeReferencesByCategory.entries.sortedBy { it.key.lowercase() }.forEach { (category, codeReferenceStatTypes) ->
         H6 {
           Text(category)
         }
