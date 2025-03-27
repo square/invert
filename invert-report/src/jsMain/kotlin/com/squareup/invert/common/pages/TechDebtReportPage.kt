@@ -25,7 +25,6 @@ import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.HistoricalData
 import com.squareup.invert.models.js.StatTotalAndMetadata
-import kotlinx.browser.window
 import org.jetbrains.compose.web.dom.Br
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.H1
@@ -92,17 +91,63 @@ object TechDebtReportPage : InvertReportPage<TechDebtNavRoute> {
     TechDebtNavRoute::class
 
   override val composableContent: @Composable (TechDebtNavRoute) -> Unit = { navRoute ->
-    TechDebtComposable(navRoute)
+    TechDebtPageComposable(navRoute)
   }
 }
 
 @Composable
-fun TechDebtComposable(
+fun TechDebtPageComposable(
   navRoute: TechDebtNavRoute,
   reportDataRepo: ReportDataRepo = DependencyGraph.reportDataRepo,
   navRouteRepo: NavRouteRepo = DependencyGraph.navRouteRepo
 ) {
-  val isEmbed = (navRoute.embed == true)
+  val statTotalsOrig by reportDataRepo.statTotals.collectAsState(null)
+  if (
+    listOf(
+      statTotalsOrig,
+    ).any { it == null }
+  ) {
+    BootstrapLoadingMessageWithSpinner()
+    return
+  }
+  val statToMetadata: Map<StatKey, StatMetadata> = statTotalsOrig!!.statTotals.mapValues {
+    it.value.metadata
+  }
+  val codeReferenceStatTypes: List<StatMetadata> = statToMetadata.values
+    .filter { it.dataType == StatDataType.CODE_REFERENCES }
+    .sortedBy { it.title }
+
+  if (navRoute.remainingKey.isNullOrBlank()) {
+    val codeReferencesByCategory = codeReferenceStatTypes.groupBy { it.category }
+    TechDebtListComposable(
+      navRoute = navRoute,
+      codeReferencesByCategory = codeReferencesByCategory,
+      navRouteUpdated = navRouteRepo::pushNavRoute
+    )
+  } else {
+    val isEmbed = (navRoute.embed == true)
+    TechDebtDetailComposable(
+      isEmbed = isEmbed,
+      remainingStatKey = navRoute.remainingKey,
+      completedStatKey = navRoute.completedKey,
+      embedNavRoute = { embed ->
+        navRoute.copy(embed = embed)
+      },
+      reportDataRepo = reportDataRepo,
+      navRouteRepo = navRouteRepo,
+    )
+  }
+}
+
+@Composable
+fun TechDebtDetailComposable(
+  isEmbed: Boolean,
+  remainingStatKey: StatKey?,
+  completedStatKey: StatKey?,
+  embedNavRoute: (Boolean) -> NavRoute,
+  reportDataRepo: ReportDataRepo,
+  navRouteRepo: NavRouteRepo
+) {
   if (isEmbed) {
     EmbedMode.enableEmbedMode()
   } else {
@@ -144,41 +189,29 @@ fun TechDebtComposable(
     .filter { it.dataType == StatDataType.CODE_REFERENCES }
     .sortedBy { it.title }
 
-  val remainingStatKey = navRoute.remainingKey
-  val completedStatKey = navRoute.completedKey
-  if (remainingStatKey.isNullOrBlank()) {
-    val codeReferencesByCategory = codeReferenceStatTypes.groupBy { it.category }
-    TechDebtListComposable(
-      navRoute = navRoute,
-      codeReferencesByCategory = codeReferencesByCategory,
-      navRouteUpdated = navRouteRepo::pushNavRoute
+  val remainingStatInfo = codeReferenceStatTypes.firstOrNull { it.key == remainingStatKey }
+  if (remainingStatInfo != null) {
+    InitiativeDetailComposable(
+      updateNavRoute = {
+        navRouteRepo.pushNavRoute(it)
+      },
+      historicalData = historicalData,
+      allOwnerNames = ownerData,
+      completedStatInfo = statToMetadata[completedStatKey],
+      remainingStatInfo = statToMetadata[remainingStatKey] ?: run {
+        H1 { Text("Could not find $remainingStatKey") }
+        return
+      },
+      ownerToOrg = ownerToOrg,
     )
-    return
-  } else {
-    val initiative = codeReferenceStatTypes.firstOrNull { it.key == remainingStatKey }
-    if (initiative != null) {
-      InitiativeDetailComposable(
-        updateNavRoute = {
-          navRouteRepo.pushNavRoute(it)
-        },
-        historicalData = historicalData,
-        allOwnerNames = ownerData,
-        completedStatInfo = statToMetadata[completedStatKey],
-        remainingStatInfo = statToMetadata[remainingStatKey] ?: run {
-          H1 { Text("Could not find $remainingStatKey") }
-          return
-        },
-        ownerToOrg = ownerToOrg,
-      )
-      if (!isEmbed) {
-        Br()
-        NavRouteLink(navRoute.copy(embed = true), navRouteRepo::pushNavRoute) {
-          Small { Text("Get Embed Link") }
-        }
+    if (!isEmbed) {
+      Br()
+      NavRouteLink(embedNavRoute(true), navRouteRepo::pushNavRoute) {
+        Small { Text("Get Embed Link") }
       }
-    } else {
-      window.alert("Initiative $remainingStatKey not found.")
     }
+  } else {
+    H1 { Text("Initiative $remainingStatKey not found.") }
   }
 }
 
