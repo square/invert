@@ -54,10 +54,10 @@ Modules and code references can have an assigned owner, which enhances the **Inv
 
 Invert collects various types of statistics:
 
+- **Code References** *(Most Valuable Feature)* - Represents occurrences of specific code references in a project.
 - **Boolean** - Flags indicating the presence or absence of a feature.
 - **Numerical** - Metrics such as counts or percentages.
 - **String** - Text-based attributes associated with a module.
-- **Code References** *(Most Valuable Feature)* - Represents occurrences of specific code references in a project.
 
 #### Code References
 
@@ -66,6 +66,21 @@ Code references provide precise data points:
 - Each reference is stored with its **file path and line number**.
 - Can optionally include a **code snippet**, which enables developers to take direct action.
 - Facilitates both **quantitative analysis** and **actionable reporting**, helping developers and organizational leaders track progress effectively.
+
+## Goals
+
+### Overall
+* Provide a tool to get an actionable, always up-to-date snapshot of what matters in your codebase.
+* Tap into code ownership and provide information by owner/org.
+* Surface static insights about your codebase via static analysis, by module.
+
+### Web Report
+* Provide dynamic report allowing exploration of data.
+* Support dynamic loading of data
+* Support Deep Links for All Report Pages
+* Support Markdown Format
+* Integrate/play nicely with GitHub to link to source files on GitHub.
+* Provide a way for someone to extend the report to build their own.
 
 ### Architecture Diagram
 
