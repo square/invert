@@ -10,6 +10,7 @@ import com.squareup.invert.internal.report.json.InvertJsonReportWriter
 import com.squareup.invert.models.ExtraDataType
 import com.squareup.invert.models.ExtraMetadata
 import com.squareup.invert.models.ModulePath
+import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
@@ -34,12 +35,20 @@ object CollectedStatAggregator {
     type = ExtraDataType.STRING,
     description = "Module"
   )
+  private val OWNER_EXTRA_METADATA = ExtraMetadata(
+    key = "owner",
+    type = ExtraDataType.STRING,
+    description = "Owner"
+  )
 
   private fun exportFullListOfCodeReferences(
     reportOutputConfig: ReportOutputConfig,
     origAllCollectedData: InvertCombinedCollectedData
   ) {
     val allStatMetadatas = origAllCollectedData.collectedStats.flatMap { it.statInfos.values }.distinct()
+
+    val moduleToOwnerMap: Map<ModulePath, OwnerName> =
+      origAllCollectedData.collectedOwners.associate { it.path to it.ownerName }
 
     allStatMetadatas.forEach { statMetadata: StatMetadata ->
       val statKey = statMetadata.key
@@ -56,7 +65,14 @@ object CollectedStatAggregator {
                 collectedCodeReferenceStat.value.map { codeReference: Stat.CodeReferencesStat.CodeReference ->
                   // Adding addition "extra" field named "project"
                   codeReference.copy(
-                    extras = codeReference.extras.plus(MODULE_EXTRA_METADATA.key to collectedStatsForProject.path)
+                    extras = codeReference.extras.apply {
+                      plus(MODULE_EXTRA_METADATA.key to collectedStatsForProject.path)
+                      moduleToOwnerMap[collectedStatsForProject.path]?.let { ownerName ->
+                        plus(
+                          OWNER_EXTRA_METADATA.key to ownerName
+                        )
+                      }
+                    }
                   )
                 }
               )
@@ -73,7 +89,11 @@ object CollectedStatAggregator {
           ),
           serializer = AggregatedCodeReferences.serializer(),
           value = AggregatedCodeReferences(
-            metadata = statMetadata.copy(extras = statMetadata.extras.plus(MODULE_EXTRA_METADATA)),
+            metadata = statMetadata.copy(
+              extras = statMetadata.extras
+                .plus(MODULE_EXTRA_METADATA)
+                .plus(OWNER_EXTRA_METADATA)
+            ),
             values = allCodeReferencesForStatWithProjectPathExtra
           )
         )
