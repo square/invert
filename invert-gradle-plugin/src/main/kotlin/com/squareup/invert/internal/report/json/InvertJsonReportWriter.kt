@@ -69,12 +69,6 @@ class InvertJsonReportWriter(
     )
 
     writeJsonFileInDir(
-      jsonFileKey = InvertPluginFileKey.STATS,
-      serializer = StatsJsReportModel.serializer(),
-      value = allProjectsStatsData
-    )
-
-    writeJsonFileInDir(
       jsonFileKey = InvertPluginFileKey.OWNERS,
       serializer = SetSerializer(CollectedOwnershipForProject.serializer()),
       value = allOwnersData

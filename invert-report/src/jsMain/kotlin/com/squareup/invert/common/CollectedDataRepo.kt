@@ -53,10 +53,6 @@ class CollectedDataRepo(
   fun statData(statKey: StatKey): Flow<Map<StatKey, StatJsReportModel>?> = _statData
     .onEach { loadJsOfType(JsReportFileKey.STAT.key + "_$statKey") }
 
-  private val _statsData = MutableStateFlow<StatsJsReportModel?>(null)
-  val statsData: Flow<StatsJsReportModel?> = _statsData
-    .onEach { loadJsOfType(JsReportFileKey.STATS) }
-
   private val _combinedReportData: MutableStateFlow<DependenciesJsReportModel?> =
     MutableStateFlow(null)
   val combinedReportData: Flow<DependenciesJsReportModel?> = _combinedReportData.onEach {
@@ -120,10 +116,6 @@ class CollectedDataRepo(
 
   fun pluginsUpdated(pluginInfo: PluginsJsReportModel) {
     this._collectedPluginInfoReport.value = pluginInfo
-  }
-
-  fun statsUpdated(statsData: StatsJsReportModel) {
-    this._statsData.value = statsData
   }
 
   fun configurationsUpdated(configurationsData: ConfigurationsJsReportModel) {

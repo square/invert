@@ -79,7 +79,6 @@ object InvertJsReportUtils {
             is Stat.CodeReferencesStat -> {
               stat.value.forEach { codeReference ->
                 val owner = codeReference.owner ?: moduleOwnerName
-                println("Adding for $owner, $codeReference")
                 val currentCountForOwner: Int = ownerToTotalCountForStat.getOrDefault(owner, 0)
                 ownerToTotalCountForStat[owner] = currentCountForOwner + 1
               }
