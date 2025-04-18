@@ -42,8 +42,6 @@ class ReportDataRepo(
       }
     }
 
-  val statsData: Flow<StatsJsReportModel?> = collectedDataRepo.statsData
-
   val historicalData: Flow<List<HistoricalData>?> = collectedDataRepo.historicalData.mapLatest { it }
 
   val statTotals: Flow<CollectedStatTotalsJsReportModel?> = collectedDataRepo.statTotals

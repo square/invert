@@ -17,12 +17,8 @@ import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
-import com.squareup.invert.models.Stat
-import com.squareup.invert.models.StatKey
-import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.utils.BuildSystemUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import org.jetbrains.compose.web.dom.Br
 import org.jetbrains.compose.web.dom.H2
@@ -131,37 +127,6 @@ fun ModuleDetailComposable(
   val directDependenciesMap = directDependenciesMapOrig!!
 
   val pageTabs = mutableListOf<BootstrapTabData>()
-  pageTabs.add(
-    BootstrapTabData(tabName = "Stats") {
-      val statsForModule: Map<StatKey, Stat>? by reportDataRepo.statsData.map { it?.statsByModule?.get(navRoute.path) }
-        .collectAsState(null)
-
-      if (statsForModule != null && statInfos != null) {
-        val statsForModuleMap: Map<StatMetadata?, Stat> = statsForModule!!.mapKeys {
-          statInfos!!.first { statInfo -> statInfo.key == it.key }
-        }
-        BootstrapTable(
-          headers = listOf("Stat", "Value"),
-          rows = statsForModuleMap.filter { it.key != null && it.value is Stat.NumericStat }
-            .map { (key, value) ->
-              listOf(key!!.description, (value as Stat.NumericStat).value.toString())
-            },
-          types = listOf(String::class, Int::class),
-          maxResultsLimitConstant = MAX_RESULTS,
-          onItemClickCallback = {
-            navRouteRepo.pushNavRoute(
-              StatDetailNavRoute(
-                statKey = statInfos!!.first { statInfo -> statInfo.description == it[0] }.key
-              )
-            )
-          },
-          sortAscending = false,
-          sortByColumn = 0
-        )
-      }
-
-    })
-
   pageTabs.add(
     BootstrapTabData(tabName = "Direct Dependencies") {
       val allDirectDependencyToConfigurationEntries = mutableSetOf<DependencyIdAndConfiguration>()

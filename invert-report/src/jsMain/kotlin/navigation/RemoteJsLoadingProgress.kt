@@ -89,12 +89,6 @@ object RemoteJsLoadingProgress {
           )
         }
 
-        JsReportFileKey.STATS.key -> {
-          collectedDataRepo.statsUpdated(
-            InvertJson.decodeFromString(StatsJsReportModel.serializer(), json)
-          )
-        }
-
         JsReportFileKey.CONFIGURATIONS.key -> {
           collectedDataRepo.configurationsUpdated(
             InvertJson.decodeFromString(ConfigurationsJsReportModel.serializer(), json)

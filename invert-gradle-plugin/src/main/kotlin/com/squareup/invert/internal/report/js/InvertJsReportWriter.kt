@@ -83,12 +83,6 @@ class InvertJsReportWriter(
     )
 
     writeJsFileInDir(
-      fileKey = JsReportFileKey.STATS.key,
-      serializer = StatsJsReportModel.serializer(),
-      value = allProjectsStatsData
-    )
-
-    writeJsFileInDir(
       fileKey = JsReportFileKey.CONFIGURATIONS.key,
       serializer = ConfigurationsJsReportModel.serializer(),
       value = InvertJsReportUtils.toCollectedConfigurations(allProjectsConfigurationsData)
