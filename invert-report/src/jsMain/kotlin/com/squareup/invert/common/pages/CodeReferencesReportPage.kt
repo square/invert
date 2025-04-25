@@ -25,6 +25,7 @@ import com.squareup.invert.models.StatMetadata
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.H4
+import org.jetbrains.compose.web.dom.H5
 import org.jetbrains.compose.web.dom.Li
 import org.jetbrains.compose.web.dom.P
 import org.jetbrains.compose.web.dom.Text
@@ -46,6 +47,7 @@ data class CodeReferencesNavRoute(
   val module: String? = null,
   val treemap: Boolean? = null,
   val chart: Boolean? = null,
+  val extras: Map<String, String>? = null
 ) : BaseNavRoute(CodeReferencesReportPage.navPage) {
 
   override fun toSearchParams(): Map<String, String> = toParamsWithOnlyPageId(this)
@@ -65,6 +67,11 @@ data class CodeReferencesNavRoute(
       chart?.let {
         params[CHART_PARAM] = chart.toString()
       }
+      extras?.let {
+        it.forEach { (key, value) ->
+          params["extra_$key"] = value
+        }
+      }
     }
 
   companion object {
@@ -74,37 +81,51 @@ data class CodeReferencesNavRoute(
     private const val OWNER_PARAM = "owner"
     private const val MODULE_PARAM = "module"
     private const val TREEMAP_PARAM = "treemap"
+    private const val EXTRAS_PARAM_PREFIX = "extra_"
+
 
     fun parser(params: Map<String, String?>): NavRoute {
-      val statKey = params[STATKEY_PARAM]
-      val owner = params[OWNER_PARAM]?.trim()?.let {
-        if (it.isNotBlank()) {
-          it
-        } else {
-          null
+      var statKey: String? = null
+      var owner: String? = null
+      var module: String? = null
+      var treemap: Boolean? = null
+      var chart: Boolean? = null
+      var extras: MutableMap<String, String> = mutableMapOf()
+      params.forEach { (key, value) ->
+        val trimmedValue = value?.trim()?.let {
+          if (it.isNotBlank()) {
+            it
+          } else {
+            null
+          }
+        }
+        if (trimmedValue != null) {
+          when (key) {
+            STATKEY_PARAM -> {
+              statKey = trimmedValue
+            }
+            OWNER_PARAM -> {
+              owner = trimmedValue
+            }
+            MODULE_PARAM -> {
+              module = trimmedValue
+            }
+            TREEMAP_PARAM -> {
+              treemap = trimmedValue.toBoolean()
+            }
+            CHART_PARAM -> {
+              chart = trimmedValue.toBoolean()
+            }
+            else -> {
+              if (key.startsWith(EXTRAS_PARAM_PREFIX)) {
+                val extraKey = key.substring(EXTRAS_PARAM_PREFIX.length)
+                extras[extraKey] = trimmedValue
+              }
+            }
+          }
         }
       }
-      val module = params[MODULE_PARAM]?.trim()?.let {
-        if (it.isNotBlank()) {
-          it
-        } else {
-          null
-        }
-      }
-      val treemap = params[TREEMAP_PARAM]?.trim()?.let {
-        if (it.isNotBlank()) {
-          it.toBoolean()
-        } else {
-          null
-        }
-      }
-      val chart = params[CHART_PARAM]?.trim()?.let {
-        if (it.isNotBlank()) {
-          it.toBoolean()
-        } else {
-          null
-        }
-      }
+
       return if (statKey == null) {
         AllStatsNavRoute()
       } else {
@@ -114,6 +135,7 @@ data class CodeReferencesNavRoute(
           module = module,
           treemap = treemap,
           chart = chart,
+          extras = extras.let { if (it.isEmpty()) null else it }
         )
       }
     }
@@ -293,6 +315,18 @@ fun CodeReferencesComposable(
         true
       }
     }
+    // Filter by extras
+    .filter { ownerAndCodeReference: ModuleOwnerAndCodeReference ->
+      val codeReference = ownerAndCodeReference.codeReference
+      val extras = codeReferencesNavRoute.extras ?: mapOf()
+      if (extras.isEmpty()) {
+        true
+      } else {
+        extras.all { (key, value) ->
+          codeReference.extras[key] == value
+        }
+      }
+    }
 
   if (codeReferencesNavRoute.treemap == true) {
     BootstrapRow {
@@ -337,12 +371,18 @@ fun CodeReferencesComposable(
     }
   }
 
+  BootstrapRow {
+    H3 {
+      Text("Filters")
+    }
+  }
+
   val codeReferencesByOwner = allCodeReferencesForStat.groupBy { it.owner }
   val totalCodeReferenceCount = allCodeReferencesForStat.size
   BootstrapRow {
     BootstrapColumn(6) {
-      H3 {
-        Text("Filter by Owner")
+      H5 {
+        Text("Owner")
         BootstrapSelectDropdown(
           placeholderText = "-- All Owners ($totalCodeReferenceCount Total) --",
           currentValue = codeReferencesNavRoute.owner,
@@ -364,8 +404,8 @@ fun CodeReferencesComposable(
     val codeReferencesByModule =
       allCodeReferencesForStat.groupBy { it.module }
     BootstrapColumn(6) {
-      H3 {
-        Text("Filter by Module")
+      H5 {
+        Text("Module")
         BootstrapSelectDropdown(
           placeholderText = "-- All Modules --",// (${codeReferencesByModule.size} Total) --",
           currentValue = codeReferencesNavRoute.module,
@@ -381,6 +421,58 @@ fun CodeReferencesComposable(
               module = it?.value
             )
           )
+        }
+      }
+    }
+  }
+  // Limit filterable extras to ones where the amount of possible values is within a reasonable limit
+  val filterableExtraCountLimit = 5000
+  val allExtraValuesByKey = allCodeReferencesForStat.flatMap {
+    it.codeReference.extras.entries.toList()
+  }.groupBy { it.key }.mapValues { it.value.map { entry -> entry.value }.toSet().sorted() }
+  val filterableExtras = currentStatMetadata.extras.filter {
+    val extraValues = allExtraValuesByKey[it.key] ?: emptyList()
+    (it.type == ExtraDataType.STRING  || it.type == ExtraDataType.BOOLEAN) &&
+      extraValues.size < filterableExtraCountLimit
+  }.sortedBy { it.description }
+  if (filterableExtras.isNotEmpty()) {
+    filterableExtras.chunked(size = 2).map { extraGroup ->
+      BootstrapRow {
+        extraGroup.forEach { extra ->
+          BootstrapColumn(6) {
+            H5 {
+              Text(extra.description)
+              BootstrapSelectDropdown(
+                placeholderText = "-- All Values --",
+                currentValue = codeReferencesNavRoute.extras?.get(extra.key),
+                options = allCodeReferencesForStat.mapNotNull {
+                  it.codeReference.extras[extra.key]
+                }.toSet().map {
+                  BootstrapSelectOption(
+                    value = it,
+                    displayText = it,
+                  )
+                }.sortedBy { it.displayText }
+              ) {
+                val value = it?.value
+                var newExtras: Map<String, String>? = null
+                val currentExtras = codeReferencesNavRoute.extras ?: mapOf()
+                if (value != null) {
+                  newExtras = currentExtras + mapOf(extra.key to value)
+                } else {
+                  newExtras = currentExtras.minus(extra.key)
+                  if (newExtras.isEmpty()) {
+                    newExtras = null
+                  }
+                }
+                navRouteRepo.pushNavRoute(
+                  codeReferencesNavRoute.copy(
+                    extras = newExtras
+                  )
+                )
+              }
+            }
+          }
         }
       }
     }
