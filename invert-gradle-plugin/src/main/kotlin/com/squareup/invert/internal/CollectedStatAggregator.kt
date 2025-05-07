@@ -63,16 +63,18 @@ object CollectedStatAggregator {
             synchronized(allCodeReferencesForStatWithProjectPathExtra) {
               allCodeReferencesForStatWithProjectPathExtra.addAll(
                 collectedCodeReferenceStat.value.map { codeReference: Stat.CodeReferencesStat.CodeReference ->
-                  // Adding addition "extra" field named "project"
-                  codeReference.copy(
-                    extras = codeReference.extras.apply {
-                      plus(MODULE_EXTRA_METADATA.key to collectedStatsForProject.path)
-                      moduleToOwnerMap[collectedStatsForProject.path]?.let { ownerName ->
-                        plus(
-                          OWNER_EXTRA_METADATA.key to ownerName
-                        )
-                      }
+                  // Use the owner from the code reference if it exists, otherwise use the module's owner
+                  val codeReferenceOwner = codeReference.owner ?: moduleToOwnerMap[collectedStatsForProject.path]
+
+                  // Updating the extras to include the "module" and "owner"
+                  val updatedExtras = codeReference.extras.toMutableMap().apply {
+                    this[MODULE_EXTRA_METADATA.key] = collectedStatsForProject.path
+                    if (codeReferenceOwner != null) {
+                      this[OWNER_EXTRA_METADATA.key] = codeReferenceOwner
                     }
+                  }
+                  codeReference.copy(
+                    extras = updatedExtras
                   )
                 }
               )
