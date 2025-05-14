@@ -45,6 +45,7 @@ sealed interface Stat {
       val extras: Map<ExtraKey, String> = emptyMap(),
       val code: String? = null,
       val owner: OwnerName? = null,
+      val uniqueId: String = "$filePath:${startLine}"
     )
   }
 }
