@@ -1,10 +1,6 @@
 package com.squareup.invert.internal.report.sarif
 
 import com.squareup.invert.internal.InvertFileUtils
-import com.squareup.invert.internal.models.CollectedConfigurationsForProject
-import com.squareup.invert.internal.models.CollectedDependenciesForProject
-import com.squareup.invert.internal.models.CollectedOwnershipForProject
-import com.squareup.invert.internal.models.CollectedPluginsForProject
 import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter.Companion.writeJsonFile
 import com.squareup.invert.logging.InvertLogger
@@ -12,9 +8,6 @@ import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
-import com.squareup.invert.models.js.HistoricalData
-import com.squareup.invert.models.js.MetadataJsReportModel
-import com.squareup.invert.models.js.StatTotalAndMetadata
 import com.squareup.invert.models.js.StatsJsReportModel
 import io.github.detekt.sarif4k.ArtifactLocation
 import io.github.detekt.sarif4k.Location
@@ -24,6 +17,7 @@ import io.github.detekt.sarif4k.PhysicalLocation
 import io.github.detekt.sarif4k.PropertyBag
 import io.github.detekt.sarif4k.Region
 import io.github.detekt.sarif4k.ReportingDescriptor
+import io.github.detekt.sarif4k.ReportingDescriptorReference
 import io.github.detekt.sarif4k.Result as SarifResult
 import io.github.detekt.sarif4k.Run
 import io.github.detekt.sarif4k.SarifSchema210
@@ -78,10 +72,10 @@ class InvertSarifReportWriter(
             statMap.forEach { (statKey, stat) ->
                 // Get or create the rule for this stat
                 val rule = statInfos[statKey]?.asReportingDescriptor() ?: return@forEach
-                
+
                 // Get or create the results list for this rule
                 val results = rulesAndResults.getOrPut(rule) { mutableListOf() }
-                
+
                 // Add results for this stat
                 results.addAll(stat.asSarifResult(modulePath, statKey, statInfos[statKey]))
             }
@@ -93,14 +87,7 @@ class InvertSarifReportWriter(
     /**
      * Creates a SARIF report for Invert statistics and metadata.
      *
-     * @param allConfigurationsData Configuration data for all projects
-     * @param allProjectsDependencyData Dependency data for all projects
      * @param allProjectsStatsData Statistics data for all projects
-     * @param allPluginsData Plugin data for all projects
-     * @param allOwnersData Ownership data for all projects
-     * @param globalStats Global statistics with metadata
-     * @param reportMetadata Report metadata
-     * @param historicalData Historical data for comparison
      */
     fun createInvertSarifReport(
         allProjectsStatsData: StatsJsReportModel
@@ -130,48 +117,6 @@ class InvertSarifReportWriter(
         value = value
     )
 
-    /**
-     * Creates a SARIF result for numeric stats.
-     */
-    private fun createNumericSarifResult(key: StatKey, module: ModulePath, details: String?, value: Int): SarifResult =
-        SarifResult(
-            ruleID = key,
-            message = Message(text = "details: $details, value: $value"),
-            locations = listOf(createLocation(module))
-        )
-
-    /**
-     * Creates a SARIF result for string stats.
-     */
-    private fun createStringSarifResult(key: StatKey, module: ModulePath, details: String?, value: String): SarifResult =
-        SarifResult(
-            ruleID = key,
-            message = Message(text = key),
-            locations = listOf(createLocation(module))
-        )
-
-    /**
-     * Creates a SARIF result for boolean stats.
-     */
-    private fun createBooleanSarifResult(key: StatKey, module: ModulePath, details: String?, value: Boolean): SarifResult =
-        SarifResult(
-            ruleID = key,
-            message = Message(text = key),
-            locations = listOf(createLocation(module))
-        )
-
-    /**
-     * Creates a SARIF location for a module.
-     */
-    private fun createLocation(module: ModulePath): Location =
-        Location(
-            physicalLocation = PhysicalLocation(
-                artifactLocation = ArtifactLocation(uri = module)
-            )
-        )
-
-
-
     companion object {
         private const val SARIF_FILE_NAME = "invert-report.sarif"
 
@@ -182,8 +127,8 @@ class InvertSarifReportWriter(
             description: String
         ) {
             val results = values.map { it.toSarifResult(metadata.key, modulePath = null, metadata) }
-            val rule = metadata.asReportingDescriptor()
-            val sarifSchema = writeSarifSchema(rule = rule, results = results)
+            val rule = metadata.asReportingDescriptor(shortDescription = description)
+            val sarifSchema = createSarifSchemaFromResults(rule = rule, results = results)
             val sarifJson = SarifSerializer.toMinifiedJson(sarifSchema)
             fileName.writeText(sarifJson)
         }
@@ -203,11 +148,8 @@ private fun Stat.asSarifResult(
             key = key, modulePath = module, metadata = metadata
         )
     }
+    // No support for other stat types in SARIF
     else -> emptyList()
-
-//    is Stat.NumericStat -> listOf(createNumericSarifResult(key, module, details, value))
-//    is Stat.StringStat -> listOf(createStringSarifResult(key, module, details, value))
-//    is Stat.BooleanStat -> listOf(createBooleanSarifResult(key, module, details, value))
 }
 
 /**
@@ -243,17 +185,19 @@ private fun Stat.CodeReferencesStat.CodeReference.toSarifResult(
             "module" to modulePath,
             "uniqueId" to uniqueId,
         )
-    )
+    ),
+    rule = ReportingDescriptorReference(id = key)
 )
 
 /**
  * Extension function to convert StatMetadata to SARIF reporting descriptor.
  */
-private fun StatMetadata.asReportingDescriptor(): ReportingDescriptor =
+private fun StatMetadata.asReportingDescriptor(shortDescription: String = ""): ReportingDescriptor =
     ReportingDescriptor(
         id = key,
         name = this.title,
         fullDescription = MultiformatMessageString(markdown = description, text = description),
+        shortDescription = MultiformatMessageString(text = shortDescription),
         properties = PropertyBag(
             mapOf(
                 "description" to description,
@@ -264,18 +208,18 @@ private fun StatMetadata.asReportingDescriptor(): ReportingDescriptor =
         )
     )
 
-private fun writeSarifSchema(
+private fun createSarifSchemaFromResults(
     rule: ReportingDescriptor,
     results: List<SarifResult>
 ): SarifSchema210 {
-    return createSarifSchema(toolName = rule.id, toolVersion = "1.0.0", rule = listOf(rule), results = results)
+    return createSarifSchema(toolName = rule.id, rule = listOf(rule), results = results)
 }
 
 private fun createSarifSchema(
+    rule: List<ReportingDescriptor>,
+    results: List<SarifResult>,
     toolName: String = "Invert",
     toolVersion: String = "1.0.0",
-    rule: List<ReportingDescriptor>,
-    results: List<SarifResult>
 ): SarifSchema210 {
     return SarifSchema210(
         version = Version.The210,

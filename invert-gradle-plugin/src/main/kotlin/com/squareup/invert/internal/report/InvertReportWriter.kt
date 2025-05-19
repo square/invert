@@ -62,16 +62,9 @@ class InvertReportWriter(
       historicalData = historicalDataWithCurrent,
     )
 
-    // SARIF Report
+    // Include all stats into one SARIF report.
     InvertSarifReportWriter(invertLogger, rootBuildReportsDir).createInvertSarifReport(
-      reportMetadata = reportMetadata,
-      allConfigurationsData = collectedConfigurations,
-      allProjectsDependencyData = collectedDependencies,
-      allProjectsStatsData = allProjectsStatsData,
-      allPluginsData = collectedPlugins,
-      allOwnersData = collectedOwners,
-      globalStats = globalStats,
-      historicalData = historicalDataWithCurrent,
+      allProjectsStatsData = allProjectsStatsData
     )
 
     // HTML/JS Report
