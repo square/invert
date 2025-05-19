@@ -7,6 +7,7 @@ import com.squareup.invert.StatCollector
 import com.squareup.invert.internal.models.CollectedStatsForProject
 import com.squareup.invert.internal.models.InvertCombinedCollectedData
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
+import com.squareup.invert.internal.report.sarif.InvertSarifReportWriter
 import com.squareup.invert.models.ExtraDataType
 import com.squareup.invert.models.ExtraMetadata
 import com.squareup.invert.models.ModulePath
@@ -98,6 +99,16 @@ object CollectedStatAggregator {
             ),
             values = allCodeReferencesForStatWithProjectPathExtra
           )
+        )
+
+        InvertSarifReportWriter.writeToSarifReport(
+          description = "All CodeReferences for ${statMetadata.key}",
+          fileName = InvertFileUtils.outputFile(
+            File(reportOutputConfig.invertReportDirectory, "sarif"),
+            "code_references_${statMetadata.key}.sarif"
+          ),
+          metadata = statMetadata,
+          values = allCodeReferencesForStatWithProjectPathExtra
         )
       }
     }
