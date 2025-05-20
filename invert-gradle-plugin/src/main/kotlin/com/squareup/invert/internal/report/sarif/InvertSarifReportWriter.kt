@@ -26,6 +26,7 @@ import io.github.detekt.sarif4k.Tool
 import io.github.detekt.sarif4k.ToolComponent
 import io.github.detekt.sarif4k.Version
 import kotlinx.serialization.KSerializer
+import org.jetbrains.annotations.VisibleForTesting
 import java.io.File
 import java.nio.file.Files
 
@@ -63,28 +64,6 @@ class InvertSarifReportWriter(
     }
 
     /**
-     * Extension function to convert StatsJsReportModel to a map of SARIF rules to their results.
-     */
-    private fun StatsJsReportModel.asSarifRulesAndResults(): Map<ReportingDescriptor, List<SarifResult>> {
-        val rulesAndResults = mutableMapOf<ReportingDescriptor, MutableList<SarifResult>>()
-
-        statsByModule.forEach { (modulePath, statMap) ->
-            statMap.forEach { (statKey, stat) ->
-                // Get or create the rule for this stat
-                val rule = statInfos[statKey]?.asReportingDescriptor() ?: return@forEach
-
-                // Get or create the results list for this rule
-                val results = rulesAndResults.getOrPut(rule) { mutableListOf() }
-
-                // Add results for this stat
-                results.addAll(stat.asSarifResult(modulePath, statKey, statInfos[statKey]))
-            }
-        }
-
-        return rulesAndResults
-    }
-
-    /**
      * Creates a SARIF report for Invert statistics and metadata.
      *
      * @param allProjectsStatsData Statistics data for all projects
@@ -99,24 +78,6 @@ class InvertSarifReportWriter(
         )
     }
 
-    /**
-     * Writes a JSON file to the specified directory.
-     */
-    private fun <T> writeJsonFileInDir(
-        jsonFileKey: InvertPluginFileKey,
-        serializer: KSerializer<T>,
-        value: T,
-    ) = writeJsonFile(
-        logger = logger,
-        jsonFileKey = jsonFileKey,
-        jsonOutputFile = InvertFileUtils.outputFile(
-            directory = rootBuildSarifReportsDir,
-            filename = jsonFileKey.filename
-        ),
-        serializer = serializer,
-        value = value
-    )
-
     companion object {
         private const val SARIF_FILE_NAME = "invert-report.sarif"
 
@@ -126,6 +87,11 @@ class InvertSarifReportWriter(
             fileName: File,
             description: String
         ) {
+            if (!fileName.exists()) {
+                fileName.parentFile.mkdirs()
+                fileName.createNewFile()
+            }
+
             val results = values.map { it.toSarifResult(metadata.key, modulePath = null, metadata) }
             val rule = metadata.asReportingDescriptor(shortDescription = description)
             val sarifSchema = createSarifSchemaFromResults(rule = rule, results = results)
@@ -138,7 +104,8 @@ class InvertSarifReportWriter(
 /**
  * Extension function to convert Stat to SARIF results.
  */
-private fun Stat.asSarifResult(
+@VisibleForTesting
+fun Stat.asSarifResult(
     module: ModulePath,
     key: StatKey,
     metadata: StatMetadata?
@@ -155,7 +122,8 @@ private fun Stat.asSarifResult(
 /**
  * Extension function to convert CodeReference to SARIF result.
  */
-private fun Stat.CodeReferencesStat.CodeReference.toSarifResult(
+@VisibleForTesting
+fun Stat.CodeReferencesStat.CodeReference.toSarifResult(
     key: StatKey,
     modulePath: ModulePath?,
     metadata: StatMetadata?
@@ -169,7 +137,7 @@ private fun Stat.CodeReferencesStat.CodeReference.toSarifResult(
                 region = Region(
                     startLine = startLine.toLong(),
                     endLine = endLine.toLong(),
-                    sourceLanguage = code?.trim()
+                    sourceLanguage = determineSourceLanguage(filePath)
                 ),
                 properties = PropertyBag(
                     extras + mapOf(
@@ -190,9 +158,33 @@ private fun Stat.CodeReferencesStat.CodeReference.toSarifResult(
 )
 
 /**
+ * Extension function to convert StatsJsReportModel to a map of SARIF rules to their results.
+ */
+@VisibleForTesting
+fun StatsJsReportModel.asSarifRulesAndResults(): Map<ReportingDescriptor, List<SarifResult>> {
+    val rulesAndResults = mutableMapOf<ReportingDescriptor, MutableList<SarifResult>>()
+
+    statsByModule.forEach { (modulePath, statMap) ->
+        statMap.forEach { (statKey, stat) ->
+            // Get or create the rule for this stat
+            val rule = statInfos[statKey]?.asReportingDescriptor() ?: return@forEach
+
+            // Get or create the results list for this rule
+            val results = rulesAndResults.getOrPut(rule) { mutableListOf() }
+
+            // Add results for this stat
+            results.addAll(stat.asSarifResult(modulePath, statKey, statInfos[statKey]))
+        }
+    }
+
+    return rulesAndResults
+}
+
+/**
  * Extension function to convert StatMetadata to SARIF reporting descriptor.
  */
-private fun StatMetadata.asReportingDescriptor(shortDescription: String = ""): ReportingDescriptor =
+@VisibleForTesting
+fun StatMetadata.asReportingDescriptor(shortDescription: String = ""): ReportingDescriptor =
     ReportingDescriptor(
         id = key,
         name = this.title,
@@ -208,7 +200,8 @@ private fun StatMetadata.asReportingDescriptor(shortDescription: String = ""): R
         )
     )
 
-private fun createSarifSchemaFromResults(
+@VisibleForTesting
+fun createSarifSchemaFromResults(
     rule: ReportingDescriptor,
     results: List<SarifResult>
 ): SarifSchema210 {
@@ -237,5 +230,33 @@ private fun createSarifSchema(
             )
         )
     )
+}
 
+/**
+ * Simple function to determine the source language based on the file path.
+ */
+private fun determineSourceLanguage(filePath: String): String {
+    return when {
+        filePath.endsWith(".kt") -> "kotlin"
+        filePath.endsWith(".java") -> "java"
+        filePath.endsWith(".js") -> "javascript"
+        filePath.endsWith(".ts") -> "typescript"
+        filePath.endsWith(".swift") -> "swift"
+        filePath.endsWith(".m") -> "objective-c"
+        filePath.endsWith(".mm") -> "objective-c++"
+        filePath.endsWith(".c") -> "c"
+        filePath.endsWith(".cpp") -> "c++"
+        filePath.endsWith(".h") -> "c-header"
+        filePath.endsWith(".hpp") -> "c++-header"
+        filePath.endsWith(".py") -> "python"
+        filePath.endsWith(".rb") -> "ruby"
+        filePath.endsWith(".go") -> "go"
+        filePath.endsWith(".php") -> "php"
+        filePath.endsWith(".html") -> "html"
+        filePath.endsWith(".css") -> "css"
+        filePath.endsWith(".xml") -> "xml"
+        filePath.endsWith(".json") -> "json"
+        filePath.endsWith(".yaml") || filePath.endsWith(".yml") -> "yaml"
+        else -> "unknown"
+    }
 }
