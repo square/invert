@@ -13,6 +13,7 @@ object InvertFileUtils {
   const val INVERT_FOLDER_NAME = "invert"
   const val JS_FOLDER_NAME = "js"
   const val JSON_FOLDER_NAME = "json"
+  const val SARIF_FOLDER_NAME = "sarif"
 
   val REPORTS_SLASH_INVERT_PATH = REPORTS_FOLDER_NAME.addSlashAnd(INVERT_FOLDER_NAME)
 

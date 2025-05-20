@@ -9,6 +9,7 @@ import com.squareup.invert.internal.report.js.InvertJsReportUtils
 import com.squareup.invert.internal.report.js.InvertJsReportUtils.computeGlobalTotals
 import com.squareup.invert.internal.report.js.InvertJsReportWriter
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
+import com.squareup.invert.internal.report.sarif.InvertSarifReportWriter
 import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.ModulePath
@@ -59,6 +60,11 @@ class InvertReportWriter(
       allOwnersData = collectedOwners,
       globalStats = globalStats,
       historicalData = historicalDataWithCurrent,
+    )
+
+    // Include all stats into one SARIF report.
+    InvertSarifReportWriter(invertLogger, rootBuildReportsDir).createInvertSarifReport(
+      allProjectsStatsData = allProjectsStatsData
     )
 
     // HTML/JS Report
