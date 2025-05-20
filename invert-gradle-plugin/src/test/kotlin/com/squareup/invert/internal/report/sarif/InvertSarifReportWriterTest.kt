@@ -3,21 +3,14 @@ package com.squareup.invert.internal.report.sarif
 import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.logging.InvertLogger
-import com.squareup.invert.models.ModulePath
-import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatDataType
-import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.StatsJsReportModel
-import io.github.detekt.sarif4k.ReportingDescriptor
 import org.gradle.internal.impldep.org.testng.Assert.assertEquals
-import io.github.detekt.sarif4k.Result as SarifResult
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import java.io.File
-import java.nio.file.Files
 
 class InvertSarifReportWriterTest {
 
