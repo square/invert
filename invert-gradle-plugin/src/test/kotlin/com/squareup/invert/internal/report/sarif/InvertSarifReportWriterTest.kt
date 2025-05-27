@@ -34,7 +34,7 @@ class InvertSarifReportWriterTest {
         val sarifFile = File(testDir, InvertFileUtils.SARIF_FOLDER_NAME + "/" + InvertPluginFileKey.STATS_SARIF.filename)
         assertTrue(sarifFile.exists(), "SARIF file should be created")
         val content = sarifFile.readText()
-        assertTrue(content.contains("\"name\":\"Invert\""), "Should contain tool name")
+        assertTrue(content.contains("\"name\":\"invert\""), "Should contain tool name")
         assertTrue(content.contains("\"version\":\"1.0.0\""), "Should contain tool version")
     }
 
