@@ -39,7 +39,7 @@ dependencies {
 
   implementation(libs.kotlinx.serialization.json)
   implementation(libs.kotlinx.coroutines.core)
-  implementation("io.github.detekt.sarif4k:sarif4k:0.6.0")
+  implementation(libs.detekt.sarif4k)
 
   testImplementation(libs.kotlin.test)
 }

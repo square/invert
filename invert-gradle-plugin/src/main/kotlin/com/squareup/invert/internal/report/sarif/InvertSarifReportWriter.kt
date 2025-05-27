@@ -35,12 +35,9 @@ class InvertSarifReportWriter(
         rulesAndResults: Map<ReportingDescriptor, List<SarifResult>>
     ) {
         val sarif = createSarifSchema(
-            toolName = "Invert",
-            toolVersion = "1.0.0",
             rule = rulesAndResults.keys.toList(),
             results = rulesAndResults.values.flatten()
         )
-
 
         val sarifFile = InvertFileUtils.outputFile(
             directory = rootBuildSarifReportsDir,
@@ -67,6 +64,9 @@ class InvertSarifReportWriter(
 
     companion object {
         private const val SARIF_FILE_NAME = "invert-report.sarif"
+        private const val SARIF_INVERT_TOOL_NAME = "invert"
+        private const val SARIF_INVERT_TOOL_VERSION = "1.0.0"
+        private const val SARIF_SCHEMA = "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0.json"
 
         fun writeToSarifReport(
             values: List<Stat.CodeReferencesStat.CodeReference>,
@@ -89,12 +89,12 @@ class InvertSarifReportWriter(
         fun createSarifSchema(
             rule: List<ReportingDescriptor>,
             results: List<SarifResult>,
-            toolName: String = "Invert",
-            toolVersion: String = "1.0.0",
+            toolName: String = SARIF_INVERT_TOOL_NAME,
+            toolVersion: String = SARIF_INVERT_TOOL_VERSION,
         ): SarifSchema210 {
             return SarifSchema210(
                 version = Version.The210,
-                schema = "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0.json",
+                schema = SARIF_SCHEMA,
                 runs = listOf(
                     Run(
                         tool = Tool(

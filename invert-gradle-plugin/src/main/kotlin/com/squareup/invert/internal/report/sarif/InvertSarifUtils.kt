@@ -2,6 +2,7 @@ package com.squareup.invert.internal.report.sarif
 
 import com.squareup.invert.internal.report.sarif.InvertSarifReportWriter.Companion.createSarifSchema
 import com.squareup.invert.models.ModulePath
+import com.squareup.invert.models.OwnerInfo
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
@@ -22,6 +23,17 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.plus
 
+
+data object SarifKey {
+    const val OWNER = "owner"
+    const val MODULE = "module"
+    const val UNIQUE_ID = "uniqueId"
+    const val DESCRIPTION = "description"
+    const val FILE_TYPE = "fileType"
+    const val EXTRAS = "extras"
+    const val CATEGORIES = "categories"
+    const val TITLE = "title"
+}
 
 /**
  * Extension function to convert Stat to SARIF results.
@@ -60,18 +72,18 @@ fun Stat.CodeReferencesStat.CodeReference.toSarifResult(
                     sourceLanguage = determineSourceLanguage(filePath)
                 ),
                 properties = PropertyBag(
-                    extras + mapOf(
-                        "fileType" to filePath.split(".").last()
+                    value = extras + mapOf(
+                        SarifKey.FILE_TYPE to filePath.split(".").last()
                     )
                 )
             )
         )
     ),
     properties = PropertyBag(
-        mapOf(
-            "owner" to (owner ?: "Unknown"),
-            "module" to modulePath,
-            "uniqueId" to uniqueId,
+        value = mapOf(
+            SarifKey.OWNER to (owner ?: OwnerInfo.UNOWNED),
+            SarifKey.MODULE to modulePath,
+            SarifKey.UNIQUE_ID to uniqueId,
         )
     ),
     rule = ReportingDescriptorReference(id = key)
@@ -90,10 +102,15 @@ fun StatsJsReportModel.asSarifRulesAndResults(): Map<ReportingDescriptor, List<S
             val rule = statInfos[statKey]?.asReportingDescriptor() ?: return@forEach
 
             // Get or create the results list for this rule
-            val results = rulesAndResults.getOrPut(rule) { mutableListOf() }
+            val results = rulesAndResults.getOrPut(key = rule) { mutableListOf() }
 
             // Add results for this stat
-            results.addAll(stat.asSarifResult(modulePath, statKey))
+            results.addAll(
+                elements = stat.asSarifResult(
+                    module = modulePath,
+                    key = statKey
+                )
+            )
         }
     }
 
@@ -111,11 +128,11 @@ fun StatMetadata.asReportingDescriptor(shortDescription: String = ""): Reporting
         fullDescription = MultiformatMessageString(markdown = description, text = description),
         shortDescription = MultiformatMessageString(text = shortDescription),
         properties = PropertyBag(
-            mapOf(
-                "description" to description,
-                "extras" to extras,
-                "category" to category,
-                "title" to title
+            value = mapOf(
+                SarifKey.DESCRIPTION to description,
+                SarifKey.EXTRAS to extras,
+                SarifKey.CATEGORIES to category,
+                SarifKey.TITLE to title
             )
         )
     )

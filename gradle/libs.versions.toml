@@ -16,11 +16,13 @@ jetbrains-compose = "1.6.10"
 ksp = "1.9.23-1.0.20"
 truth = "1.4.2"
 dokka = "1.9.20"
+sarif4k = "0.6.0"
 
 [libraries]
 anvil-annotations = { module = "com.squareup.anvil:annotations", version.ref = "anvil" }
 dagger = { module = "com.google.dagger:dagger", version.ref = "dagger" }
 dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "dagger" }
+detekt-sarif4k = { module = "io.github.detekt.sarif4k:sarif4k", version.ref = "sarif4k" }
 javax-inject = { module = "javax.inject:javax.inject", version.ref = "javax-inject" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
