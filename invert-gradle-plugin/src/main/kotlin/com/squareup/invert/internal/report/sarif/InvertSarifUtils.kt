@@ -142,7 +142,7 @@ fun createSarifSchemaFromResults(
     rule: ReportingDescriptor,
     results: List<SarifResult>
 ): SarifSchema210 {
-    return createSarifSchema(toolName = rule.id, rule = listOf(rule), results = results)
+    return createSarifSchema(rule = listOf(rule), results = results)
 }
 
 /**
