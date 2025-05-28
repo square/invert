@@ -2,6 +2,20 @@
 
 _2024-11-27_
 
+## Version 0.0.4-dev
+* Added uniqueIdentifier to `CodeReference` to allow for easier linking.
+* Added Sarif support to export `CodeReference`s in the Sarif format.
+* Simplified the "Stat Detail" page to only include a single statKey as a param instead of a list.  We weren't really using that feature anyways.
+* Added collectors to init scripts. Also publishing all artifacts.
+* Added new 'configureInvert' callback before invert is loaded.
+* Added line chart support.
+* Updated CodeReferences and Owner Breakdown pages.
+* Compute totals by module and by ownership.
+* Added sorting for numeric extras!
+* Added a new AllOwners field to the InvertOwnershipCollector
+* Added Tech Debt Page w/embed view
+**Full Changelog**: https://github.com/square/invert/compare/0.0.3-dev...0.0.4-dev
+
 ## Version 0.0.3-dev
 * Added in the ability to attach "extras" key/value pairs to a `CodeReference`
 * Renamed `gradlePath` -> `modulePath` to be more general.
