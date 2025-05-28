@@ -3,6 +3,8 @@ package com.squareup.invert.internal.report.sarif
 import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.logging.InvertLogger
+import com.squareup.invert.models.ExtraDataType
+import com.squareup.invert.models.ExtraMetadata
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatMetadata
@@ -99,7 +101,14 @@ class InvertSarifReportWriterTest {
         val codeRefStatInfo = StatMetadata(
             key = "test_stat",
             description = "Test Stat",
-            dataType = StatDataType.CODE_REFERENCES
+            dataType = StatDataType.CODE_REFERENCES,
+            extras = listOf(
+                ExtraMetadata(
+                    key = "extra_info",
+                    type = ExtraDataType.STRING,
+                    description = "Extra information for test stat"
+                )
+            )
         )
 
         val codeReferences = listOf(
