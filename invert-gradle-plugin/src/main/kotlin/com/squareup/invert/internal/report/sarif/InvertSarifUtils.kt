@@ -130,7 +130,11 @@ fun StatMetadata.asReportingDescriptor(shortDescription: String = ""): Reporting
         properties = PropertyBag(
             value = mapOf(
                 SarifKey.DESCRIPTION to description,
-                SarifKey.EXTRAS to extras,
+                SarifKey.EXTRAS to extras.map {
+                    mapOf(
+                        it.key to it.description
+                    )
+                },
                 SarifKey.CATEGORIES to category,
                 SarifKey.TITLE to title
             )
