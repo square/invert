@@ -58,7 +58,8 @@ fun Stat.asSarifResult(
 @VisibleForTesting
 fun Stat.CodeReferencesStat.CodeReference.toSarifResult(
     key: StatKey,
-    modulePath: ModulePath?
+    modulePath: ModulePath?,
+    ownerInfo: String = OwnerInfo.UNOWNED
 ): SarifResult = SarifResult(
     ruleID = key,
     message = Message(text = code),
@@ -81,8 +82,8 @@ fun Stat.CodeReferencesStat.CodeReference.toSarifResult(
     ),
     properties = PropertyBag(
         value = mapOf(
-            SarifKey.OWNER to (owner ?: OwnerInfo.UNOWNED),
-            SarifKey.MODULE to modulePath,
+            SarifKey.OWNER to (owner ?: ownerInfo),
+            SarifKey.MODULE to (modulePath),
             SarifKey.UNIQUE_ID to uniqueId,
         )
     ),

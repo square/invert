@@ -108,7 +108,9 @@ object CollectedStatAggregator {
             "code_references_${statMetadata.key}.sarif"
           ),
           metadata = statMetadata,
-          values = allCodeReferencesForStatWithProjectPathExtra
+          values = allCodeReferencesForStatWithProjectPathExtra,
+          moduleExtraKey = MODULE_EXTRA_METADATA,
+            ownerExtraKey = OWNER_EXTRA_METADATA,
         )
       }
     }
