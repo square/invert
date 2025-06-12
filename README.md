@@ -104,7 +104,7 @@ plugins {
 }
 repositories {
     mavenCentral() // Released Versions
-    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots" } // SNAPSHOT Versions
+    maven { url "https://central.sonatype.com/repository/maven-snapshots/" } // SNAPSHOT Versions
 }
 ```
 
