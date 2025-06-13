@@ -4,6 +4,8 @@ import com.squareup.invert.CollectedStat
 import com.squareup.invert.InvertCollectContext
 import com.squareup.invert.StatCollector
 import com.squareup.invert.collectors.internal.wrapCodeForMarkdown
+import com.squareup.invert.models.ExtraDataType
+import com.squareup.invert.models.ExtraMetadata
 import com.squareup.invert.models.Markdown
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatDataType
@@ -51,6 +53,13 @@ open class InvertContainsStatCollector(
             title = statTitle,
             description = statDescription ?: statTitle,
             dataType = StatDataType.CODE_REFERENCES,
+            extras = listOf(
+              ExtraMetadata(
+                key = "filePredicate",
+                type = ExtraDataType.STRING,
+                description = "Predicate to filter files for this stat collector"
+              )
+            )
           ),
           stat = Stat.CodeReferencesStat(codeReferences)
         )
