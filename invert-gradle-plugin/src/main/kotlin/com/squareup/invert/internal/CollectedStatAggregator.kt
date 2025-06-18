@@ -109,8 +109,8 @@ object CollectedStatAggregator {
           ),
           metadata = statMetadata,
           values = allCodeReferencesForStatWithProjectPathExtra,
-          moduleExtraKey = MODULE_EXTRA_METADATA,
-            ownerExtraKey = OWNER_EXTRA_METADATA,
+          moduleExtraKey = MODULE_EXTRA_METADATA.key,
+          ownerExtraKey = OWNER_EXTRA_METADATA.key,
         )
       }
     }

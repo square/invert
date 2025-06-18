@@ -87,16 +87,8 @@ class InvertSarifReportWriterTest {
             metadata = metadata,
             fileName = testFile,
             description = "Test Description",
-            moduleExtraKey = ExtraMetadata(
-                key = "module",
-                type = ExtraDataType.STRING,
-                description = "Module information"
-            ),
-            ownerExtraKey = ExtraMetadata(
-                key = "owner",
-                type = ExtraDataType.STRING,
-                description = "Owner information"
-            )
+            moduleExtraKey = "module",
+            ownerExtraKey = "owner"
         )
 
         // Then
@@ -143,16 +135,8 @@ class InvertSarifReportWriterTest {
             metadata = metadata,
             fileName = testFile,
             description = "Test Description",
-            moduleExtraKey = ExtraMetadata(
-                key = "module",
-                type = ExtraDataType.STRING,
-                description = "Module information"
-            ),
-            ownerExtraKey = ExtraMetadata(
-                key = "owner",
-                type = ExtraDataType.STRING,
-                description = "Owner information"
-            )
+            moduleExtraKey = "module",
+            ownerExtraKey = "owner"
         )
 
         // Then

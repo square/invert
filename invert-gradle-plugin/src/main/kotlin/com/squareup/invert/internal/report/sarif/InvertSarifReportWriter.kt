@@ -76,8 +76,8 @@ class InvertSarifReportWriter(
             metadata: StatMetadata,
             fileName: File,
             description: String,
-            moduleExtraKey: ExtraMetadata,
-            ownerExtraKey: ExtraMetadata,
+            moduleExtraKey: String,
+            ownerExtraKey: String,
         ) {
             if (!fileName.exists()) {
                 fileName.parentFile.mkdirs()
@@ -87,8 +87,8 @@ class InvertSarifReportWriter(
             val results = values.map {
                 it.toSarifResult(
                     metadata.key,
-                    modulePath = it.extras.getOrElse(moduleExtraKey.key) { null },
-                    ownerInfo = it.extras.getOrElse(ownerExtraKey.key) { OwnerInfo.UNOWNED }
+                    modulePath = it.extras.getOrElse(moduleExtraKey) { null },
+                    ownerInfo = it.extras.getOrElse(ownerExtraKey) { OwnerInfo.UNOWNED }
                 )
             }
             val rule = metadata.asReportingDescriptor(shortDescription = description)

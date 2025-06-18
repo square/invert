@@ -45,7 +45,7 @@ fun Stat.asSarifResult(
 ): List<SarifResult> = when (this) {
     is Stat.CodeReferencesStat -> value.map {
         it.toSarifResult(
-            key = key, modulePath = module
+            key = key, modulePath = module, ownerInfo = it.owner ?: OwnerInfo.UNOWNED
         )
     }
     // No support for other stat types in SARIF
@@ -59,7 +59,7 @@ fun Stat.asSarifResult(
 fun Stat.CodeReferencesStat.CodeReference.toSarifResult(
     key: StatKey,
     modulePath: ModulePath?,
-    ownerInfo: String = OwnerInfo.UNOWNED
+    ownerInfo: String
 ): SarifResult = SarifResult(
     ruleID = key,
     message = Message(text = code),
