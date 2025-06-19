@@ -45,7 +45,7 @@ fun Stat.asSarifResult(
 ): List<SarifResult> = when (this) {
     is Stat.CodeReferencesStat -> value.map {
         it.toSarifResult(
-            key = key, modulePath = module
+            key = key, modulePath = module, ownerInfo = it.owner ?: OwnerInfo.UNOWNED
         )
     }
     // No support for other stat types in SARIF
@@ -58,7 +58,8 @@ fun Stat.asSarifResult(
 @VisibleForTesting
 fun Stat.CodeReferencesStat.CodeReference.toSarifResult(
     key: StatKey,
-    modulePath: ModulePath?
+    modulePath: ModulePath?,
+    ownerInfo: String
 ): SarifResult = SarifResult(
     ruleID = key,
     message = Message(text = code),
@@ -81,8 +82,8 @@ fun Stat.CodeReferencesStat.CodeReference.toSarifResult(
     ),
     properties = PropertyBag(
         value = mapOf(
-            SarifKey.OWNER to (owner ?: OwnerInfo.UNOWNED),
-            SarifKey.MODULE to modulePath,
+            SarifKey.OWNER to (owner ?: ownerInfo),
+            SarifKey.MODULE to (modulePath),
             SarifKey.UNIQUE_ID to uniqueId,
         )
     ),

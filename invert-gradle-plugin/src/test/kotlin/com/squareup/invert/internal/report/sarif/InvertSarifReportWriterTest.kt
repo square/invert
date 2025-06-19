@@ -86,7 +86,9 @@ class InvertSarifReportWriterTest {
             values = codeReferences,
             metadata = metadata,
             fileName = testFile,
-            description = "Test Description"
+            description = "Test Description",
+            moduleExtraKey = "module",
+            ownerExtraKey = "owner"
         )
 
         // Then
@@ -95,6 +97,57 @@ class InvertSarifReportWriterTest {
         assertTrue(content.contains("\"id\":\"test_stat\""), "Should contain rule ID")
         assertTrue(content.contains("\"text\":\"test code\""), "Should contain code snippet")
         assertTrue(content.contains("\"uri\":\"test.kt\""), "Should contain file path")
+    }
+
+
+    @Test
+    fun `test writeToSarifReport uses extras owner if code stat owner doesnt exist`() {
+        // Given
+        val testFile = File(testDir, "test.sarif")
+        val codeReferences = listOf(
+            Stat.CodeReferencesStat.CodeReference(
+                filePath = "test.kt",
+                startLine = 1,
+                endLine = 10,
+                code = "test code",
+                owner = "codeStatOwner"
+            ),
+            Stat.CodeReferencesStat.CodeReference(
+                filePath = "test.kt",
+                startLine = 1,
+                endLine = 10,
+                code = "test code",
+                extras =  mapOf(
+                    "owner" to "testOwner",
+                    "module" to "testModule"
+                )
+            )
+        )
+        val metadata = StatMetadata(
+            key = "test_stat",
+            description = "Test Stat",
+            dataType = StatDataType.CODE_REFERENCES
+        )
+
+        // When
+        InvertSarifReportWriter.writeToSarifReport(
+            values = codeReferences,
+            metadata = metadata,
+            fileName = testFile,
+            description = "Test Description",
+            moduleExtraKey = "module",
+            ownerExtraKey = "owner"
+        )
+
+        // Then
+        assertTrue(testFile.exists(), "SARIF file should be created")
+        val content = testFile.readText()
+        assertTrue(content.contains("\"id\":\"test_stat\""), "Should contain rule ID")
+        assertTrue(content.contains("\"text\":\"test code\""), "Should contain code snippet")
+        assertTrue(content.contains("\"uri\":\"test.kt\""), "Should contain file path")
+        assertTrue(content.contains("\"owner\":\"testOwner\""), "Should contain owner information")
+        assertTrue(content.contains("\"owner\":\"codeStatOwner\""), "Should contain owner information")
+        assertTrue(content.contains("\"module\":\"testModule\""), "Should contain module information")
     }
 
     private fun createTestStatsData(): StatsJsReportModel {

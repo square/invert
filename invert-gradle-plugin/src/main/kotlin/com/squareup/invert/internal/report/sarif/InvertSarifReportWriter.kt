@@ -1,8 +1,11 @@
 package com.squareup.invert.internal.report.sarif
 
 import com.squareup.invert.internal.InvertFileUtils
+import com.squareup.invert.internal.models.CollectedOwnershipForProject
 import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.logging.InvertLogger
+import com.squareup.invert.models.ExtraMetadata
+import com.squareup.invert.models.OwnerInfo
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.StatsJsReportModel
@@ -72,14 +75,22 @@ class InvertSarifReportWriter(
             values: List<Stat.CodeReferencesStat.CodeReference>,
             metadata: StatMetadata,
             fileName: File,
-            description: String
+            description: String,
+            moduleExtraKey: String,
+            ownerExtraKey: String,
         ) {
             if (!fileName.exists()) {
                 fileName.parentFile.mkdirs()
                 fileName.createNewFile()
             }
 
-            val results = values.map { it.toSarifResult(metadata.key, modulePath = null) }
+            val results = values.map {
+                it.toSarifResult(
+                    metadata.key,
+                    modulePath = it.extras.getOrElse(moduleExtraKey) { null },
+                    ownerInfo = it.extras.getOrElse(ownerExtraKey) { OwnerInfo.UNOWNED }
+                )
+            }
             val rule = metadata.asReportingDescriptor(shortDescription = description)
             val sarifSchema = createSarifSchemaFromResults(rule = rule, results = results)
             val sarifJson = SarifSerializer.toMinifiedJson(sarifSchema)
