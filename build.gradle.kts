@@ -47,7 +47,7 @@ subprojects
       val hasPublishPlugin = it.plugins.hasPlugin("com.vanniktech.maven.publish.base")
       if (hasPublishPlugin) {
         it.extensions.getByType(MavenPublishBaseExtension::class.java).apply {
-          publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
+          publishToMavenCentral(automaticRelease = true)
           val isCI = System.getenv().containsKey("GITHUB_ACTIONS")
           if (isCI) {
             signAllPublications()
