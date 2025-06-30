@@ -5,6 +5,15 @@ plugins {
   alias(libs.plugins.dokka)
 }
 
+afterEvaluate {
+  tasks.named("publishMavenPublicationToMavenCentralRepository") {
+    mustRunAfter(tasks.named("signPluginMavenPublication"))
+  }
+  tasks.named("publishPluginMavenPublicationToMavenCentralRepository") {
+    mustRunAfter(tasks.named("signMavenPublication"))
+  }
+}
+
 java {
   withSourcesJar()
 }
