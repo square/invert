@@ -1,6 +1,6 @@
 # 🔃 Invert
 [![Maven Central](https://img.shields.io/badge/dynamic/xml?url=https://repo1.maven.org/maven2/com/squareup/invert/invert-gradle-plugin/maven-metadata.xml&label=Maven%20Central&color=blue&query=.//versioning/latest)](https://repo1.maven.org/maven2/com/squareup/invert/com.squareup.invert.gradle.plugin/)
-[![Latest Snapshot](https://img.shields.io/badge/dynamic/xml?url=https://s01.oss.sonatype.org/content/repositories/snapshots/com/squareup/invert/com.squareup.invert.gradle.plugin/maven-metadata.xml&label=Latest%20Snapshot&color=orange&query=.//versioning/latest)](https://s01.oss.sonatype.org/content/repositories/snapshots/com/squareup/invert/com.squareup.invert.gradle.plugin/)
+[![Latest Snapshot](https://img.shields.io/badge/dynamic/xml?url=https://central.sonatype.com/repository/maven-snapshots/com/squareup/invert/invert-gradle-plugin/maven-metadata.xml&label=Maven%20Central&color=blue&query=.//versioning/latest)](https://central.sonatype.com/repository/maven-snapshots/com/squareup/invert/invert-gradle-plugin/)
 [![LICENSE](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/square/invert/blob/main/LICENSE)
 
 # What is Invert?
