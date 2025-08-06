@@ -12,6 +12,7 @@ build
 ### Mac OS ###
 .DS_Store
 /local.properties
+/examples/local.properties
 
 .gradle
 yarn.lock
