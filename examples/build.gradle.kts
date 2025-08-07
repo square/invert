@@ -4,11 +4,10 @@ buildscript {
     mavenCentral()
     google()
     gradlePluginPortal()
-    maven { url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content") }
-//        maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") } // SNAPSHOT Versions
+    maven { url = uri("https://central.sonatype.com/repository/maven-snapshots") }
   }
   dependencies {
-    val invertVersion = "0.0.4-dev-SNAPSHOT"
+    val invertVersion = "0.0.5-dev-SNAPSHOT"
     classpath("com.squareup.invert:invert-gradle-plugin:$invertVersion")
     classpath("com.squareup.invert:invert-collectors:$invertVersion")
     classpath("com.squareup.invert:invert-owners-github:$invertVersion")
@@ -20,7 +19,7 @@ allprojects {
     mavenCentral()
     google()
     gradlePluginPortal()
-    maven { url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content") }
+    maven { url = uri("https://central.sonatype.com/repository/maven-snapshots") }
   }
 }
 

@@ -77,7 +77,7 @@ subprojects
           if (plugins.hasPlugin("org.jetbrains.kotlin.jvm")) {
             configure(
               KotlinJvm(
-                javadocJar = JavadocJar.Dokka("dokkaHtml"),
+                javadocJar = JavadocJar.Dokka("dokkaGeneratePublicationHtml"),
                 sourcesJar = true,
               )
             )
@@ -85,17 +85,11 @@ subprojects
           if (plugins.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
             configure(
               KotlinMultiplatform(
-                javadocJar = JavadocJar.Dokka("dokkaHtml"),
+                javadocJar = JavadocJar.Dokka("dokkaGeneratePublicationHtml"),
                 sourcesJar = true,
               )
             )
           }
-//                    configure(
-//                        GradlePlugin(
-//                            javadocJar = JavadocJar.None(),
-//                            sourcesJar = true,
-//                        )
-//                    )
         }
       }
     }
