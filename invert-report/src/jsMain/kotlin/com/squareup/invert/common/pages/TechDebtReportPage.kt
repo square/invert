@@ -73,9 +73,9 @@ data class TechDebtNavRoute(
 }
 
 val TechDebtNavPage = NavPage(
-  pageId = "tech_debt",
-  displayName = "Tech Debt",
-  navIconSlug = "piggy-bank",
+  pageId = "stat_breakdown",
+  displayName = "Stat Breakdown",
+  navIconSlug = "clipboard2-data",
   navRouteParser = { params: Map<String, String?> ->
     TechDebtNavRoute(
       completedKey = params[TechDebtNavRoute.PARAM_COMPLETED_STAT_KEY]?.trim(),
@@ -647,7 +647,7 @@ fun TechDebtListComposable(
   BootstrapRow {
     BootstrapColumn {
       H3 {
-        Text("Tech Debt")
+        Text("Stat Breakdown")
       }
       codeReferencesByCategory.entries.sortedBy { it.key.lowercase() }.forEach { (category, codeReferenceStatTypes) ->
         H6 {
