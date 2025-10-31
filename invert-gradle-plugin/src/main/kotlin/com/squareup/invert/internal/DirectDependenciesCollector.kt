@@ -4,7 +4,7 @@ import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ExternalDependency
-import org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependency
+import org.gradle.api.artifacts.ProjectDependency
 
 internal class DirectDependenciesCollector(
   private val annotationProcessorNames: Set<String> = setOf("kapt", "ksp", "annotationProcessor"),
@@ -24,7 +24,7 @@ internal class DirectDependenciesCollector(
         cfg.name to cfg.allDependencies.mapNotNull { dependency ->
           when (dependency) {
             is ExternalDependency -> "${dependency.group}:${dependency.name}:${dependency.version}"
-            is DefaultProjectDependency -> dependency.dependencyProject.path
+            is ProjectDependency -> dependency.path
             else -> null
           }
         }.toSortedSet()
