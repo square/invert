@@ -2,6 +2,7 @@ package com.squareup.invert.internal.tasks
 
 import com.squareup.invert.InvertExtension
 import com.squareup.invert.internal.InvertDependencyCollectors.computeCollectedDependenciesForProject
+import com.squareup.invert.internal.DirectDependenciesCollector
 import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.InvertFileUtils.addSlashAnd
 import com.squareup.invert.internal.getResolvedComponentResult
@@ -142,35 +143,12 @@ internal abstract class InvertCollectDependenciesTask : DefaultTask() {
     )
     monitoredConfigurationsMap.set(resolvedMonitoredConfigurationsMap)
 
-    val annotationProcessors = setOf("kapt", "ksp", "annotationProcessor")
-
-    directDependencies.set(
-      project.configurations
-        .toSet()
-        .filter {
-          filteredConfigurationNames.contains(it.name)
-              || annotationProcessors.contains(it.name)
-              || it.name.contains("kotlinCompilerPluginClasspath")
-        }
-        .associate { configuration ->
-          configuration.name to configuration.allDependencies.mapNotNull { dependency: Dependency ->
-            when (dependency) {
-              is ExternalDependency -> {
-                "${dependency.group}:${dependency.name}:${dependency.version}"
-              }
-
-              is DefaultProjectDependency -> {
-                dependency.dependencyProject.path
-              }
-
-              else -> {
-                null
-              }
-            }
-          }.toSortedSet()
-        }
-        .filter { it.value.isNotEmpty() }
-    )
+    val directDepsMap = DirectDependenciesCollector()
+      .collect(
+        configurations = project.configurations.toSet(),
+        filteredConfigurationNames = filteredConfigurationNames.toSet(),
+      )
+    directDependencies.set(directDepsMap)
 
     projectBuildReportDependenciesFile.set(
       project.layout.buildDirectory.file(
