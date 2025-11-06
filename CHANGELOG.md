@@ -2,6 +2,16 @@
 
 _2024-11-27_
 
+## Version 0.0.5-dev
+
+* Upgraded to Kotlin 2.1.21 and updated other libraries to compatible versions.
+* Replaced deprecated `getDependencyProject()` method with Gradle 9-compatible version.
+* Renamed "Tech Debt" page to "Stats Burndown" for better clarity.
+* Fixed Kotlin 2.1.21 webpack resources issue.
+* Updated documentation with proper snapshot version information.
+
+**Full Changelog**: https://github.com/square/invert/compare/0.0.4-dev...0.0.5-dev
+
 ## Version 0.0.4-dev
 * Added uniqueIdentifier to `CodeReference` to allow for easier linking.
 * Added Sarif support to export `CodeReference`s in the Sarif format.
