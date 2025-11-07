@@ -4,16 +4,26 @@ import com.squareup.invert.InvertExtension
 import com.squareup.invert.InvertOwnershipCollector
 import com.squareup.invert.ReportOutputConfig
 import com.squareup.invert.StatCollector
+import com.squareup.invert.internal.AggregatedCodeReferences
 import com.squareup.invert.internal.CollectedStatAggregator
 import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.NoOpInvertOwnershipCollector
 import com.squareup.invert.internal.isRootProject
+import com.squareup.invert.internal.models.CollectedStatsForProject
 import com.squareup.invert.internal.models.InvertCombinedCollectedData
 import com.squareup.invert.internal.report.GradleProjectAnalysisCombiner
 import com.squareup.invert.internal.report.InvertReportWriter
+import com.squareup.invert.internal.report.json.InvertJsonReportWriter
+import com.squareup.invert.internal.report.sarif.InvertSarifReportWriter
 import com.squareup.invert.logging.GradleInvertLogger
 import com.squareup.invert.logging.InvertLogger
+import com.squareup.invert.models.ExtraDataType
+import com.squareup.invert.models.ExtraMetadata
 import com.squareup.invert.models.InvertSerialization.InvertJson
+import com.squareup.invert.models.ModulePath
+import com.squareup.invert.models.OwnerName
+import com.squareup.invert.models.Stat
+import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.HistoricalData
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
@@ -95,15 +105,23 @@ abstract class InvertTask : DefaultTask() {
       val allCollectedDataOrig: InvertCombinedCollectedData = GradleProjectAnalysisCombiner
         .combineAnalysisResults(subprojectInvertReportDirs.get())
 
+      val reportOutputConfig = ReportOutputConfig(
+        gitCloneDir = File(rootProjectDirPath.get()),
+        invertReportDirectory = invertReportDir,
+        ownershipCollector = ownershipCollector,
+      )
+
       val allCollectedData = CollectedStatAggregator.aggregate(
         origAllCollectedData = allCollectedDataOrig,
         reportMetadata = reportMetadata,
         statCollectorsForAggregation = statCollectors,
-        reportOutputConfig = ReportOutputConfig(
-          gitCloneDir = File(rootProjectDirPath.get()),
-          invertReportDirectory = invertReportDir,
-          ownershipCollector = ownershipCollector,
-        )
+        reportOutputConfig = reportOutputConfig
+      )
+
+      // Exports all Code References to individual JSON and SARIF files.
+      exportFullListOfCodeReferences(
+        reportOutputConfig = reportOutputConfig,
+        aggregatedCollectedData = allCollectedData
       )
 
       val historicalDataFile: File? = historicalDataFileProperty.orNull?.let { File(it) }
@@ -174,4 +192,91 @@ abstract class InvertTask : DefaultTask() {
         .distinct()
     )
   }
+
+
+  private val MODULE_EXTRA_METADATA = ExtraMetadata(
+    key = "module",
+    type = ExtraDataType.STRING,
+    description = "Module"
+  )
+  private val OWNER_EXTRA_METADATA = ExtraMetadata(
+    key = "owner",
+    type = ExtraDataType.STRING,
+    description = "Owner"
+  )
+
+  private fun exportFullListOfCodeReferences(
+    reportOutputConfig: ReportOutputConfig,
+    aggregatedCollectedData: InvertCombinedCollectedData
+  ) {
+    val allStatMetadatas = aggregatedCollectedData.collectedStats.flatMap { it.statInfos.values }.distinct()
+
+    val moduleToOwnerMap: Map<ModulePath, OwnerName> =
+      aggregatedCollectedData.collectedOwners.associate { it.path to it.ownerName }
+
+    allStatMetadatas.forEach { statMetadata: StatMetadata ->
+      val statKey = statMetadata.key
+      val allCodeReferencesForStatWithProjectPathExtra = mutableListOf<Stat.CodeReferencesStat.CodeReference>()
+      // Create Code References Export after Aggregation
+      aggregatedCollectedData.collectedStats.forEach { collectedStatsForProject: CollectedStatsForProject ->
+        collectedStatsForProject.stats[statKey]?.takeIf { it is Stat.CodeReferencesStat }?.let { stat ->
+          val collectedCodeReferenceStat = stat as Stat.CodeReferencesStat
+
+          val codeReferences = collectedCodeReferenceStat.value
+          if (codeReferences.isNotEmpty()) {
+            synchronized(allCodeReferencesForStatWithProjectPathExtra) {
+              allCodeReferencesForStatWithProjectPathExtra.addAll(
+                collectedCodeReferenceStat.value.map { codeReference: Stat.CodeReferencesStat.CodeReference ->
+                  // Use the owner from the code reference if it exists, otherwise use the module's owner
+                  val codeReferenceOwner = codeReference.owner ?: moduleToOwnerMap[collectedStatsForProject.path]
+
+                  // Updating the extras to include the "module" and "owner"
+                  val updatedExtras = codeReference.extras.toMutableMap().apply {
+                    this[MODULE_EXTRA_METADATA.key] = collectedStatsForProject.path
+                    if (codeReferenceOwner != null) {
+                      this[OWNER_EXTRA_METADATA.key] = codeReferenceOwner
+                    }
+                  }
+                  codeReference.copy(
+                    extras = updatedExtras
+                  )
+                }
+              )
+            }
+          }
+        }
+      }
+      if (allCodeReferencesForStatWithProjectPathExtra.isNotEmpty()) {
+        InvertJsonReportWriter.writeJsonFile(
+          description = "All CodeReferences for ${statMetadata.key}",
+          jsonOutputFile = InvertFileUtils.outputFile(
+            File(reportOutputConfig.invertReportDirectory, "json"),
+            "code_references_${statMetadata.key}.json"
+          ),
+          serializer = AggregatedCodeReferences.serializer(),
+          value = AggregatedCodeReferences(
+            metadata = statMetadata.copy(
+              extras = statMetadata.extras
+                .plus(MODULE_EXTRA_METADATA)
+                .plus(OWNER_EXTRA_METADATA)
+            ),
+            values = allCodeReferencesForStatWithProjectPathExtra
+          )
+        )
+
+        InvertSarifReportWriter.writeToSarifReport(
+          description = "All CodeReferences for ${statMetadata.key}",
+          fileName = InvertFileUtils.outputFile(
+            File(reportOutputConfig.invertReportDirectory, "sarif"),
+            "code_references_${statMetadata.key}.sarif"
+          ),
+          metadata = statMetadata,
+          values = allCodeReferencesForStatWithProjectPathExtra,
+          moduleExtraKey = MODULE_EXTRA_METADATA.key,
+          ownerExtraKey = OWNER_EXTRA_METADATA.key,
+        )
+      }
+    }
+  }
+
 }
