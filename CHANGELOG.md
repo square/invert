@@ -1,6 +1,14 @@
 # Change Log
 
-_2024-11-27_
+## Version 0.0.6-dev
+
+_2025-11-10_
+
+* Improved export functionality to run after the aggregating stats phase for better data collection.
+* Enhanced stat aggregation by passing all accumulated stats to collectors during aggregation.
+* Migrated to OKIO for buffered file writing for improved performance.
+
+**Full Changelog**: https://github.com/square/invert/compare/0.0.5-dev...0.0.6-dev
 
 ## Version 0.0.5-dev
 
