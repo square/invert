@@ -17,6 +17,7 @@ ksp = "2.1.21-2.0.2"
 truth = "1.4.4"
 dokka = "2.0.0"
 sarif4k = "0.6.0"
+okio = "3.16.2"
 
 [libraries]
 anvil-annotations = { module = "com.squareup.anvil:annotations", version.ref = "anvil" }
@@ -37,6 +38,7 @@ ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "kto
 ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
 
 

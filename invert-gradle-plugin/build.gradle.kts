@@ -39,6 +39,7 @@ dependencies {
 
   implementation(libs.kotlinx.serialization.json)
   implementation(libs.kotlinx.coroutines.core)
+  implementation(libs.okio)
   implementation(libs.detekt.sarif4k)
 
   testImplementation(libs.kotlin.test)

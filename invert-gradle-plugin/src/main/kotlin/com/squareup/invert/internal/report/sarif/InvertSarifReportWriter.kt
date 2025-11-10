@@ -1,24 +1,23 @@
 package com.squareup.invert.internal.report.sarif
 
 import com.squareup.invert.internal.InvertFileUtils
-import com.squareup.invert.internal.models.CollectedOwnershipForProject
 import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.logging.InvertLogger
-import com.squareup.invert.models.ExtraMetadata
 import com.squareup.invert.models.OwnerInfo
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.StatsJsReportModel
 import io.github.detekt.sarif4k.ReportingDescriptor
-import io.github.detekt.sarif4k.Result as SarifResult
 import io.github.detekt.sarif4k.Run
 import io.github.detekt.sarif4k.SarifSchema210
 import io.github.detekt.sarif4k.SarifSerializer
 import io.github.detekt.sarif4k.Tool
 import io.github.detekt.sarif4k.ToolComponent
 import io.github.detekt.sarif4k.Version
+import okio.buffer
+import okio.sink
 import java.io.File
-import java.nio.file.Files
+import io.github.detekt.sarif4k.Result as SarifResult
 
 /**
  * Writer for generating SARIF (Static Analysis Results Interchange Format) reports for Invert.
@@ -47,7 +46,9 @@ class InvertSarifReportWriter(
             filename = jsonFileKey.filename
         )
 
-        Files.write(sarifFile.toPath(), SarifSerializer.toMinifiedJson(sarif).toByteArray())
+        sarifFile.sink().buffer().use { sink ->
+            sink.writeUtf8(SarifSerializer.toMinifiedJson(sarif))
+        }
     }
 
     /**
@@ -94,7 +95,9 @@ class InvertSarifReportWriter(
             val rule = metadata.asReportingDescriptor(shortDescription = description)
             val sarifSchema = createSarifSchemaFromResults(rule = rule, results = results)
             val sarifJson = SarifSerializer.toMinifiedJson(sarifSchema)
-            fileName.writeText(sarifJson)
+            fileName.sink().buffer().use { sink ->
+                sink.writeUtf8(sarifJson)
+            }
         }
 
         fun createSarifSchema(

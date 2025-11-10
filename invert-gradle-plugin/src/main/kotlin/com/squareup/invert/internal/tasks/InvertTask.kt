@@ -101,6 +101,7 @@ abstract class InvertTask : DefaultTask() {
         gitProjectDir = gitProjectDir,
         ownershipCollector = ownershipCollector,
       )
+      invertLogger().lifecycle("Finished project metadata collection.")
 
       val allCollectedDataOrig: InvertCombinedCollectedData = GradleProjectAnalysisCombiner
         .combineAnalysisResults(subprojectInvertReportDirs.get())
@@ -111,6 +112,8 @@ abstract class InvertTask : DefaultTask() {
         ownershipCollector = ownershipCollector,
       )
 
+      invertLogger().info("Report output config: $reportOutputConfig")
+
       val allCollectedData = CollectedStatAggregator.aggregate(
         origAllCollectedData = allCollectedDataOrig,
         reportMetadata = reportMetadata,
@@ -118,11 +121,15 @@ abstract class InvertTask : DefaultTask() {
         reportOutputConfig = reportOutputConfig
       )
 
+      invertLogger().lifecycle("Finished aggregated data collection pass.")
+
       // Exports all Code References to individual JSON and SARIF files.
       exportFullListOfCodeReferences(
         reportOutputConfig = reportOutputConfig,
         aggregatedCollectedData = allCollectedData
       )
+
+      invertLogger().lifecycle("Finished data export to JSON and SARIF files.")
 
       val historicalDataFile: File? = historicalDataFileProperty.orNull?.let { File(it) }
       val historicalData: Set<HistoricalData> =
