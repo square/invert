@@ -32,7 +32,8 @@ data class AggregatedCodeReferences(
 object CollectedStatAggregator {
 
   /**
-   * This gives the opportunity for [StatCollector]s to run a final time with the context of the entire project.
+   * This gives the opportunity for [StatCollector]s to run a final time with the context of the
+   * entire project. Do not call this concurrently to avoid race conditions.
    */
   fun aggregate(
     origAllCollectedData: InvertCombinedCollectedData,
@@ -44,16 +45,22 @@ object CollectedStatAggregator {
       origAllCollectedData.collectedStats
         .associateBy { it.path }
         .toMutableMap()
+
+    // Track the current state of collected data, updating it after each collector
+    var currentCollectedData = origAllCollectedData
+
     statCollectorsForAggregation?.forEach { statCollectorForAggregation: StatCollector ->
       val aggregationResult: CollectedStatsAggregate? = statCollectorForAggregation.aggregate(
         reportOutputConfig = reportOutputConfig,
         invertAllCollectedDataRepo = InvertAllCollectedDataRepo(
           projectMetadata = reportMetadata,
-          allCollectedData = origAllCollectedData
+          allCollectedData = currentCollectedData  // Use current data, not original
         ),
       )
 
       aggregationResult?.aggregatedStatsByProject?.entries?.forEach { (projectPath, stats) ->
+
+        // If this was not in a `forEach` curr could be out of date.
         val curr: CollectedStatsForProject =
           projectPathToCollectedStatsForProject[projectPath] ?: CollectedStatsForProject(
             path = projectPath,
@@ -77,6 +84,11 @@ object CollectedStatAggregator {
           )
         }
       }
+
+      // Update currentCollectedData to reflect the stats added by this collector
+      currentCollectedData = currentCollectedData.copy(
+        collectedStats = projectPathToCollectedStatsForProject.values.toSet()
+      )
     }
     return origAllCollectedData.copy(
       collectedStats = projectPathToCollectedStatsForProject.values.toSet()
