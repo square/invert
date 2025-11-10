@@ -17,6 +17,8 @@ import com.squareup.invert.models.js.StatTotalAndMetadata
 import com.squareup.invert.models.js.StatsJsReportModel
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.SetSerializer
+import okio.buffer
+import okio.sink
 import java.io.File
 
 class InvertJsonReportWriter(
@@ -98,12 +100,14 @@ class InvertJsonReportWriter(
       serializer: KSerializer<T>,
       value: T,
     ) = jsonOutputFile.apply {
-      writeText(
-        InvertJson.encodeToString(
-          serializer = serializer,
-          value = value
+      sink().buffer().use { sink ->
+        sink.writeUtf8(
+          InvertJson.encodeToString(
+            serializer = serializer,
+            value = value
+          )
         )
-      )
+      }
       logger.lifecycle("Writing JSON ${jsonFileKey.description} to file://$canonicalPath")
     }
 
@@ -114,12 +118,14 @@ class InvertJsonReportWriter(
       value: T,
       logger: InvertLogger = SystemOutInvertLogger,
     ) = jsonOutputFile.apply {
-      writeText(
-        InvertJson.encodeToString(
-          serializer = serializer,
-          value = value
+      sink().buffer().use { sink ->
+        sink.writeUtf8(
+          InvertJson.encodeToString(
+            serializer = serializer,
+            value = value
+          )
         )
-      )
+      }
       logger.lifecycle("Writing JSON ${description} to file://$canonicalPath")
     }
   }

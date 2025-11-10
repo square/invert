@@ -20,6 +20,8 @@ import com.squareup.invert.models.js.StatJsReportModel
 import com.squareup.invert.models.js.StatsJsReportModel
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.SetSerializer
+import okio.buffer
+import okio.sink
 import java.io.File
 
 class InvertJsReportWriter(
@@ -127,7 +129,9 @@ class InvertJsReportWriter(
           filename = filename
         ).also {
           logger.lifecycle("Written to file://${it.path}")
-          it.writeBytes(contents)
+          it.sink().buffer().use { sink ->
+            sink.write(contents)
+          }
         }
       }
     }
@@ -190,15 +194,17 @@ class InvertJsReportWriter(
       if (!parentFile.exists()) {
         parentFile.mkdirs()
       }
-      writeText(
-        invertJsGlobalVariableAssignment(
-          fileKey = fileKey,
-          value = InvertJson.encodeToString(
-            serializer = serializer,
-            value = value
+      sink().buffer().use { sink ->
+        sink.writeUtf8(
+          invertJsGlobalVariableAssignment(
+            fileKey = fileKey,
+            value = InvertJson.encodeToString(
+              serializer = serializer,
+              value = value
+            )
           )
         )
-      )
+      }
       logger.lifecycle("Writing JavaScript $fileKey to file://$canonicalPath")
     }
   }
