@@ -103,9 +103,7 @@ object InvertJsReportUtils {
             metadata = statMetadata,
             total = ownerToTotalCountForStat.values.sum(),
             totalByOwner = ownerToTotalCountForStat
-          ).also { total ->
-            println(total)
-          }
+          )
         }
       }
     }
