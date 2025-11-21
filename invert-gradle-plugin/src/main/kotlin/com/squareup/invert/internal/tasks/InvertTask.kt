@@ -25,6 +25,8 @@ import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.HistoricalData
+import com.squareup.invert.models.js.TechDebtInitiative
+import com.squareup.invert.models.js.TechDebtInitiativeConfig
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import org.gradle.api.DefaultTask
@@ -41,9 +43,10 @@ import org.gradle.api.tasks.TaskAction
 import java.io.File
 
 /**
- * This task orchestrates analysis on submodules and the result creates 2 formats:
+ * This task orchestrates analysis on submodules and the result creates 3 formats:
  * 1. HTML/JS report
  * 2. JSON Artifacts that contain all data collected about submodules.
+ * 3. SARIF artifacts that contain data collected about submodules using the SARIF[https://docs.oasis-open.org/sarif/sarif/v2.1.0/] format.
  */
 abstract class InvertTask : DefaultTask() {
 
@@ -56,6 +59,9 @@ abstract class InvertTask : DefaultTask() {
 
   @get:Internal
   abstract var statCollectors: List<StatCollector>?
+
+  @get:Internal
+  abstract var techDebtInitiatives: List<TechDebtInitiative>?
 
   @get:Internal
   abstract var ownershipCollector: InvertOwnershipCollector?
@@ -182,6 +188,7 @@ abstract class InvertTask : DefaultTask() {
 
     this.historicalDataFileProperty.set(extension.getHistoricalDataFilePath())
     this.statCollectors = extension.getStatCollectors().toList()
+    this.techDebtInitiatives = extension.getTechDebtInitiatives().toList()
     this.ownershipCollector = extension.getOwnershipCollector()
 
     this.mavenRepoUrls.set(
@@ -283,6 +290,22 @@ abstract class InvertTask : DefaultTask() {
           ownerExtraKey = OWNER_EXTRA_METADATA.key,
         )
       }
+    }
+
+    val initiatives = techDebtInitiatives
+    // Write TDI config if we have specified any via extension.
+    if (!initiatives.isNullOrEmpty()) {
+      InvertJsonReportWriter.writeJsonFile(
+        description = "Tech Debt Initiatives Configuration",
+        jsonOutputFile = InvertFileUtils.outputFile(
+          File(reportOutputConfig.invertReportDirectory, "json"),
+          "tdi_config.json"
+        ),
+        serializer = TechDebtInitiativeConfig.serializer(),
+        value = TechDebtInitiativeConfig(
+          initiatives
+        )
+      )
     }
   }
 
