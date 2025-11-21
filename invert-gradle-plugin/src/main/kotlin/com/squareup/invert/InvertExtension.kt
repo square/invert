@@ -4,6 +4,7 @@ import com.squareup.invert.internal.IncludeAnySubprojectCalculator
 import com.squareup.invert.internal.IncludeRuntimeClasspathConfigurationsCalculator
 import com.squareup.invert.internal.NoOpInvertOwnershipCollector
 import com.squareup.invert.models.ConfigurationName
+import com.squareup.invert.models.js.TechDebtInitiative
 import org.gradle.api.Project
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -20,6 +21,12 @@ open class InvertExtension(project: Project) {
    */
   @get:Input
   internal val statCollectors = objects.domainObjectContainer(StatCollector::class.java)
+
+  /**
+   * User-provided [com.squareup.invert.models.js.TechDebtInitiative]s via [com.squareup.invert.InvertExtension].
+   */
+  @get:Input
+  internal val techDebtInitiatives = objects.listProperty(TechDebtInitiative::class.java)
 
   /**
    * User-provided [InvertOwnershipCollector]s via [InvertExtension].
@@ -88,12 +95,20 @@ open class InvertExtension(project: Project) {
     statCollectors.add(statCollector)
   }
 
+  fun addTechDebtInitiative(techDebtInitiative: TechDebtInitiative) {
+    techDebtInitiatives.add(techDebtInitiative)
+  }
+
   internal fun getHistoricalDataFilePath(): String? {
     return historicalDataFileProperty.orNull
   }
 
   internal fun getStatCollectors(): Collection<StatCollector> {
     return statCollectors
+  }
+
+  internal fun getTechDebtInitiatives(): Collection<TechDebtInitiative> {
+    return techDebtInitiatives.getOrElse(emptyList())
   }
 
   internal fun getConfigurationsForProjectCalculator(): InvertIncludeConfigurationCalculator {
