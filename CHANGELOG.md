@@ -1,5 +1,12 @@
 # Change Log
 
+## Version 0.0.7-dev
+
+* Added TechDebtInitiative type and added specification of TechDebtInitiatives to extension.
+
+**Full Changelog**: https://github.com/square/invert/compare/0.0.6-dev...0.0.7-dev
+
+
 ## Version 0.0.6-dev
 
 _2025-11-10_
