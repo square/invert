@@ -129,14 +129,6 @@ abstract class InvertTask : DefaultTask() {
 
       invertLogger().lifecycle("Finished aggregated data collection pass.")
 
-      // Exports all Code References to individual JSON and SARIF files.
-      exportFullListOfCodeReferences(
-        reportOutputConfig = reportOutputConfig,
-        aggregatedCollectedData = allCollectedData
-      )
-
-      invertLogger().lifecycle("Finished data export to JSON and SARIF files.")
-
       val historicalDataFile: File? = historicalDataFileProperty.orNull?.let { File(it) }
       val historicalData: Set<HistoricalData> =
         if (historicalDataFile?.isFile == true && historicalDataFile.length() > 0) {
@@ -156,12 +148,9 @@ abstract class InvertTask : DefaultTask() {
         rootBuildReportsDir = invertReportDir,
       ).writeProjectData(
         reportMetadata = reportMetadata,
-        collectedOwners = allCollectedData.collectedOwners,
-        collectedStats = allCollectedData.collectedStats,
-        collectedDependencies = allCollectedData.collectedDependencies,
-        collectedConfigurations = allCollectedData.collectedConfigurations,
-        collectedPlugins = allCollectedData.collectedPlugins,
+        collectedData = allCollectedData,
         historicalData = historicalData,
+        techDebtInitiatives = techDebtInitiatives ?: emptyList(),
       )
     }
   }
@@ -206,107 +195,4 @@ abstract class InvertTask : DefaultTask() {
         .distinct()
     )
   }
-
-
-  private val MODULE_EXTRA_METADATA = ExtraMetadata(
-    key = "module",
-    type = ExtraDataType.STRING,
-    description = "Module"
-  )
-  private val OWNER_EXTRA_METADATA = ExtraMetadata(
-    key = "owner",
-    type = ExtraDataType.STRING,
-    description = "Owner"
-  )
-
-  private fun exportFullListOfCodeReferences(
-    reportOutputConfig: ReportOutputConfig,
-    aggregatedCollectedData: InvertCombinedCollectedData
-  ) {
-    val allStatMetadatas = aggregatedCollectedData.collectedStats.flatMap { it.statInfos.values }.distinct()
-
-    val moduleToOwnerMap: Map<ModulePath, OwnerName> =
-      aggregatedCollectedData.collectedOwners.associate { it.path to it.ownerName }
-
-    allStatMetadatas.forEach { statMetadata: StatMetadata ->
-      val statKey = statMetadata.key
-      val allCodeReferencesForStatWithProjectPathExtra = mutableListOf<Stat.CodeReferencesStat.CodeReference>()
-      // Create Code References Export after Aggregation
-      aggregatedCollectedData.collectedStats.forEach { collectedStatsForProject: CollectedStatsForProject ->
-        collectedStatsForProject.stats[statKey]?.takeIf { it is Stat.CodeReferencesStat }?.let { stat ->
-          val collectedCodeReferenceStat = stat as Stat.CodeReferencesStat
-
-          val codeReferences = collectedCodeReferenceStat.value
-          if (codeReferences.isNotEmpty()) {
-            synchronized(allCodeReferencesForStatWithProjectPathExtra) {
-              allCodeReferencesForStatWithProjectPathExtra.addAll(
-                collectedCodeReferenceStat.value.map { codeReference: Stat.CodeReferencesStat.CodeReference ->
-                  // Use the owner from the code reference if it exists, otherwise use the module's owner
-                  val codeReferenceOwner = codeReference.owner ?: moduleToOwnerMap[collectedStatsForProject.path]
-
-                  // Updating the extras to include the "module" and "owner"
-                  val updatedExtras = codeReference.extras.toMutableMap().apply {
-                    this[MODULE_EXTRA_METADATA.key] = collectedStatsForProject.path
-                    if (codeReferenceOwner != null) {
-                      this[OWNER_EXTRA_METADATA.key] = codeReferenceOwner
-                    }
-                  }
-                  codeReference.copy(
-                    extras = updatedExtras
-                  )
-                }
-              )
-            }
-          }
-        }
-      }
-      if (allCodeReferencesForStatWithProjectPathExtra.isNotEmpty()) {
-        InvertJsonReportWriter.writeJsonFile(
-          description = "All CodeReferences for ${statMetadata.key}",
-          jsonOutputFile = InvertFileUtils.outputFile(
-            File(reportOutputConfig.invertReportDirectory, "json"),
-            "code_references_${statMetadata.key}.json"
-          ),
-          serializer = AggregatedCodeReferences.serializer(),
-          value = AggregatedCodeReferences(
-            metadata = statMetadata.copy(
-              extras = statMetadata.extras
-                .plus(MODULE_EXTRA_METADATA)
-                .plus(OWNER_EXTRA_METADATA)
-            ),
-            values = allCodeReferencesForStatWithProjectPathExtra
-          )
-        )
-
-        InvertSarifReportWriter.writeToSarifReport(
-          description = "All CodeReferences for ${statMetadata.key}",
-          fileName = InvertFileUtils.outputFile(
-            File(reportOutputConfig.invertReportDirectory, "sarif"),
-            "code_references_${statMetadata.key}.sarif"
-          ),
-          metadata = statMetadata,
-          values = allCodeReferencesForStatWithProjectPathExtra,
-          moduleExtraKey = MODULE_EXTRA_METADATA.key,
-          ownerExtraKey = OWNER_EXTRA_METADATA.key,
-        )
-      }
-    }
-
-    val initiatives = techDebtInitiatives
-    // Write TDI config if we have specified any via extension.
-    if (!initiatives.isNullOrEmpty()) {
-      InvertJsonReportWriter.writeJsonFile(
-        description = "Tech Debt Initiatives Configuration",
-        jsonOutputFile = InvertFileUtils.outputFile(
-          File(reportOutputConfig.invertReportDirectory, "json"),
-          "tdi_config.json"
-        ),
-        serializer = TechDebtInitiativeConfig.serializer(),
-        value = TechDebtInitiativeConfig(
-          initiatives
-        )
-      )
-    }
-  }
-
 }
