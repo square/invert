@@ -1,5 +1,12 @@
 # Change Log
 
+## Version 0.0.8
+
+* Moved JSON and SARIF file writing to InvertReportWriter.
+* Dropped -dev suffix on version as this is more stable now.
+
+**Full Changelog**: https://github.com/square/invert/compare/0.0.7-dev...0.0.8
+
 ## Version 0.0.7-dev
 
 * Added TechDebtInitiative type and added specification of TechDebtInitiatives to extension.
