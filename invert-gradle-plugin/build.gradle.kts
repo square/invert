@@ -7,11 +7,15 @@ plugins {
 }
 
 afterEvaluate {
-  tasks.named("publishMavenPublicationToMavenCentralRepository") {
-    mustRunAfter(tasks.named("signPluginMavenPublication"))
+  tasks.findByName("publishMavenPublicationToMavenCentralRepository")?.let { publishTask ->
+    tasks.findByName("signPluginMavenPublication")?.let { signTask ->
+      publishTask.mustRunAfter(signTask)
+    }
   }
-  tasks.named("publishPluginMavenPublicationToMavenCentralRepository") {
-    mustRunAfter(tasks.named("signMavenPublication"))
+  tasks.findByName("publishPluginMavenPublicationToMavenCentralRepository")?.let { publishTask ->
+    tasks.findByName("signMavenPublication")?.let { signTask ->
+      publishTask.mustRunAfter(signTask)
+    }
   }
 }
 
