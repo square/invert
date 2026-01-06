@@ -32,4 +32,4 @@ jobs:
         uses: gradle/actions/wrapper-validation@v3
 
       - name: Test on Ubuntu
-        run: ./gradlew assemble check --no-build-cache --no-daemon --stacktrace
+        run: ./gradlew assemble check --no-daemon --stacktrace
