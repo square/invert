@@ -48,6 +48,18 @@ project(":invert-report") {
     "jsBrowserDevelopmentWebpack"
   }
   val reportWebpackTask = tasks.named(webpackTaskName)
+  
+  // Fix implicit dependency issues between webpack and compile sync tasks
+  tasks.named("jsBrowserProductionWebpack").configure {
+    dependsOn("jsDevelopmentExecutableCompileSync")
+    dependsOn("jsProductionExecutableCompileSync")
+  }
+  
+  tasks.named("jsBrowserDevelopmentWebpack").configure {
+    dependsOn("jsDevelopmentExecutableCompileSync")
+    dependsOn("jsProductionExecutableCompileSync")
+  }
+  
   project(":invert-gradle-plugin").tasks.named("processResources").configure {
     dependsOn(reportWebpackTask)
   }

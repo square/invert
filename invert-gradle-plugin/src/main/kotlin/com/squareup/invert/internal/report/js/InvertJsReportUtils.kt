@@ -9,6 +9,7 @@ import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.GradlePluginId
 import com.squareup.invert.models.ModulePath
+import com.squareup.invert.models.OwnerInfo
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatDataType
@@ -46,7 +47,7 @@ object InvertJsReportUtils {
     allProjectsStatsData: StatsJsReportModel,
     collectedOwnershipInfo: OwnershipJsReportModel
   ): Map<StatKey, StatTotalAndMetadata> {
-    val moduleToOwnerMap = collectedOwnershipInfo.modules
+    val moduleToOwnerMap: Map<ModulePath, OwnerName> = collectedOwnershipInfo.modules
     val allStatMetadatas: List<StatMetadata> = allProjectsStatsData.statInfos.values
       .filter { statInfo ->
         when (statInfo.dataType) {
@@ -61,14 +62,12 @@ object InvertJsReportUtils {
 
     val globalTotals = mutableMapOf<StatKey, StatTotalAndMetadata>()
     allStatMetadatas.forEach { statMetadata: StatMetadata ->
-      var totalCount = 0 // Total count of the stat across all modules
-
       val ownerToTotalCountForStat = mutableMapOf<OwnerName, Int>()
 
-      allProjectsStatsData.statsByModule.entries.forEach { (modulePath, statTotalAndMetadata) ->
-        val stat: Stat? = statTotalAndMetadata[statMetadata.key]
+      allProjectsStatsData.statsByModule.entries.forEach { (modulePath, statTotalAndMetadata: Map<StatKey, Stat>) ->
+        val stat: Stat? = statTotalAndMetadata.get(statMetadata.key)
         if (stat != null) {
-          val moduleOwnerName = moduleToOwnerMap[modulePath]!!
+          val moduleOwnerName = moduleToOwnerMap[modulePath] ?: OwnerInfo.UNOWNED
 
           val currentCountForOwner: Int = ownerToTotalCountForStat.getOrDefault(moduleOwnerName, 0)
           when (stat) {
