@@ -1,5 +1,12 @@
 # Change Log
 
+## Version 0.0.9
+
+* Add support for filtering code references by values in 'extras'
+* Fix NullPointerException when resolving ownership
+
+**Full Changelog**: https://github.com/square/invert/compare/0.0.7-dev...0.0.8
+
 ## Version 0.0.8
 
 * Moved JSON and SARIF file writing to InvertReportWriter.
@@ -12,7 +19,6 @@
 * Added TechDebtInitiative type and added specification of TechDebtInitiatives to extension.
 
 **Full Changelog**: https://github.com/square/invert/compare/0.0.6-dev...0.0.7-dev
-
 
 ## Version 0.0.6-dev
 
