@@ -1,5 +1,39 @@
 window.invert_report = window.invert_report || {};
 
+// Bootstrap 5.3 data-bs-theme only supports "light" and "dark".
+// "auto" is not natively handled, so we detect system preference and set it.
+(function() {
+    var html = document.documentElement;
+    if (html.getAttribute('data-bs-theme') === 'auto') {
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        html.setAttribute('data-bs-theme', prefersDark ? 'dark' : 'light');
+        // Update if system preference changes mid-session
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                if (!html.dataset.userOverride) {
+                    html.setAttribute('data-bs-theme', e.matches ? 'dark' : 'light');
+                }
+            });
+        }
+    }
+})();
+
+window.invertIsDarkMode = function() {
+    var theme = document.documentElement.getAttribute('data-bs-theme');
+    if (theme === 'dark') return true;
+    if (theme === 'light') return false;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+};
+
+window.applyChartJsTheme = function() {
+    if (typeof Chart === 'undefined') return;
+    var rootStyles = getComputedStyle(document.documentElement);
+    var textColor = rootStyles.getPropertyValue('--bs-body-color').trim();
+    var borderColor = rootStyles.getPropertyValue('--bs-border-color').trim();
+    if (textColor) Chart.defaults.color = textColor;
+    if (borderColor) Chart.defaults.borderColor = borderColor;
+};
+
 window.keysForObject = function (obj) {
     let newKeys = []
     let keys = obj.keys()
@@ -48,6 +82,7 @@ window.render3dGraph = function (domElementId, graphDataJson, width, height) {
                 .dagMode('rl')
                 .width(width)
                 .height(height)
+                .backgroundColor(window.invertIsDarkMode() ? '#212529' : '#ffffff')
                 .nodeCanvasObject((node, ctx, globalScale) => {
                     const label = node.id;
                     const fontSize = 12 / globalScale;
@@ -55,7 +90,7 @@ window.render3dGraph = function (domElementId, graphDataJson, width, height) {
                     const textWidth = ctx.measureText(label).width;
                     const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2);
 
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.fillStyle = window.invertIsDarkMode() ? 'rgba(33, 37, 41, 0.8)' : 'rgba(255, 255, 255, 0.8)';
                     ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
 
                     ctx.textAlign = 'center';
@@ -94,6 +129,7 @@ window.renderChartJs = function (domElementId, graphDataJson, onClick) {
             }
             // chartJsData['type']='bar'
             chartJsData['options']['indexAxis'] = 'y'
+            window.applyChartJsTheme();
             new Chart(ctx, chartJsData);
         });
     }
@@ -180,12 +216,14 @@ window.renderPlotlyTreeMap = function (domElementId, filePaths, onClick) {
         }];
 
         // Layout configuration to remove margins
+        var rootStyles = getComputedStyle(document.documentElement);
+        var bgColor = rootStyles.getPropertyValue('--bs-body-bg').trim() || '#ffffff';
+        var textColor = rootStyles.getPropertyValue('--bs-body-color').trim() || '#212529';
         const layout = {
             margin: {t: 0, l: 0, r: 0, b: 0}, // Removes top, left, right, and bottom margins
-            // title: {
-            //     text: 'Hide the Modebar'
-            // },
-            showlegend: true
+            showlegend: true,
+            paper_bgcolor: bgColor,
+            font: { color: textColor }
         };
 
         // Configuration to remove Plotly logo and download button
@@ -208,6 +246,7 @@ window.renderLineChartJs = function (domElementId, graphDataJson, onClick) {
         const chartJsData = JSON.parse(graphDataJson)
         console.log(chartJsData)
         const ctx = document.getElementById(domElementId).getContext('2d');
+        window.applyChartJsTheme();
         new Chart(ctx, chartJsData);
     }
 }

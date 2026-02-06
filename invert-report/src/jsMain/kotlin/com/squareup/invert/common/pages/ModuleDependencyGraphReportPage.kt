@@ -21,9 +21,6 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.web.attributes.list
 import org.jetbrains.compose.web.attributes.placeholder
-import org.jetbrains.compose.web.css.Color
-import org.jetbrains.compose.web.css.LineStyle
-import org.jetbrains.compose.web.css.border
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.style
@@ -201,11 +198,7 @@ fun ModuleDependencyGraphComposable(
     Div({
       id(graphDomId)
       style {
-        border {
-          width(2.px)
-          style(LineStyle.Solid)
-          color = Color.black
-        }
+        property("border", "2px solid var(--bs-border-color)")
         width(width.px)
         height(height.px)
       }

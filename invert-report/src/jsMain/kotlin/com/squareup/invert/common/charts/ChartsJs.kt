@@ -8,9 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.web.css.CSSSizeValue
-import org.jetbrains.compose.web.css.Color
-import org.jetbrains.compose.web.css.LineStyle
-import org.jetbrains.compose.web.css.border
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.maxWidth
@@ -81,11 +78,7 @@ private fun LineChartJsComposable(
   Canvas({
     id(graphDomId)
     style {
-      border {
-        width(1.px)
-        style(LineStyle.Solid)
-        color = Color.gray
-      }
+      property("border", "1px solid var(--bs-border-color)")
       height(heightCssValue)
       maxWidth(100.percent)
     }
@@ -112,11 +105,7 @@ private fun ChartJsComposable(
   Canvas({
     id(graphDomId)
     style {
-      border {
-        width(2.px)
-        style(LineStyle.Solid)
-        color = Color.black
-      }
+      property("border", "2px solid var(--bs-border-color)")
       height(heightCssValue)
       maxHeight(heightCssValue)
       maxWidth(100.percent)
