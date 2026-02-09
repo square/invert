@@ -27,7 +27,7 @@ fun NavBarComposable(loadingProgressFlow: Flow<List<FileKey>>) {
         )
       }
       Div({
-        classes("spinner-border text-light".split(" "))
+        classes("spinner-border text-body-secondary".split(" "))
         attr("role", "status")
       }) {
         Span({
