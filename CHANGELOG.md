@@ -1,5 +1,12 @@
 # Change Log
 
+## Version 0.0.10
+
+* Fix composite build (`includeBuild`) ClassNotFoundException for KMP `invert-models` dependency
+* Add dark mode support
+
+**Full Changelog**: https://github.com/square/invert/compare/0.0.9...0.0.10
+
 ## Version 0.0.9
 
 * Add support for filtering code references by values in 'extras'
