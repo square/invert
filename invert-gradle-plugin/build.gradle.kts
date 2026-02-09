@@ -39,7 +39,9 @@ tasks.named<Jar>("sourcesJar") {
 
 dependencies {
   api(gradleApi())
-  api(project(":invert-models"))
+  // Explicit JVM configuration is needed for composite builds (includeBuild) to correctly
+  // resolve the JVM variant of this Kotlin Multiplatform dependency on the plugin classpath.
+  api(project(path = ":invert-models", configuration = "jvmRuntimeElements"))
 
   implementation(libs.kotlinx.serialization.json)
   implementation(libs.kotlinx.coroutines.core)
