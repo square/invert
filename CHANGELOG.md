@@ -1,5 +1,11 @@
 # Change Log
 
+## Version 0.0.11
+
+* Expose owner details metadata through `InvertAllCollectedDataRepo.getOwners()` for collector aggregation enrichment.
+
+**Full Changelog**: https://github.com/square/invert/compare/0.0.10...0.0.11
+
 ## Version 0.0.10
 
 * Fix composite build (`includeBuild`) ClassNotFoundException for KMP `invert-models` dependency
