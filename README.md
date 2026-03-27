@@ -127,6 +127,9 @@ invert {
         configurationNames
     }
     ownershipCollector(<<ownership collector instance>>)
+    // Optional: disable only the aggregate `sarif/stats.sarif` artifact for very large repos.
+    // Per-stat `sarif/code_references_*.sarif` artifacts are still generated.
+    aggregateStatsSarifReport(false)
 }
 ```
 

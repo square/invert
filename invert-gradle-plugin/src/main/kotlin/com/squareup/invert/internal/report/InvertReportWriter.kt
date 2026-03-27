@@ -37,7 +37,8 @@ class InvertReportWriter(
     reportMetadata: MetadataJsReportModel,
     collectedData: InvertCombinedCollectedData,
     historicalData: Set<HistoricalData>,
-    techDebtInitiatives: List<TechDebtInitiative>
+    techDebtInitiatives: List<TechDebtInitiative>,
+    aggregateStatsSarifReportEnabled: Boolean = true,
   ) {
     val collectedOwners: Set<CollectedOwnershipForProject> = collectedData.collectedOwners
     val collectedStats: Set<CollectedStatsForProject> = collectedData.collectedStats
@@ -78,10 +79,14 @@ class InvertReportWriter(
       historicalData = historicalDataWithCurrent,
     )
 
-    // Include all stats into one SARIF report.
-    InvertSarifReportWriter(invertLogger, rootBuildReportsDir).createInvertSarifReport(
-      allProjectsStatsData = allProjectsStatsData
-    )
+    if (aggregateStatsSarifReportEnabled) {
+      // Include all stats into one SARIF report.
+      InvertSarifReportWriter(invertLogger, rootBuildReportsDir).createInvertSarifReport(
+        allProjectsStatsData = allProjectsStatsData
+      )
+    } else {
+      invertLogger.info("Skipping aggregate stats.sarif generation.")
+    }
 
     // HTML/JS Report
     InvertJsReportWriter(invertLogger, rootBuildReportsDir).createInvertHtmlReport(
