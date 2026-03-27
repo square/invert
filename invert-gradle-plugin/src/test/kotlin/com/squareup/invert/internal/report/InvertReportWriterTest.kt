@@ -102,6 +102,31 @@ class InvertReportWriterTest {
   }
 
   @Test
+  fun `test writeProjectData can skip aggregate stats sarif while preserving code reference sarif`() {
+    // Given
+    val writer = InvertReportWriter(logger, testDir)
+    val testMetadata = createTestMetadata()
+    val testCollectedData = createCollectedDataWithCodeReferences()
+
+    // When
+    writer.writeProjectData(
+      reportMetadata = testMetadata,
+      collectedData = testCollectedData,
+      historicalData = emptySet(),
+      techDebtInitiatives = emptyList(),
+      aggregateStatsSarifReportEnabled = false,
+    )
+
+    // Then
+    val sarifDir = File(testDir, "sarif")
+    assertFalse(File(sarifDir, "stats.sarif").exists(), "Aggregate stats SARIF file should not be created")
+    assertTrue(
+      File(sarifDir, "code_references_test_code_ref_stat.sarif").exists(),
+      "Code references SARIF file should still be created"
+    )
+  }
+
+  @Test
   fun `test writeProjectData includes module and owner in code reference extras`() {
     // Given
     val writer = InvertReportWriter(logger, testDir)

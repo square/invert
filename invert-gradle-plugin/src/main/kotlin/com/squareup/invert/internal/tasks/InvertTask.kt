@@ -85,6 +85,9 @@ abstract class InvertTask : DefaultTask() {
   @get:Input
   abstract val mavenRepoUrls: ListProperty<String>
 
+  @get:Input
+  abstract val aggregateStatsSarifReportEnabled: Property<Boolean>
+
   @get:OutputDirectory
   abstract val rootBuildReportsDir: DirectoryProperty
 
@@ -151,6 +154,7 @@ abstract class InvertTask : DefaultTask() {
         collectedData = allCollectedData,
         historicalData = historicalData,
         techDebtInitiatives = techDebtInitiatives ?: emptyList(),
+        aggregateStatsSarifReportEnabled = aggregateStatsSarifReportEnabled.get(),
       )
     }
   }
@@ -179,6 +183,7 @@ abstract class InvertTask : DefaultTask() {
     this.statCollectors = extension.getStatCollectors().toList()
     this.techDebtInitiatives = extension.getTechDebtInitiatives().toList()
     this.ownershipCollector = extension.getOwnershipCollector()
+    this.aggregateStatsSarifReportEnabled.set(extension.isAggregateStatsSarifReportEnabled())
 
     this.mavenRepoUrls.set(
       project.rootProject.buildscript.repositories

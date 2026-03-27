@@ -57,12 +57,20 @@ open class InvertExtension(project: Project) {
   @get:Input
   internal val historicalDataFileProperty = objects.property<String?>(String::class.java)
 
+  @get:Input
+  internal val aggregateStatsSarifReportEnabledProperty =
+    objects.property(Boolean::class.java).convention(true)
+
   fun ownershipCollector(ownershipCollector: InvertOwnershipCollector) {
     ownershipCollectorProperty.set(ownershipCollector)
   }
 
   fun historicalData(historicalDataFile: String) {
     this.historicalDataFileProperty.set(historicalDataFile)
+  }
+
+  fun aggregateStatsSarifReport(enabled: Boolean) {
+    aggregateStatsSarifReportEnabledProperty.set(enabled)
   }
 
   fun includeSubproject(invertShouldIncludeSubProject: (subproject: Project) -> Boolean) {
@@ -101,6 +109,10 @@ open class InvertExtension(project: Project) {
 
   internal fun getHistoricalDataFilePath(): String? {
     return historicalDataFileProperty.orNull
+  }
+
+  internal fun isAggregateStatsSarifReportEnabled(): Boolean {
+    return aggregateStatsSarifReportEnabledProperty.getOrElse(true)
   }
 
   internal fun getStatCollectors(): Collection<StatCollector> {
