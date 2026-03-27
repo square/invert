@@ -1,5 +1,11 @@
 # Change Log
 
+## Version 0.0.12
+
+* Add a Gradle DSL option to disable aggregate `stats.sarif` generation while preserving per-stat `code_references_*.sarif` exports.
+
+**Full Changelog**: https://github.com/square/invert/compare/0.0.11...0.0.12
+
 ## Version 0.0.11
 
 * Expose owner details metadata through `InvertAllCollectedDataRepo.getOwners()` for collector aggregation enrichment.
