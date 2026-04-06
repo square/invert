@@ -5,13 +5,13 @@ import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 buildscript {
   repositories {
-    mavenLocal()
     mavenCentral()
     google()
     gradlePluginPortal()
     maven {
       url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content")
     } // SNAPSHOT Versions for statik
+    mavenLocal()
   }
 }
 
@@ -23,6 +23,7 @@ allprojects {
     maven {
       url = uri("https://oss.sonatype.org/service/local/repositories/snapshots/content")
     } // SNAPSHOT Versions for statik
+    mavenLocal()
   }
 }
 

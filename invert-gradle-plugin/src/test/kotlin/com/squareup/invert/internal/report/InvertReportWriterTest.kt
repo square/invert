@@ -14,6 +14,8 @@ import com.squareup.invert.models.js.AllOwners
 import com.squareup.invert.models.js.BuildSystem
 import com.squareup.invert.models.js.MetadataJsReportModel
 import com.squareup.invert.models.js.TechDebtInitiative
+import io.github.detekt.sarif4k.SarifSerializer
+import io.github.detekt.sarif4k.fromJson
 import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -95,10 +97,12 @@ class InvertReportWriterTest {
     assertTrue(sarifFile.length() > 0, "Code references SARIF file should have content")
 
     // Verify SARIF content
-    val content = sarifFile.readText()
-    assertTrue(content.contains("\"id\":\"test_code_ref_stat\""), "Should contain rule ID")
-    assertTrue(content.contains("\"uri\":\"test.kt\""), "Should contain file path")
-    assertTrue(content.contains("\"text\":\"test code\""), "Should contain code snippet")
+    val sarif = sarifFile.inputStream().use { input -> SarifSerializer.fromJson(input) }
+    val run = sarif.runs.single()
+    assertTrue(run.tool.driver.rules!!.single().id == "test_code_ref_stat", "Should contain rule ID")
+    val result = run.results!!.single()
+    assertTrue(result.locations!![0].physicalLocation!!.artifactLocation!!.uri == "test.kt", "Should contain file path")
+    assertTrue(result.message.text == "test code", "Should contain code snippet")
   }
 
   @Test

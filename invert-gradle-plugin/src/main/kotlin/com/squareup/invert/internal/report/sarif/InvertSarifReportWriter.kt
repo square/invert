@@ -14,8 +14,7 @@ import io.github.detekt.sarif4k.SarifSerializer
 import io.github.detekt.sarif4k.Tool
 import io.github.detekt.sarif4k.ToolComponent
 import io.github.detekt.sarif4k.Version
-import okio.buffer
-import okio.sink
+import io.github.detekt.sarif4k.toMinifiedJson
 import java.io.File
 import io.github.detekt.sarif4k.Result as SarifResult
 
@@ -46,8 +45,8 @@ class InvertSarifReportWriter(
             filename = jsonFileKey.filename
         )
 
-        sarifFile.sink().buffer().use { sink ->
-            sink.writeUtf8(SarifSerializer.toMinifiedJson(sarif))
+        sarifFile.outputStream().use { output ->
+            SarifSerializer.toMinifiedJson(sarif, output)
         }
     }
 
@@ -94,9 +93,8 @@ class InvertSarifReportWriter(
             }
             val rule = metadata.asReportingDescriptor(shortDescription = description)
             val sarifSchema = createSarifSchemaFromResults(rule = rule, results = results)
-            val sarifJson = SarifSerializer.toMinifiedJson(sarifSchema)
-            fileName.sink().buffer().use { sink ->
-                sink.writeUtf8(sarifJson)
+            fileName.outputStream().use { output ->
+                SarifSerializer.toMinifiedJson(sarifSchema, output)
             }
         }
 

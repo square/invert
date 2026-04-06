@@ -46,7 +46,27 @@ dependencies {
   implementation(libs.kotlinx.serialization.json)
   implementation(libs.kotlinx.coroutines.core)
   implementation(libs.okio)
-  implementation(libs.detekt.sarif4k)
+  compileOnly(libs.detekt.sarif4k) {
+    exclude(group = "org.jetbrains.kotlin")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-io-core")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-io-core-jvm")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-bom")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-core")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-core-jvm")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-json")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-json-jvm")
+  }
+  runtimeOnly(libs.detekt.sarif4k)
+  testCompileOnly(libs.detekt.sarif4k) {
+    exclude(group = "org.jetbrains.kotlin")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-io-core")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-io-core-jvm")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-bom")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-core")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-core-jvm")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-json")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-json-jvm")
+  }
 
   testImplementation(libs.kotlin.test)
 }

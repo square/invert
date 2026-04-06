@@ -9,6 +9,8 @@ import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.StatsJsReportModel
+import io.github.detekt.sarif4k.SarifSerializer
+import io.github.detekt.sarif4k.fromJson
 import org.gradle.internal.impldep.org.testng.Assert.assertEquals
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -35,9 +37,10 @@ class InvertSarifReportWriterTest {
         // Then
         val sarifFile = File(testDir, InvertFileUtils.SARIF_FOLDER_NAME + "/" + InvertPluginFileKey.STATS_SARIF.filename)
         assertTrue(sarifFile.exists(), "SARIF file should be created")
-        val content = sarifFile.readText()
-        assertTrue(content.contains("\"name\":\"invert\""), "Should contain tool name")
-        assertTrue(content.contains("\"version\":\"1.0.0\""), "Should contain tool version")
+        val sarif = sarifFile.inputStream().use { input -> SarifSerializer.fromJson(input) }
+        val run = sarif.runs.single()
+        assertEquals("invert", run.tool.driver.name, "Should contain tool name")
+        assertEquals("1.0.0", run.tool.driver.version, "Should contain tool version")
     }
 
     @Test
@@ -93,10 +96,12 @@ class InvertSarifReportWriterTest {
 
         // Then
         assertTrue(testFile.exists(), "SARIF file should be created")
-        val content = testFile.readText()
-        assertTrue(content.contains("\"id\":\"test_stat\""), "Should contain rule ID")
-        assertTrue(content.contains("\"text\":\"test code\""), "Should contain code snippet")
-        assertTrue(content.contains("\"uri\":\"test.kt\""), "Should contain file path")
+        val sarif = testFile.inputStream().use { input -> SarifSerializer.fromJson(input) }
+        val run = sarif.runs.single()
+        assertEquals("test_stat", run.tool.driver.rules!!.single().id, "Should contain rule ID")
+        val result = run.results!!.single()
+        assertEquals("test code", result.message.text, "Should contain code snippet")
+        assertEquals("test.kt", result.locations!![0].physicalLocation!!.artifactLocation!!.uri, "Should contain file path")
     }
 
 
@@ -192,4 +197,4 @@ class InvertSarifReportWriterTest {
             statsByModule = statsByModule
         )
     }
-} 
+}
