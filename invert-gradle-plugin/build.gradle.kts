@@ -37,6 +37,11 @@ tasks.named<Jar>("sourcesJar") {
   duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
+fun ExternalModuleDependency.excludeTransitiveKotlinDependencies() {
+  exclude(group = "org.jetbrains.kotlin")
+  exclude(group = "org.jetbrains.kotlinx")
+}
+
 dependencies {
   api(gradleApi())
   // Explicit JVM configuration is needed for composite builds (includeBuild) to correctly
@@ -46,7 +51,13 @@ dependencies {
   implementation(libs.kotlinx.serialization.json)
   implementation(libs.kotlinx.coroutines.core)
   implementation(libs.okio)
-  implementation(libs.detekt.sarif4k)
+  compileOnly(libs.detekt.sarif4k) {
+    excludeTransitiveKotlinDependencies()
+  }
+  runtimeOnly(libs.detekt.sarif4k)
+  testCompileOnly(libs.detekt.sarif4k) {
+    excludeTransitiveKotlinDependencies()
+  }
 
   testImplementation(libs.kotlin.test)
 }
