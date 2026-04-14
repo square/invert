@@ -34,8 +34,8 @@ jobs:
           java-version: '11'
           check-latest: true
 
-      - name: Gradle Wrapper Validation
-        uses: gradle/actions/wrapper-validation@v3
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
 
 
       - name: Test on Ubuntu
@@ -60,6 +60,12 @@ jobs:
           distribution: 'zulu'
           java-version: '21' # Some of the projects we run invert against require Java 21
           check-latest: true
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: true
+          validate-wrappers: false
 
       - name: Run Invert on Test Projects and Generate GitHub Pages
         #        run: cd examples && ./gradlew :invert && cd ..
@@ -96,8 +102,11 @@ jobs:
           java-version: '11'
           check-latest: true
 
-      - name: Gradle Wrapper Validation
-        uses: gradle/actions/wrapper-validation@v3
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: true
+          validate-wrappers: false
 
       - name: Retrieve Version from gradle.properties
         run: echo "VERSION_NAME=$(cat gradle.properties | grep "^version=" | awk -F'=' '{print $2}')" >> $GITHUB_ENV
@@ -130,8 +139,11 @@ jobs:
           java-version: '11'
           check-latest: true
 
-      - name: Gradle Wrapper Validation
-        uses: gradle/actions/wrapper-validation@v3
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: true
+          validate-wrappers: false
 
       - name: Retrieve Version from gradle.properties
         run: echo "VERSION_NAME=$(cat gradle.properties | grep "^version=" | awk -F'=' '{print $2}')" >> $GITHUB_ENV

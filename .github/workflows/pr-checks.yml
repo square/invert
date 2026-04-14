@@ -28,8 +28,8 @@ jobs:
           java-version: '17'
           check-latest: true
 
-      - name: Gradle Wrapper Validation
-        uses: gradle/actions/wrapper-validation@v3
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Test on Ubuntu
         run: ./gradlew assemble check --no-daemon --stacktrace
