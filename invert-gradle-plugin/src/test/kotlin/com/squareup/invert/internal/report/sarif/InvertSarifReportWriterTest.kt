@@ -11,8 +11,8 @@ import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.StatsJsReportModel
 import io.github.detekt.sarif4k.SarifSerializer
 import io.github.detekt.sarif4k.fromJson
-import org.gradle.internal.impldep.org.testng.Assert.assertEquals
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import java.io.File
 

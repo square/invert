@@ -37,6 +37,11 @@ tasks.named<Jar>("sourcesJar") {
   duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
+fun ExternalModuleDependency.excludeTransitiveKotlinDependencies() {
+  exclude(group = "org.jetbrains.kotlin")
+  exclude(group = "org.jetbrains.kotlinx")
+}
+
 dependencies {
   api(gradleApi())
   // Explicit JVM configuration is needed for composite builds (includeBuild) to correctly
@@ -47,25 +52,11 @@ dependencies {
   implementation(libs.kotlinx.coroutines.core)
   implementation(libs.okio)
   compileOnly(libs.detekt.sarif4k) {
-    exclude(group = "org.jetbrains.kotlin")
-    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-io-core")
-    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-io-core-jvm")
-    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-bom")
-    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-core")
-    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-core-jvm")
-    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-json")
-    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-json-jvm")
+    excludeTransitiveKotlinDependencies()
   }
   runtimeOnly(libs.detekt.sarif4k)
   testCompileOnly(libs.detekt.sarif4k) {
-    exclude(group = "org.jetbrains.kotlin")
-    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-io-core")
-    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-io-core-jvm")
-    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-bom")
-    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-core")
-    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-core-jvm")
-    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-json")
-    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-serialization-json-jvm")
+    excludeTransitiveKotlinDependencies()
   }
 
   testImplementation(libs.kotlin.test)

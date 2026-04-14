@@ -20,6 +20,7 @@ import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -99,10 +100,10 @@ class InvertReportWriterTest {
     // Verify SARIF content
     val sarif = sarifFile.inputStream().use { input -> SarifSerializer.fromJson(input) }
     val run = sarif.runs.single()
-    assertTrue(run.tool.driver.rules!!.single().id == "test_code_ref_stat", "Should contain rule ID")
+    assertEquals("test_code_ref_stat", run.tool.driver.rules!!.single().id, "Should contain rule ID")
     val result = run.results!!.single()
-    assertTrue(result.locations!![0].physicalLocation!!.artifactLocation!!.uri == "test.kt", "Should contain file path")
-    assertTrue(result.message.text == "test code", "Should contain code snippet")
+    assertEquals("test.kt", result.locations!![0].physicalLocation!!.artifactLocation!!.uri, "Should contain file path")
+    assertEquals("test code", result.message.text, "Should contain code snippet")
   }
 
   @Test

@@ -45,7 +45,7 @@ class InvertSarifReportWriter(
             filename = jsonFileKey.filename
         )
 
-        sarifFile.outputStream().use { output ->
+        sarifFile.outputStream().buffered().use { output ->
             SarifSerializer.toMinifiedJson(sarif, output)
         }
     }
@@ -93,7 +93,7 @@ class InvertSarifReportWriter(
             }
             val rule = metadata.asReportingDescriptor(shortDescription = description)
             val sarifSchema = createSarifSchemaFromResults(rule = rule, results = results)
-            fileName.outputStream().use { output ->
+            fileName.outputStream().buffered().use { output ->
                 SarifSerializer.toMinifiedJson(sarifSchema, output)
             }
         }
