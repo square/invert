@@ -1,5 +1,11 @@
 # Change Log
 
+## Version 0.0.13
+
+* Stream SARIF serialization with sarif4k 0.7.0 to avoid materializing very large SARIF reports as a single string before writing.
+
+**Full Changelog**: https://github.com/square/invert/compare/0.0.12...0.0.13
+
 ## Version 0.0.12
 
 * Add a Gradle DSL option to disable aggregate `stats.sarif` generation while preserving per-stat `code_references_*.sarif` exports.
