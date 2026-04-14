@@ -29,7 +29,7 @@ jobs:
           check-latest: true
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6
 
       - name: Test on Ubuntu
         run: ./gradlew assemble check --no-daemon --stacktrace
