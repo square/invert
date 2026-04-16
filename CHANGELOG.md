@@ -1,5 +1,12 @@
 # Change Log
 
+## Version 0.0.14
+
+* Add chunked JSON transport for large stat payloads. Stats exceeding 2 MB are split into parallel-fetchable chunks alongside the legacy single-file JS. The runtime tries chunked loading first and falls back to legacy if no manifest is found.
+* Bump browser-side loading timeouts from 10s/30s to 15s/120s and replace `window.alert()` on timeout with bounded state cleanup.
+
+**Full Changelog**: https://github.com/square/invert/compare/0.0.13...0.0.14
+
 ## Version 0.0.13
 
 * Stream SARIF serialization with sarif4k 0.7.0 to avoid materializing very large SARIF reports as a single string before writing.
