@@ -16,6 +16,7 @@ import com.squareup.invert.models.js.OwnershipJsReportModel
 import com.squareup.invert.models.js.PluginsJsReportModel
 import com.squareup.invert.models.js.StatJsReportModel
 import com.squareup.invert.models.js.StatsJsReportModel
+import externalLoadChunkedJsonFile
 import externalLoadJavaScriptFile
 import kotlinx.browser.window
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,9 +27,9 @@ object RemoteJsLoadingProgress {
 
   fun getTimeoutForFileKey(jsReportFileKey: String): Int {
     return when (jsReportFileKey) {
-      JsReportFileKey.METADATA.key -> 10
-      else -> 30
-    } * 1_000
+      JsReportFileKey.METADATA.key -> 15_000
+      else -> 120_000
+    }
   }
 
   fun loadJavaScriptFile(fileKey: String, callback: (String) -> Unit) {
@@ -37,15 +38,21 @@ object RemoteJsLoadingProgress {
       Log.d("Loading $fileKey")
       val loadingTimeout = window.setTimeout(
         {
-          window.alert("Timeout while fetching $fileKey data.")
+          Log.d("Timeout while fetching $fileKey data.")
+          awaitingResults.value = awaitingResults.value.toMutableList().apply { remove(fileKey) }
         },
         getTimeoutForFileKey(fileKey)
       )
-      externalLoadJavaScriptFile(fileKey) { json ->
+      val onLoaded: (String) -> Unit = { json ->
         Log.d("Finished Loading $fileKey")
         window.clearTimeout(loadingTimeout)
         callback(json)
         awaitingResults.value = awaitingResults.value.toMutableList().apply { remove(fileKey) }
+      }
+      if (fileKey.startsWith("stat_")) {
+        externalLoadChunkedJsonFile(fileKey, onLoaded)
+      } else {
+        externalLoadJavaScriptFile(fileKey, onLoaded)
       }
     }
   }

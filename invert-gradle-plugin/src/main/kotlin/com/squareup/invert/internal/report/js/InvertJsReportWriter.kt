@@ -6,6 +6,9 @@ import com.squareup.invert.internal.models.CollectedDependenciesForProject
 import com.squareup.invert.internal.models.CollectedPluginsForProject
 import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.InvertSerialization.InvertJson
+import com.squareup.invert.models.ModulePath
+import com.squareup.invert.models.Stat
+import com.squareup.invert.models.js.ChunkManifest
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import com.squareup.invert.models.js.ConfigurationsJsReportModel
 import com.squareup.invert.models.js.DependenciesJsReportModel
@@ -46,11 +49,17 @@ class InvertJsReportWriter(
     val modulesList = allProjectsDependencyData.map { it.path }
 
     val statsMapData: Set<StatJsReportModel> = InvertJsReportUtils.buildStatJsReportModelList(allProjectsStatsData)
-    statsMapData.forEach {
+    statsMapData.forEach { statModel ->
+      val fileKey = JsReportFileKey.STAT.key + "_" + statModel.statInfo.key
+      val serializedJson = InvertJson.encodeToString(StatJsReportModel.serializer(), statModel)
       writeJsFileInDir(
-        fileKey = JsReportFileKey.STAT.key + "_" + it.statInfo.key,
-        serializer = StatJsReportModel.serializer(),
-        value = it
+        fileKey = fileKey,
+        serializedJson = serializedJson,
+      )
+      writeChunkedStatIfNeeded(
+        fileKey = fileKey,
+        statModel = statModel,
+        serializedJsonLength = serializedJson.length,
       )
     }
 
@@ -152,6 +161,23 @@ class InvertJsReportWriter(
     value = value
   )
 
+  fun writeJsFileInDir(
+    fileKey: String,
+    serializedJson: String,
+  ) {
+    val jsOutputFile = InvertFileUtils.outputFile(
+      directory = rootBuildHtmlReportDir,
+      filename = "$fileKey.js"
+    )
+    if (!jsOutputFile.parentFile.exists()) {
+      jsOutputFile.parentFile.mkdirs()
+    }
+    jsOutputFile.sink().buffer().use { sink ->
+      sink.writeUtf8(invertJsGlobalVariableAssignment(fileKey = fileKey, value = serializedJson))
+    }
+    logger.lifecycle("Writing JavaScript $fileKey to file://${jsOutputFile.canonicalPath}")
+  }
+
   fun <T> writeJsFileInDir(
     fileKey: String,
     jsFilename: String,
@@ -168,7 +194,115 @@ class InvertJsReportWriter(
     value = value
   )
 
+  /**
+   * If [statModel] serializes to more than [CHUNK_THRESHOLD_BYTES], emit a chunk manifest
+   * and individual JSON chunk files alongside the legacy single-file JS.
+   *
+   * Each chunk is a valid [StatJsReportModel] containing the full [statInfo] and a subset
+   * of [statsByModule] entries, split on sorted module-key boundaries.
+   */
+  internal fun writeChunkedStatIfNeeded(
+    fileKey: String,
+    statModel: StatJsReportModel,
+    serializedJsonLength: Int = InvertJson.encodeToString(StatJsReportModel.serializer(), statModel).length,
+  ) {
+    if (serializedJsonLength < CHUNK_THRESHOLD_BYTES) return
+
+    val sortedModuleKeys = statModel.statsByModule.keys.sorted()
+    if (sortedModuleKeys.isEmpty()) return
+
+    val chunks = buildChunks(statModel, sortedModuleKeys)
+
+    val chunkFileNames = chunks.mapIndexed { index, _ ->
+      "$fileKey.chunk.$index.json"
+    }
+
+    // Write chunk files
+    chunks.forEachIndexed { index, chunkModel ->
+      val chunkFile = InvertFileUtils.outputFile(
+        directory = rootBuildHtmlReportDir,
+        filename = chunkFileNames[index]
+      )
+      chunkFile.sink().buffer().use { sink ->
+        sink.writeUtf8(InvertJson.encodeToString(StatJsReportModel.serializer(), chunkModel))
+      }
+      logger.lifecycle("Writing chunk ${index + 1}/${chunks.size} for $fileKey to file://${chunkFile.canonicalPath}")
+    }
+
+    // Write manifest
+    val manifest = ChunkManifest(
+      key = fileKey,
+      totalChunks = chunks.size,
+      chunkFiles = chunkFileNames,
+    )
+    val manifestFile = InvertFileUtils.outputFile(
+      directory = rootBuildHtmlReportDir,
+      filename = "$fileKey.manifest.json"
+    )
+    manifestFile.sink().buffer().use { sink ->
+      sink.writeUtf8(InvertJson.encodeToString(ChunkManifest.serializer(), manifest))
+    }
+    logger.lifecycle("Writing chunk manifest for $fileKey (${chunks.size} chunks) to file://${manifestFile.canonicalPath}")
+  }
+
   companion object {
+    /**
+     * Stat payloads larger than this threshold (in bytes of serialized JSON) are also
+     * emitted as chunked JSON files alongside the legacy single-file JS.
+     */
+    const val CHUNK_THRESHOLD_BYTES = 2_000_000
+
+    /**
+     * Target maximum size per chunk in bytes. Chunks may exceed this slightly because
+     * splitting happens on module boundaries.
+     */
+    private const val TARGET_CHUNK_SIZE_BYTES = 2_000_000
+
+    /**
+     * Build a list of [StatJsReportModel] chunks from the given model, splitting on
+     * sorted module-key boundaries so each chunk targets approximately [TARGET_CHUNK_SIZE_BYTES].
+     */
+    internal fun buildChunks(
+      statModel: StatJsReportModel,
+      sortedModuleKeys: List<ModulePath>,
+    ): List<StatJsReportModel> {
+      val chunks = mutableListOf<StatJsReportModel>()
+      var currentModules = mutableMapOf<ModulePath, Stat>()
+      var currentSize = 0L
+
+      // Pre-compute the fixed overhead of a chunk (statInfo + JSON structure) so we only
+      // measure the incremental cost of each module entry in the loop.
+      val emptyChunkSize = InvertJson.encodeToString(
+        StatJsReportModel.serializer(),
+        StatJsReportModel(statInfo = statModel.statInfo, statsByModule = emptyMap()),
+      ).length.toLong()
+
+      for (moduleKey in sortedModuleKeys) {
+        val stat = statModel.statsByModule[moduleKey] ?: continue
+        // Estimate incremental size: full single-entry model minus the fixed overhead.
+        val singleEntryModel = StatJsReportModel(
+          statInfo = statModel.statInfo,
+          statsByModule = mapOf(moduleKey to stat),
+        )
+        val entrySize = InvertJson.encodeToString(StatJsReportModel.serializer(), singleEntryModel).length.toLong() - emptyChunkSize
+
+        if (currentModules.isNotEmpty() && currentSize + entrySize > TARGET_CHUNK_SIZE_BYTES) {
+          chunks.add(StatJsReportModel(statInfo = statModel.statInfo, statsByModule = currentModules))
+          currentModules = mutableMapOf()
+          currentSize = 0L
+        }
+
+        currentModules[moduleKey] = stat
+        currentSize += entrySize
+      }
+
+      if (currentModules.isNotEmpty()) {
+        chunks.add(StatJsReportModel(statInfo = statModel.statInfo, statsByModule = currentModules))
+      }
+
+      return chunks
+    }
+
     /**
      * Utility method that concatenates the JS window variable assignment with the actual JSON.
      *
