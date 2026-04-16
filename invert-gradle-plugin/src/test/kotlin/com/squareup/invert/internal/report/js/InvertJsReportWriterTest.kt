@@ -7,6 +7,7 @@ import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.ConfigurationName
 import com.squareup.invert.models.DependencyId
 import com.squareup.invert.models.GradlePluginId
+import com.squareup.invert.models.InvertSerialization.InvertJson
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerInfo
 import com.squareup.invert.models.Stat
@@ -14,6 +15,7 @@ import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.AllOwners
 import com.squareup.invert.models.js.BuildSystem
+import com.squareup.invert.models.js.ChunkManifest
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import com.squareup.invert.models.js.DependenciesJsReportModel
 import com.squareup.invert.models.js.DirectDependenciesJsReportModel
@@ -21,6 +23,7 @@ import com.squareup.invert.models.js.HistoricalData
 import com.squareup.invert.models.js.JsReportFileKey
 import com.squareup.invert.models.js.MetadataJsReportModel
 import com.squareup.invert.models.js.OwnershipJsReportModel
+import com.squareup.invert.models.js.StatJsReportModel
 import com.squareup.invert.models.js.StatsJsReportModel
 import okio.buffer
 import okio.source
@@ -29,6 +32,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -315,6 +319,195 @@ class InvertJsReportWriterTest {
     val content = testFile.source().buffer().use { it.readUtf8() }
     assertTrue(content.contains("window.invert_report"))
     assertTrue(content.contains("large_module_"))
+  }
+
+  // --- Chunked stat transport tests ---
+
+  @Test
+  fun `test small stat does not produce chunks or manifest`() {
+    val writer = InvertJsReportWriter(logger, testDir)
+    val statInfo = StatMetadata(key = "small_stat", description = "Small", dataType = StatDataType.NUMERIC)
+    val statModel = StatJsReportModel(
+      statInfo = statInfo,
+      statsByModule = mapOf(":app" to Stat.NumericStat(42))
+    )
+    val fileKey = "stat_small_stat"
+
+    writer.writeChunkedStatIfNeeded(fileKey, statModel)
+
+    val jsDir = File(testDir, "js")
+    assertFalse(File(jsDir, "$fileKey.manifest.json").exists(), "Manifest should not exist for small stat")
+    assertFalse(File(jsDir, "$fileKey.chunk.0.json").exists(), "Chunk should not exist for small stat")
+  }
+
+  @Test
+  fun `test large stat produces manifest and chunk files`() {
+    val writer = InvertJsReportWriter(logger, testDir)
+    val statModel = createLargeCodeReferenceStat(moduleCount = 200, refsPerModule = 50)
+    val fileKey = "stat_large_stat"
+
+    writer.writeChunkedStatIfNeeded(fileKey, statModel)
+
+    val jsDir = File(testDir, "js")
+    val manifestFile = File(jsDir, "$fileKey.manifest.json")
+    assertTrue(manifestFile.exists(), "Manifest should exist for large stat")
+
+    val manifest = InvertJson.decodeFromString(ChunkManifest.serializer(), manifestFile.readText())
+    assertEquals(fileKey, manifest.key)
+    assertEquals(1, manifest.version)
+    assertTrue(manifest.totalChunks > 1, "Should have multiple chunks, got ${manifest.totalChunks}")
+    assertEquals(manifest.totalChunks, manifest.chunkFiles.size)
+
+    manifest.chunkFiles.forEach { chunkFilename ->
+      assertTrue(File(jsDir, chunkFilename).exists(), "Chunk file $chunkFilename should exist")
+    }
+  }
+
+  @Test
+  fun `test chunk files are valid StatJsReportModel JSON`() {
+    val writer = InvertJsReportWriter(logger, testDir)
+    val statModel = createLargeCodeReferenceStat(moduleCount = 200, refsPerModule = 50)
+    val fileKey = "stat_valid_chunks"
+
+    writer.writeChunkedStatIfNeeded(fileKey, statModel)
+
+    val jsDir = File(testDir, "js")
+    val manifest = InvertJson.decodeFromString(
+      ChunkManifest.serializer(),
+      File(jsDir, "$fileKey.manifest.json").readText()
+    )
+
+    manifest.chunkFiles.forEach { chunkFilename ->
+      val chunkJson = File(jsDir, chunkFilename).readText()
+      val chunkModel = InvertJson.decodeFromString(StatJsReportModel.serializer(), chunkJson)
+      assertEquals(statModel.statInfo, chunkModel.statInfo, "Chunk statInfo should match original")
+      assertTrue(chunkModel.statsByModule.isNotEmpty(), "Chunk should have at least one module entry")
+    }
+  }
+
+  @Test
+  fun `test merged chunks equal original model`() {
+    val writer = InvertJsReportWriter(logger, testDir)
+    val statModel = createLargeCodeReferenceStat(moduleCount = 200, refsPerModule = 50)
+    val fileKey = "stat_merge_test"
+
+    writer.writeChunkedStatIfNeeded(fileKey, statModel)
+
+    val jsDir = File(testDir, "js")
+    val manifest = InvertJson.decodeFromString(
+      ChunkManifest.serializer(),
+      File(jsDir, "$fileKey.manifest.json").readText()
+    )
+
+    val mergedModules = mutableMapOf<ModulePath, Stat>()
+    manifest.chunkFiles.forEach { chunkFilename ->
+      val chunkModel = InvertJson.decodeFromString(
+        StatJsReportModel.serializer(),
+        File(jsDir, chunkFilename).readText()
+      )
+      mergedModules.putAll(chunkModel.statsByModule)
+    }
+
+    assertEquals(
+      statModel.statsByModule.keys.sorted(),
+      mergedModules.keys.sorted(),
+      "Merged chunk module keys should match original"
+    )
+    statModel.statsByModule.forEach { (moduleKey, stat) ->
+      assertEquals(stat, mergedModules[moduleKey], "Stat for $moduleKey should match after merge")
+    }
+  }
+
+  @Test
+  fun `test chunks do not have duplicate module keys`() {
+    val writer = InvertJsReportWriter(logger, testDir)
+    val statModel = createLargeCodeReferenceStat(moduleCount = 200, refsPerModule = 50)
+    val fileKey = "stat_no_dup_test"
+
+    writer.writeChunkedStatIfNeeded(fileKey, statModel)
+
+    val jsDir = File(testDir, "js")
+    val manifest = InvertJson.decodeFromString(
+      ChunkManifest.serializer(),
+      File(jsDir, "$fileKey.manifest.json").readText()
+    )
+
+    val allModuleKeys = mutableListOf<ModulePath>()
+    manifest.chunkFiles.forEach { chunkFilename ->
+      val chunkModel = InvertJson.decodeFromString(
+        StatJsReportModel.serializer(),
+        File(jsDir, chunkFilename).readText()
+      )
+      allModuleKeys.addAll(chunkModel.statsByModule.keys)
+    }
+
+    assertEquals(allModuleKeys.size, allModuleKeys.toSet().size, "No duplicate module keys across chunks")
+  }
+
+  @Test
+  fun `test buildChunks preserves all modules`() {
+    val statModel = createLargeCodeReferenceStat(moduleCount = 100, refsPerModule = 100)
+    val sortedKeys = statModel.statsByModule.keys.sorted()
+
+    val chunks = InvertJsReportWriter.buildChunks(statModel, sortedKeys)
+
+    val allModules = chunks.flatMap { it.statsByModule.keys }
+    assertEquals(
+      statModel.statsByModule.keys.sorted(),
+      allModules.sorted(),
+      "All modules should be present across chunks"
+    )
+    chunks.forEach { chunk ->
+      assertEquals(statModel.statInfo, chunk.statInfo, "Each chunk should carry the full statInfo")
+    }
+  }
+
+  @Test
+  fun `test buildChunks with single large module produces single chunk`() {
+    val statInfo = StatMetadata(key = "single_big", description = "Single Big", dataType = StatDataType.CODE_REFERENCES)
+    val bigRefs = (1..5000).map { i ->
+      Stat.CodeReferencesStat.CodeReference(
+        filePath = "src/main/kotlin/com/example/Big$i.kt",
+        startLine = i,
+        endLine = i + 10,
+        code = "fun bigMethod$i() { /* padding content to make this larger: ${"x".repeat(100)} */ }"
+      )
+    }
+    val statModel = StatJsReportModel(
+      statInfo = statInfo,
+      statsByModule = mapOf(":single-big-module" to Stat.CodeReferencesStat(bigRefs))
+    )
+    val sortedKeys = statModel.statsByModule.keys.sorted()
+
+    val chunks = InvertJsReportWriter.buildChunks(statModel, sortedKeys)
+
+    assertEquals(1, chunks.size, "Single module can't be split, should produce 1 chunk")
+    assertEquals(statModel.statsByModule, chunks.single().statsByModule)
+  }
+
+  private fun createLargeCodeReferenceStat(moduleCount: Int, refsPerModule: Int): StatJsReportModel {
+    val statInfo = StatMetadata(
+      key = "large_stat",
+      description = "Large Code Reference Stat",
+      dataType = StatDataType.CODE_REFERENCES,
+    )
+    val modules = (1..moduleCount).associate { moduleIdx ->
+      val refs = (1..refsPerModule).map { refIdx ->
+        Stat.CodeReferencesStat.CodeReference(
+          filePath = "src/main/kotlin/com/example/module$moduleIdx/File$refIdx.kt",
+          startLine = refIdx,
+          endLine = refIdx + 10,
+          code = "fun method$refIdx() { /* module $moduleIdx ref $refIdx padding ${"x".repeat(50)} */ }",
+          extras = mapOf(
+            "test_subtype" to "unit.jvm",
+            "host_module" to ":module-$moduleIdx",
+            "owner_slug" to "team-${moduleIdx % 10}",
+          )
+        )
+      }
+      ":module-$moduleIdx" to Stat.CodeReferencesStat(refs) as Stat
+    }
+    return StatJsReportModel(statInfo = statInfo, statsByModule = modules)
   }
 
   // Helper functions
