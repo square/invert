@@ -68,6 +68,46 @@ window.externalLoadJavaScriptFile = function (key, callback) {
     })
 }
 
+/**
+ * Load a stat key via chunked JSON transport when a manifest is available.
+ * Falls back to legacy externalLoadJavaScriptFile if no manifest exists.
+ *
+ * Flow: fetch manifest → fetch all chunks in parallel → merge statsByModule → callback(json)
+ */
+window.externalLoadChunkedJsonFile = function (key, callback) {
+    var manifestUrl = "js/" + key + ".manifest.json";
+    fetch(manifestUrl)
+        .then(function (response) {
+            if (!response.ok) throw new Error("No manifest for " + key);
+            return response.json();
+        })
+        .then(function (manifest) {
+            return Promise.all(
+                manifest.chunkFiles.map(function (chunkFile) {
+                    return fetch("js/" + chunkFile).then(function (r) {
+                        if (!r.ok) throw new Error("Failed to fetch chunk: " + chunkFile);
+                        return r.json();
+                    });
+                })
+            );
+        })
+        .then(function (chunks) {
+            var merged = { statInfo: chunks[0].statInfo, statsByModule: {} };
+            chunks.forEach(function (chunk) {
+                var modules = chunk.statsByModule;
+                var keys = Object.keys(modules);
+                for (var i = 0; i < keys.length; i++) {
+                    merged.statsByModule[keys[i]] = modules[keys[i]];
+                }
+            });
+            callback(JSON.stringify(merged));
+        })
+        .catch(function (err) {
+            console.log("Chunked load unavailable for " + key + ", falling back to legacy: " + err.message);
+            externalLoadJavaScriptFile(key, callback);
+        });
+}
+
 // https://github.com/vasturiano/force-graph
 // https://unpkg.com/force-graph
 window.render3dGraph = function (domElementId, graphDataJson, width, height) {
