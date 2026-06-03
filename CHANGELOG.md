@@ -1,5 +1,13 @@
 # Change Log
 
+## Version 0.0.15
+
+* Harden chunked stat loading so incomplete chunked reports fail visibly instead of falling back to empty legacy stats.
+* Add per-request timeouts and retries for manifest/chunk JSON loading, while preserving legacy loading when chunk transport is unavailable.
+* Route chunk, timeout, and decode failures through report load-failure state and show stat load failures on stat detail pages.
+
+**Full Changelog**: https://github.com/square/invert/compare/0.0.14...0.0.15
+
 ## Version 0.0.14
 
 * Add chunked JSON transport for large stat payloads. Stats exceeding 2 MB are split into parallel-fetchable chunks alongside the legacy single-file JS. The runtime tries chunked loading first and falls back to legacy if no manifest is found.
