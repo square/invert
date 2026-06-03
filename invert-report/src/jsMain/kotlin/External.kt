@@ -2,7 +2,11 @@
 
 external fun externalLoadJavaScriptFile(key: String, callback: (json: String) -> Unit)
 
-external fun externalLoadChunkedJsonFile(key: String, callback: (json: String) -> Unit)
+external fun externalLoadChunkedJsonFile(
+  key: String,
+  callback: (json: String) -> Unit,
+  errorCallback: (message: String) -> Unit,
+)
 
 external fun loadJsFileAsync(url: String, callback: () -> Unit)
 

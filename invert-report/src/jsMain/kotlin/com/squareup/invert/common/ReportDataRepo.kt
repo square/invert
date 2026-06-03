@@ -14,6 +14,7 @@ import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import com.squareup.invert.models.js.HistoricalData
+import com.squareup.invert.models.js.JsReportFileKey
 import com.squareup.invert.models.js.MetadataJsReportModel
 import com.squareup.invert.models.js.PluginsJsReportModel
 import com.squareup.invert.models.js.StatJsReportModel
@@ -102,6 +103,9 @@ class ReportDataRepo(
 
   fun statForKey(statKey: StatKey): Flow<StatJsReportModel?> =
     collectedDataRepo.statData(statKey).mapLatest { it?.get(statKey) }
+
+  fun statLoadFailure(statKey: StatKey): Flow<String?> =
+    collectedDataRepo.fileLoadFailure(JsReportFileKey.STAT.key + "_$statKey")
 
   val pluginIdToAllModulesMap: Flow<Map<GradlePluginId, List<ModulePath>>?> =
     collectedDataRepo.collectedPluginInfoReport

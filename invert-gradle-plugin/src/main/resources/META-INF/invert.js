@@ -70,24 +70,89 @@ window.externalLoadJavaScriptFile = function (key, callback) {
 
 /**
  * Load a stat key via chunked JSON transport when a manifest is available.
- * Falls back to legacy externalLoadJavaScriptFile if no manifest exists.
+ * Falls back to legacy externalLoadJavaScriptFile only when no manifest exists.
  *
  * Flow: fetch manifest → fetch all chunks in parallel → merge statsByModule → callback(json)
  */
-window.externalLoadChunkedJsonFile = function (key, callback) {
+window.externalLoadChunkedJsonFile = function (key, callback, errorCallback) {
+    function chunkTransportUnavailable(message) {
+        var err = new Error(message);
+        err.noChunkManifest = true;
+        return err;
+    }
+
+    function fetchWithTimeout(url, timeoutMs, responseHandler) {
+        var controller = typeof AbortController === "function" ? new AbortController() : null;
+        var timeoutId;
+        var timeout = new Promise(function (_, reject) {
+            timeoutId = setTimeout(function () {
+                if (controller) {
+                    controller.abort();
+                }
+                reject(new Error("Timed out fetching " + url));
+            }, timeoutMs);
+        });
+        var request = Promise.resolve().then(function () {
+            return controller ? fetch(url, { signal: controller.signal }) : fetch(url);
+        }).then(function (response) {
+            return responseHandler ? responseHandler(response) : response;
+        });
+        return Promise.race([request, timeout]).then(
+            function (response) {
+                clearTimeout(timeoutId);
+                return response;
+            },
+            function (err) {
+                clearTimeout(timeoutId);
+                throw err;
+            }
+        );
+    }
+
+    function fetchJson(url, attemptsRemaining) {
+        return fetchWithTimeout(
+            url,
+            30000,
+            function (response) {
+                if (!response.ok) throw new Error("Failed to fetch " + url + " (" + response.status + ")");
+                return response.json();
+            }
+        )
+            .catch(function (err) {
+                if (attemptsRemaining > 1) {
+                    return fetchJson(url, attemptsRemaining - 1);
+                }
+                throw err;
+            });
+    }
+
     var manifestUrl = "js/" + key + ".manifest.json";
-    fetch(manifestUrl)
-        .then(function (response) {
-            if (!response.ok) throw new Error("No manifest for " + key);
-            return response.json();
+    fetchWithTimeout(
+        manifestUrl,
+        30000,
+        function (response) {
+            if (!response.ok) {
+                throw chunkTransportUnavailable("Manifest unavailable for " + key + " (" + response.status + ")");
+            }
+            return response.json().catch(function (err) {
+                err.invalidChunkManifest = true;
+                throw err;
+            });
+        }
+    )
+        .catch(function (err) {
+            if (err.noChunkManifest || err.invalidChunkManifest) {
+                throw err;
+            }
+            throw chunkTransportUnavailable("Unable to fetch manifest for " + key + ": " + err.message);
         })
         .then(function (manifest) {
+            if (!manifest.chunkFiles || manifest.chunkFiles.length === 0) {
+                throw new Error("Chunk manifest for " + key + " does not list any chunk files");
+            }
             return Promise.all(
                 manifest.chunkFiles.map(function (chunkFile) {
-                    return fetch("js/" + chunkFile).then(function (r) {
-                        if (!r.ok) throw new Error("Failed to fetch chunk: " + chunkFile);
-                        return r.json();
-                    });
+                    return fetchJson("js/" + chunkFile, 3);
                 })
             );
         })
@@ -103,8 +168,16 @@ window.externalLoadChunkedJsonFile = function (key, callback) {
             callback(JSON.stringify(merged));
         })
         .catch(function (err) {
-            console.log("Chunked load unavailable for " + key + ", falling back to legacy: " + err.message);
-            externalLoadJavaScriptFile(key, callback);
+            if (err.noChunkManifest) {
+                console.log("Chunked load unavailable for " + key + ", falling back to legacy: " + err.message);
+                externalLoadJavaScriptFile(key, callback);
+                return;
+            }
+            var errorMessage = "Chunked load failed for " + key + ": " + err.message;
+            console.error(errorMessage);
+            if (typeof errorCallback === "function") {
+                errorCallback(errorMessage);
+            }
         });
 }
 

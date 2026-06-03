@@ -113,7 +113,14 @@ fun StatDetailComposable(
   val metadata by reportDataRepo.reportMetadata.collectAsState(null)
 
   val statKey = statsNavRoute.statKey
+  val statLoadFailure: String? by reportDataRepo.statLoadFailure(statKey).collectAsState(null)
   val statsData: StatJsReportModel? by reportDataRepo.statForKey(statKey).collectAsState(null)
+
+  statLoadFailure?.let { message ->
+    H3 { Text("Failed to load stat data") }
+    Text(message)
+    return
+  }
 
   if (moduleToOwnerMapFlowValue == null || metadata == null || statsData == null) {
     BootstrapLoadingSpinner()
@@ -274,4 +281,3 @@ fun statToDetailsString(stat: Stat?): String = when (stat) {
 
   else -> ""
 } ?: ""
-
