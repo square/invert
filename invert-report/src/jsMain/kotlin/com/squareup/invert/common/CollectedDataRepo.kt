@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 
 /**
@@ -32,6 +33,7 @@ class CollectedDataRepo(
 ) {
 
   private val hasLoadedFile = mutableMapOf<FileKey, Boolean>()
+  private val _fileLoadFailures = MutableStateFlow<Map<FileKey, String>>(mapOf())
 
   private suspend fun loadJsOfType(fileKey: FileKey) = withContext(coroutineDispatcher) {
     if (!hasLoadedFile.contains(fileKey)) {
@@ -42,6 +44,27 @@ class CollectedDataRepo(
 
   private suspend fun loadJsOfType(jsReportFileKey: JsReportFileKey) = withContext(coroutineDispatcher) {
     loadJsOfType(jsReportFileKey.key)
+  }
+
+  fun fileLoadFailure(fileKey: FileKey): Flow<String?> =
+    _fileLoadFailures.map { it[fileKey] }
+
+  fun fileLoadFailed(fileKey: FileKey, message: String) {
+    hasLoadedFile.remove(fileKey)
+    _fileLoadFailures.update {
+      it.toMutableMap().apply {
+        put(fileKey, message)
+      }
+    }
+  }
+
+  fun fileLoadSucceeded(fileKey: FileKey) {
+    hasLoadedFile[fileKey] = true
+    _fileLoadFailures.update {
+      it.toMutableMap().apply {
+        remove(fileKey)
+      }
+    }
   }
 
   private val _collectedPluginInfoReport: MutableStateFlow<PluginsJsReportModel?> =

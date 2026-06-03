@@ -32,27 +32,63 @@ object RemoteJsLoadingProgress {
     }
   }
 
-  fun loadJavaScriptFile(fileKey: String, callback: (String) -> Unit) {
+  fun loadJavaScriptFile(
+    fileKey: String,
+    onFailure: (String) -> Unit = {},
+    callback: (String) -> Unit
+  ) {
     if (!awaitingResults.value.contains(fileKey)) {
       awaitingResults.value = awaitingResults.value.toMutableList().apply { add(fileKey) }
       Log.d("Loading $fileKey")
-      val loadingTimeout = window.setTimeout(
-        {
-          Log.d("Timeout while fetching $fileKey data.")
+      var loadingTimeout = 0
+      var completed = false
+      fun complete(block: () -> Unit) {
+        if (completed) return
+        completed = true
+        try {
+          block()
+        } finally {
+          window.clearTimeout(loadingTimeout)
           awaitingResults.value = awaitingResults.value.toMutableList().apply { remove(fileKey) }
+        }
+      }
+      val onLoaded: (String) -> Unit = { json ->
+        complete {
+          Log.d("Finished Loading $fileKey")
+          callback(json)
+        }
+      }
+      val onFailed: (String) -> Unit = { message ->
+        complete {
+          Log.d("Failed Loading $fileKey: $message")
+          onFailure(message)
+        }
+      }
+      fun failureMessage(throwable: Throwable): String =
+        throwable.message ?: throwable.toString()
+
+      loadingTimeout = window.setTimeout(
+        {
+          onFailed("Timed out fetching $fileKey data.")
         },
         getTimeoutForFileKey(fileKey)
       )
-      val onLoaded: (String) -> Unit = { json ->
-        Log.d("Finished Loading $fileKey")
-        window.clearTimeout(loadingTimeout)
-        callback(json)
-        awaitingResults.value = awaitingResults.value.toMutableList().apply { remove(fileKey) }
-      }
-      if (fileKey.startsWith("stat_")) {
-        externalLoadChunkedJsonFile(fileKey, onLoaded)
-      } else {
-        externalLoadJavaScriptFile(fileKey, onLoaded)
+      try {
+        if (fileKey.startsWith("stat_")) {
+          externalLoadChunkedJsonFile(fileKey, onLoaded, onFailed)
+        } else {
+          externalLoadJavaScriptFile(fileKey, onLoaded)
+        }
+      } catch (throwable: Throwable) {
+        if (fileKey.startsWith("stat_")) {
+          try {
+            externalLoadJavaScriptFile(fileKey, onLoaded)
+          } catch (legacyThrowable: Throwable) {
+            onFailed(failureMessage(legacyThrowable))
+          }
+        } else {
+          onFailed(failureMessage(throwable))
+        }
       }
     }
   }

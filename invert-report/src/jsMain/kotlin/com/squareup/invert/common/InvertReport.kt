@@ -66,8 +66,21 @@ class InvertReport(
   val collectedDataRepo = CollectedDataRepo(
     coroutineDispatcher = Dispatchers.Default,
     loadFileData = { jsFileKey, reportRepoData ->
-      RemoteJsLoadingProgress.loadJavaScriptFile(jsFileKey) { json ->
-        RemoteJsLoadingProgress.handleLoadedJsFile(reportRepoData, jsFileKey, json)
+      RemoteJsLoadingProgress.loadJavaScriptFile(
+        fileKey = jsFileKey,
+        onFailure = { message ->
+          reportRepoData.fileLoadFailed(jsFileKey, message)
+        }
+      ) { json ->
+        try {
+          RemoteJsLoadingProgress.handleLoadedJsFile(reportRepoData, jsFileKey, json)
+          reportRepoData.fileLoadSucceeded(jsFileKey)
+        } catch (throwable: Throwable) {
+          reportRepoData.fileLoadFailed(
+            fileKey = jsFileKey,
+            message = throwable.message ?: throwable.toString()
+          )
+        }
       }
     },
   )
