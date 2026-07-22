@@ -4,8 +4,8 @@ import com.squareup.invert.internal.InvertFileUtils
 import com.squareup.invert.internal.models.CollectedConfigurationsForProject
 import com.squareup.invert.internal.models.CollectedDependenciesForProject
 import com.squareup.invert.internal.models.CollectedPluginsForProject
+import com.squareup.invert.internal.report.InvertJsonStreams
 import com.squareup.invert.logging.InvertLogger
-import com.squareup.invert.models.InvertSerialization.InvertJson
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.js.ChunkManifest
@@ -51,15 +51,15 @@ class InvertJsReportWriter(
     val statsMapData: Set<StatJsReportModel> = InvertJsReportUtils.buildStatJsReportModelList(allProjectsStatsData)
     statsMapData.forEach { statModel ->
       val fileKey = JsReportFileKey.STAT.key + "_" + statModel.statInfo.key
-      val serializedJson = InvertJson.encodeToString(StatJsReportModel.serializer(), statModel)
-      writeJsFileInDir(
+      val legacyStatFile = writeJsFileInDir(
         fileKey = fileKey,
-        serializedJson = serializedJson,
+        serializer = StatJsReportModel.serializer(),
+        value = statModel,
       )
       writeChunkedStatIfNeeded(
         fileKey = fileKey,
         statModel = statModel,
-        serializedJsonLength = serializedJson.length,
+        serializedJsonSizeBytes = serializedJsonSizeInBytes(legacyStatFile, fileKey),
       )
     }
 
@@ -204,9 +204,12 @@ class InvertJsReportWriter(
   internal fun writeChunkedStatIfNeeded(
     fileKey: String,
     statModel: StatJsReportModel,
-    serializedJsonLength: Int = InvertJson.encodeToString(StatJsReportModel.serializer(), statModel).length,
+    serializedJsonSizeBytes: Long = InvertJsonStreams.encodedSizeInBytes(
+      StatJsReportModel.serializer(),
+      statModel,
+    ),
   ) {
-    if (serializedJsonLength < CHUNK_THRESHOLD_BYTES) return
+    if (serializedJsonSizeBytes < CHUNK_THRESHOLD_BYTES) return
 
     val sortedModuleKeys = statModel.statsByModule.keys.sorted()
     if (sortedModuleKeys.isEmpty()) return
@@ -223,9 +226,7 @@ class InvertJsReportWriter(
         directory = rootBuildHtmlReportDir,
         filename = chunkFileNames[index]
       )
-      chunkFile.sink().buffer().use { sink ->
-        sink.writeUtf8(InvertJson.encodeToString(StatJsReportModel.serializer(), chunkModel))
-      }
+      InvertJsonStreams.write(chunkFile, StatJsReportModel.serializer(), chunkModel)
       logger.lifecycle("Writing chunk ${index + 1}/${chunks.size} for $fileKey to file://${chunkFile.canonicalPath}")
     }
 
@@ -239,9 +240,7 @@ class InvertJsReportWriter(
       directory = rootBuildHtmlReportDir,
       filename = "$fileKey.manifest.json"
     )
-    manifestFile.sink().buffer().use { sink ->
-      sink.writeUtf8(InvertJson.encodeToString(ChunkManifest.serializer(), manifest))
-    }
+    InvertJsonStreams.write(manifestFile, ChunkManifest.serializer(), manifest)
     logger.lifecycle("Writing chunk manifest for $fileKey (${chunks.size} chunks) to file://${manifestFile.canonicalPath}")
   }
 
@@ -272,10 +271,10 @@ class InvertJsReportWriter(
 
       // Pre-compute the fixed overhead of a chunk (statInfo + JSON structure) so we only
       // measure the incremental cost of each module entry in the loop.
-      val emptyChunkSize = InvertJson.encodeToString(
+      val emptyChunkSize = InvertJsonStreams.encodedSizeInBytes(
         StatJsReportModel.serializer(),
         StatJsReportModel(statInfo = statModel.statInfo, statsByModule = emptyMap()),
-      ).length.toLong()
+      )
 
       for (moduleKey in sortedModuleKeys) {
         val stat = statModel.statsByModule[moduleKey] ?: continue
@@ -284,7 +283,10 @@ class InvertJsReportWriter(
           statInfo = statModel.statInfo,
           statsByModule = mapOf(moduleKey to stat),
         )
-        val entrySize = InvertJson.encodeToString(StatJsReportModel.serializer(), singleEntryModel).length.toLong() - emptyChunkSize
+        val entrySize = InvertJsonStreams.encodedSizeInBytes(
+          StatJsReportModel.serializer(),
+          singleEntryModel,
+        ) - emptyChunkSize
 
         if (currentModules.isNotEmpty() && currentSize + entrySize > TARGET_CHUNK_SIZE_BYTES) {
           chunks.add(StatJsReportModel(statInfo = statModel.statInfo, statsByModule = currentModules))
@@ -329,17 +331,20 @@ class InvertJsReportWriter(
         parentFile.mkdirs()
       }
       sink().buffer().use { sink ->
-        sink.writeUtf8(
-          invertJsGlobalVariableAssignment(
-            fileKey = fileKey,
-            value = InvertJson.encodeToString(
-              serializer = serializer,
-              value = value
-            )
-          )
-        )
+        sink.writeUtf8(invertJsGlobalVariablePrefix(fileKey))
+        InvertJsonStreams.write(sink.outputStream(), serializer, value)
+        sink.writeByte('\n'.code)
       }
       logger.lifecycle("Writing JavaScript $fileKey to file://$canonicalPath")
+    }
+
+    private fun invertJsGlobalVariablePrefix(fileKey: String): String {
+      return "window.invert_report[\"${fileKey}\"]=\n"
+    }
+
+    private fun serializedJsonSizeInBytes(jsFile: File, fileKey: String): Long {
+      val wrapperSize = invertJsGlobalVariablePrefix(fileKey).toByteArray().size + 1
+      return jsFile.length() - wrapperSize
     }
   }
 }

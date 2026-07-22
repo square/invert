@@ -116,6 +116,12 @@ class InvertJsReportWriterTest {
     // Read file using Okio to verify it was written correctly
     val content = testFile.source().buffer().use { it.readUtf8() }
 
+    assertEquals(
+      "window.invert_report[\"test_key\"]=\n" +
+        InvertJson.encodeToString(MetadataJsReportModel.serializer(), testMetadata) +
+        "\n",
+      content,
+    )
     assertTrue(
       content.contains("window.invert_report[\"test_key\"]="),
       "Should contain window variable assignment"
@@ -294,7 +300,7 @@ class InvertJsReportWriterTest {
   }
 
   @Test
-  fun `test large file writing is efficient with Okio buffering`() {
+  fun `test large JavaScript file is streamed to disk`() {
     // Given
     val testFile = File(testDir, "large-data.js")
     val largeStatsData = createLargeStatsData()

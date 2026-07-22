@@ -6,6 +6,7 @@ import com.squareup.invert.internal.models.CollectedOwnershipForProject
 import com.squareup.invert.internal.models.CollectedPluginsForProject
 import com.squareup.invert.internal.models.InvertPluginFileKey
 import com.squareup.invert.logging.InvertLogger
+import com.squareup.invert.models.InvertSerialization.InvertJson
 import com.squareup.invert.models.OwnerInfo
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatDataType
@@ -131,6 +132,7 @@ class InvertJsonReportWriterTest {
     // Read file using Okio to verify it was written correctly
     val content = testFile.source().buffer().use { it.readUtf8() }
 
+    assertEquals(InvertJson.encodeToString(MetadataJsReportModel.serializer(), testMetadata), content)
     assertTrue(content.contains("\"branchName\":\"test-branch\""), "Should contain branch name")
     assertTrue(content.contains("\"buildSystem\":\"GRADLE\""), "Should contain build system")
     assertTrue(content.contains("test-branch"), "Should contain test branch data")
@@ -214,7 +216,7 @@ class InvertJsonReportWriterTest {
   }
 
   @Test
-  fun `test large JSON file writing is efficient with Okio buffering`() {
+  fun `test large JSON file is streamed to disk`() {
     // Given
     val testFile = File(testDir, "large-stats.json")
     val largeStatsData = createLargeStatsData()

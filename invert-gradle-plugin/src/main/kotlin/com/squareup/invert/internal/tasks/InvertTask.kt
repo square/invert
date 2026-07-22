@@ -12,6 +12,7 @@ import com.squareup.invert.internal.isRootProject
 import com.squareup.invert.internal.models.CollectedStatsForProject
 import com.squareup.invert.internal.models.InvertCombinedCollectedData
 import com.squareup.invert.internal.report.GradleProjectAnalysisCombiner
+import com.squareup.invert.internal.report.InvertJsonStreams
 import com.squareup.invert.internal.report.InvertReportWriter
 import com.squareup.invert.internal.report.json.InvertJsonReportWriter
 import com.squareup.invert.internal.report.sarif.InvertSarifReportWriter
@@ -19,7 +20,6 @@ import com.squareup.invert.logging.GradleInvertLogger
 import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.ExtraDataType
 import com.squareup.invert.models.ExtraMetadata
-import com.squareup.invert.models.InvertSerialization.InvertJson
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
@@ -136,8 +136,10 @@ abstract class InvertTask : DefaultTask() {
       val historicalData: Set<HistoricalData> =
         if (historicalDataFile?.isFile == true && historicalDataFile.length() > 0) {
           try {
-            val fileContents = historicalDataFile.readText()
-            InvertJson.decodeFromString(ListSerializer(HistoricalData.serializer()), fileContents)
+            InvertJsonStreams.read(
+              file = historicalDataFile,
+              deserializer = ListSerializer(HistoricalData.serializer()),
+            )
           } catch (e: Exception) {
             invertLogger().warn("Failed to read historical data file: $e")
             listOf()

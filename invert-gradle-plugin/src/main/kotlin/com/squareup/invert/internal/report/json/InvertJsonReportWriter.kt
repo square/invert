@@ -6,9 +6,9 @@ import com.squareup.invert.internal.models.CollectedDependenciesForProject
 import com.squareup.invert.internal.models.CollectedOwnershipForProject
 import com.squareup.invert.internal.models.CollectedPluginsForProject
 import com.squareup.invert.internal.models.InvertPluginFileKey
+import com.squareup.invert.internal.report.InvertJsonStreams
 import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.logging.SystemOutInvertLogger
-import com.squareup.invert.models.InvertSerialization.InvertJson
 import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import com.squareup.invert.models.js.HistoricalData
@@ -17,8 +17,6 @@ import com.squareup.invert.models.js.StatTotalAndMetadata
 import com.squareup.invert.models.js.StatsJsReportModel
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.SetSerializer
-import okio.buffer
-import okio.sink
 import java.io.File
 
 class InvertJsonReportWriter(
@@ -100,14 +98,7 @@ class InvertJsonReportWriter(
       serializer: KSerializer<T>,
       value: T,
     ) = jsonOutputFile.apply {
-      sink().buffer().use { sink ->
-        sink.writeUtf8(
-          InvertJson.encodeToString(
-            serializer = serializer,
-            value = value
-          )
-        )
-      }
+      InvertJsonStreams.write(this, serializer, value)
       logger.lifecycle("Writing JSON ${jsonFileKey.description} to file://$canonicalPath")
     }
 
@@ -118,14 +109,7 @@ class InvertJsonReportWriter(
       value: T,
       logger: InvertLogger = SystemOutInvertLogger,
     ) = jsonOutputFile.apply {
-      sink().buffer().use { sink ->
-        sink.writeUtf8(
-          InvertJson.encodeToString(
-            serializer = serializer,
-            value = value
-          )
-        )
-      }
+      InvertJsonStreams.write(this, serializer, value)
       logger.lifecycle("Writing JSON ${description} to file://$canonicalPath")
     }
   }
