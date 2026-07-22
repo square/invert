@@ -100,7 +100,7 @@ Invert is a Gradle Plugin with a dynamic web report that lets you gain insights 
 ```
 // Root build.gradle
 plugins {
-    id("com.squareup.invert") version "0.0.15"
+    id("com.squareup.invert") version "0.0.16"
 }
 repositories {
     mavenCentral() // Released Versions

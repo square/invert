@@ -1,5 +1,13 @@
 # Change Log
 
+## Version 0.0.16
+
+* Stream JSON report serialization directly to output files to reduce peak heap usage for large reports.
+* Stream intermediate and historical JSON reads instead of materializing whole-file strings.
+* Preserve existing JSON and JavaScript report output while counting chunk sizes without allocating serialized strings.
+
+**Full Changelog**: https://github.com/square/invert/compare/0.0.15...0.0.16
+
 ## Version 0.0.15
 
 * Harden chunked stat loading so incomplete chunked reports fail visibly instead of falling back to empty legacy stats.
