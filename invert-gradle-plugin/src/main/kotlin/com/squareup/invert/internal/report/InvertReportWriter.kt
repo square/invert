@@ -20,6 +20,8 @@ import com.squareup.invert.models.ExtraMetadata
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
+import com.squareup.invert.models.StatDataType
+import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.js.CollectedStatTotalsJsReportModel
 import com.squareup.invert.models.js.HistoricalData
@@ -39,6 +41,30 @@ class InvertReportWriter(
     historicalData: Set<HistoricalData>,
     techDebtInitiatives: List<TechDebtInitiative>,
     aggregateStatsSarifReportEnabled: Boolean = true,
+  ) {
+    // Publish filtered TDI stats as derived stats, before anything reads the collected stats.
+    val tdiStats = TechDebtInitiativeStats.addDerivedStats(
+      collectedData = collectedData,
+      techDebtInitiatives = techDebtInitiatives,
+      logger = invertLogger,
+    )
+    writeProjectDataWithDerivedStats(
+      reportMetadata = reportMetadata,
+      collectedData = tdiStats.collectedData,
+      derivedStatKeys = tdiStats.derivedStatKeys,
+      historicalData = historicalData,
+      techDebtInitiatives = techDebtInitiatives,
+      aggregateStatsSarifReportEnabled = aggregateStatsSarifReportEnabled,
+    )
+  }
+
+  private fun writeProjectDataWithDerivedStats(
+    reportMetadata: MetadataJsReportModel,
+    collectedData: InvertCombinedCollectedData,
+    derivedStatKeys: Set<StatKey>,
+    historicalData: Set<HistoricalData>,
+    techDebtInitiatives: List<TechDebtInitiative>,
+    aggregateStatsSarifReportEnabled: Boolean,
   ) {
     val collectedOwners: Set<CollectedOwnershipForProject> = collectedData.collectedOwners
     val collectedStats: Set<CollectedStatsForProject> = collectedData.collectedStats
@@ -81,8 +107,14 @@ class InvertReportWriter(
 
     if (aggregateStatsSarifReportEnabled) {
       // Include all stats into one SARIF report.
+      // Derived TDI stats repeat findings of their source stats, so they are left out here.
       InvertSarifReportWriter(invertLogger, rootBuildReportsDir).createInvertSarifReport(
-        allProjectsStatsData = allProjectsStatsData
+        allProjectsStatsData = allProjectsStatsData.copy(
+          statInfos = allProjectsStatsData.statInfos - derivedStatKeys,
+          statsByModule = allProjectsStatsData.statsByModule.mapValues { (_, stats) ->
+            stats - derivedStatKeys
+          },
+        )
       )
     } else {
       invertLogger.info("Skipping aggregate stats.sarif generation.")
@@ -106,6 +138,7 @@ class InvertReportWriter(
     writeIndividualCodeReferenceStatFiles(
       reportDirectory = rootBuildReportsDir,
       aggregatedCollectedData = collectedData,
+      writeEvenIfEmptyStatKeys = derivedStatKeys,
     )
 
     // Write TDI config if we have specified any via extension.
@@ -152,9 +185,14 @@ class InvertReportWriter(
     }
   }
 
+  /**
+   * @param writeEvenIfEmptyStatKeys Stats to export even when they have no code references, so that
+   * a finished initiative reads as 0 rather than missing.
+   */
   private fun writeIndividualCodeReferenceStatFiles(
     reportDirectory: File,
     aggregatedCollectedData: InvertCombinedCollectedData,
+    writeEvenIfEmptyStatKeys: Set<StatKey>,
   ) {
     val allStatMetadatas =
       aggregatedCollectedData.collectedStats.flatMap { it.statInfos.values }.distinct()
@@ -195,7 +233,11 @@ class InvertReportWriter(
             }
           }
       }
-      if (allCodeReferencesForStatWithProjectPathExtra.isNotEmpty()) {
+      val isCodeReferencesStat = statMetadata.dataType == StatDataType.CODE_REFERENCES
+      if (
+        allCodeReferencesForStatWithProjectPathExtra.isNotEmpty() ||
+        (isCodeReferencesStat && statKey in writeEvenIfEmptyStatKeys)
+      ) {
         InvertJsonReportWriter.writeJsonFile(
           description = "All CodeReferences for ${statMetadata.key}",
           jsonOutputFile = InvertFileUtils.outputFile(
