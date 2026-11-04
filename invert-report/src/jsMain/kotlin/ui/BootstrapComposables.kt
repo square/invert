@@ -301,7 +301,7 @@ fun BootstrapTable(
             title("Download Table as CSV")
           }) {
             BootstrapIcon("download", 16) {
-              val csvString = CsvFileDownloadUtil.createCsvString(rows)
+              val csvString = CsvFileDownloadUtil.createCsvString(rows, headers)
               CsvFileDownloadUtil.downloadCsvFile(csvString)
             }
           }

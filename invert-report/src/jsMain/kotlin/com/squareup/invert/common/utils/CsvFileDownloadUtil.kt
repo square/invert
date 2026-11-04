@@ -8,12 +8,22 @@ import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
 
 object CsvFileDownloadUtil {
-  fun createCsvString(rows: List<List<String>>): String = buildString {
-    rows.forEach { columns ->
-      appendLine(columns.joinToString(separator = ",") {
-        "\"${it.replace("\"", "\"\"")}\""
-      })
+  /**
+   * Builds a CSV string. If [headers] is non-empty, it is written as the first line.
+   */
+  fun createCsvString(rows: List<List<String>>, headers: List<String> = emptyList()): String = buildString {
+    if (headers.isNotEmpty()) {
+      appendCsvLine(headers)
     }
+    rows.forEach { columns ->
+      appendCsvLine(columns)
+    }
+  }
+
+  private fun StringBuilder.appendCsvLine(columns: List<String>) {
+    appendLine(columns.joinToString(separator = ",") {
+      "\"${it.replace("\"", "\"\"")}\""
+    })
   }
 
   fun downloadFile(content: String, contentType: String, fileName: String) {
