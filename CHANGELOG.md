@@ -1,5 +1,12 @@
 # Change Log
 
+## Unreleased
+
+* Tech Debt Initiatives can count part of a stat. `TechDebtInitiative.remainingFilter` and `completedFilter` take a `StatFilter`: `extras` conditions for code references, or a `details` condition for numeric and boolean stats. Each filtered stat is published at build time as a derived stat, `tdi__<id>__remaining` or `tdi__<id>__completed`, which gets totals, history, the web report and the per-stat JSON and SARIF exports like any other stat. It is left out of the aggregate `stats.sarif`.
+* `TechDebtInitiative.effectiveRemainingStatKey` and `effectiveCompletedStatKey` name the stat to read for an initiative (the derived stat when filtered), and are written to `tdi_config.json`. Consumers that show or export initiative numbers should read these instead of `remainingStatKey` and `completedStatKey`.
+* Invalid filters fail the report: an extra that the stat does not declare, a condition that does not apply to the stat type, an empty or invalid matcher, a duplicate initiative id, or a derived key that a collected stat already uses.
+* Changing `techDebtInitiatives` now reruns the `invert` task.
+
 ## Version 0.0.16
 
 * Stream JSON report serialization directly to output files to reduce peak heap usage for large reports.
