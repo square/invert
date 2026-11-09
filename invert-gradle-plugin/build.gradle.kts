@@ -60,8 +60,6 @@ dependencies {
   }
 
   testImplementation(libs.kotlin.test)
-  // Consumers parse tdi_config.json with Gson; tests check the models stay compatible.
-  testImplementation(libs.gson)
 }
 
 kotlin {

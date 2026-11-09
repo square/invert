@@ -27,7 +27,6 @@ detekt-sarif4k = { module = "io.github.detekt.sarif4k:sarif4k", version.ref = "s
 javax-inject = { module = "javax.inject:javax.inject", version.ref = "javax-inject" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
-gson = { module = "com.google.code.gson:gson", version = "2.11.0" }
 kotlin-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }

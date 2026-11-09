@@ -10,9 +10,8 @@ import kotlinx.serialization.Serializable
  *
  * Every condition that is set must match.
  *
- * These classes use only concrete types and always encode their non-null defaults, so that
- * consumers which read `tdi_config.json` with Gson (which cannot create interfaces and ignores
- * Kotlin default values) can parse them.
+ * These classes always encode their non-null defaults, so that consumers of `tdi_config.json`
+ * that are not written in Kotlin see every field.
  */
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable

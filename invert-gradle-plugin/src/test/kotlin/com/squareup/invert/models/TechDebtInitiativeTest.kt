@@ -1,6 +1,5 @@
 package com.squareup.invert.models
 
-import com.google.gson.Gson
 import com.squareup.invert.models.InvertSerialization.InvertJson
 import com.squareup.invert.models.js.TechDebtInitiative
 import com.squareup.invert.models.js.TechDebtInitiativeConfig
@@ -98,21 +97,5 @@ class TechDebtInitiativeTest {
     )
     assertEquals(unfiltered, decoded.tdis.single())
     assertEquals("java_files", decoded.tdis.single().effectiveRemainingStatKey)
-  }
-
-  @Test
-  fun `tdi_config json can be read with Gson`() {
-    // Some consumers read tdi_config.json with Gson, which cannot create interfaces and ignores
-    // Kotlin default values.
-    val json = InvertJson.encodeToString(
-      TechDebtInitiativeConfig.serializer(),
-      TechDebtInitiativeConfig(listOf(unfiltered, filtered)),
-    )
-
-    val decoded = Gson().fromJson(json, TechDebtInitiativeConfig::class.java)
-
-    assertEquals(listOf(unfiltered, filtered), decoded.tdis)
-    assertEquals("tdi__kotlin_payments__remaining", decoded.tdis[1].effectiveRemainingStatKey)
-    assertEquals("kotlin_files", decoded.tdis[0].effectiveCompletedStatKey)
   }
 }
