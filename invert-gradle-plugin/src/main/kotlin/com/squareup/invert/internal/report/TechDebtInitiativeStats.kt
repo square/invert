@@ -34,7 +34,7 @@ internal object TechDebtInitiativeStats {
     val sourceStatKey: StatKey,
     val filter: StatFilter,
   ) {
-    val key: StatKey = TechDebtInitiative.derivedStatKey(tdi.id, role)
+    val key: StatKey = filter.key ?: TechDebtInitiative.derivedStatKey(tdi.id, role)
   }
 
   /**
@@ -72,7 +72,8 @@ internal object TechDebtInitiativeStats {
     derivedStats.groupBy { it.key }.filterValues { it.size > 1 }.forEach { (key, duplicates) ->
       errors.add(
         "Derived stat key '$key' is produced more than once " +
-          "(TDI ids: ${duplicates.joinToString { it.tdi.id }}). TDI ids must be unique."
+          "(TDI ids: ${duplicates.joinToString { it.tdi.id }}). " +
+          "TDI ids and StatFilter keys must be unique."
       )
     }
 

@@ -5,10 +5,8 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 
 /**
- * Selects part of a [Stat], so that a [com.squareup.invert.models.js.TechDebtInitiative] can track
- * a subset of an existing stat.
- *
- * Every condition that is set must match.
+ * Selects part of a [StatDataType.CODE_REFERENCES] stat by its code references' extras, so that a
+ * [com.squareup.invert.models.js.TechDebtInitiative] can track a subset of an existing stat.
  *
  * These classes always encode their non-null defaults, so that consumers of `tdi_config.json`
  * that are not written in Kotlin see every field.
@@ -17,19 +15,21 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class StatFilter(
   /**
-   * [StatDataType.CODE_REFERENCES] stats only. Each entry must match the code reference's
-   * [Stat.CodeReferencesStat.CodeReference.extras] value for that key. Every key must be declared
-   * in the stat's [StatMetadata.extras].
+   * Conditions on a code reference's [Stat.CodeReferencesStat.CodeReference.extras], by extra key.
+   * A code reference is kept when all of them match. Every key must be declared in the stat's
+   * [StatMetadata.extras].
    */
   @EncodeDefault
   val extras: Map<ExtraKey, ValueMatcher> = emptyMap(),
   /**
-   * [StatDataType.NUMERIC] and [StatDataType.BOOLEAN] stats only. Matches the stat's `details`.
+   * (Optional) The key of the derived stat that holds the filtered result. Defaults to
+   * [com.squareup.invert.models.js.TechDebtInitiative.derivedStatKey].
    *
-   * These stats hold one value per module, so a module whose `details` do not match contributes
-   * `0` (or `false`) instead of its value.
+   * History is kept by this key. Set it to version the definition independently of the
+   * initiative's id, and change it when you change what the filter selects, so that the old and
+   * new definitions do not share one history.
    */
-  val details: ValueMatcher? = null,
+  val key: StatKey? = null,
 )
 
 /**

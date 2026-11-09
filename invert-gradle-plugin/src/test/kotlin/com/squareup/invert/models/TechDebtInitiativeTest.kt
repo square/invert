@@ -46,6 +46,23 @@ class TechDebtInitiativeTest {
   }
 
   @Test
+  fun `effective keys are filter keys when set`() {
+    val keyed = filtered.copy(
+      remainingFilter = filtered.remainingFilter!!.copy(key = "java_files.payments.v2"),
+    )
+    assertEquals("java_files.payments.v2", keyed.effectiveRemainingStatKey)
+    assertEquals("tdi__kotlin_payments__completed", keyed.effectiveCompletedStatKey)
+
+    val json = InvertJson.encodeToJsonElement(TechDebtInitiative.serializer(), keyed).jsonObject
+    assertEquals("java_files.payments.v2", json.getValue("effectiveRemainingStatKey").jsonPrimitive.content)
+    assertEquals(
+      "java_files.payments.v2",
+      json.getValue("remainingFilter").jsonObject.getValue("key").jsonPrimitive.content,
+    )
+    assertFalse("key" in json.getValue("completedFilter").jsonObject, "No key is written when there is none")
+  }
+
+  @Test
   fun `effective completed key is null without a completed stat`() {
     assertNull(filtered.copy(completedStatKey = null).effectiveCompletedStatKey)
   }

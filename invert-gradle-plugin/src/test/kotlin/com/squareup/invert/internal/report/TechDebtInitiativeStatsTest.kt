@@ -116,16 +116,31 @@ class TechDebtInitiativeStatsTest {
   }
 
   @Test
-  fun `derived numeric stat zeroes modules whose details do not match`() {
-    val tdi = dialogsTdi.copy(
-      id = "unit_tests",
-      remainingStatKey = testCountMetadata.key,
-      remainingFilter = StatFilter(details = ValueMatcher.equalTo("unit")),
-    )
+  fun `derived stat uses the filter key when set`() {
+    val versionedKey = "legacy_screens.kind_dialog.v2"
+    val tdi = dialogsTdi.copy(remainingFilter = dialogsTdi.remainingFilter!!.copy(key = versionedKey))
     val result = TechDebtInitiativeStats.addDerivedStats(collectedData(), listOf(tdi), logger)
-    val byModule = result.collectedData.collectedStats.associateBy { it.path }
-    assertEquals(Stat.NumericStat(3, "unit"), byModule.getValue(":app").stats["tdi__unit_tests__remaining"])
-    assertEquals(Stat.NumericStat(0, "ui"), byModule.getValue(":lib").stats["tdi__unit_tests__remaining"])
+
+    assertEquals(setOf(versionedKey), result.derivedStatKeys)
+    assertEquals(versionedKey, tdi.effectiveRemainingStatKey)
+    val app = result.collectedData.collectedStats.single { it.path == ":app" }
+    assertEquals(
+      listOf("app/A.kt"),
+      (app.stats.getValue(versionedKey) as Stat.CodeReferencesStat).value.map { it.filePath },
+    )
+    assertFalse(derivedKey in app.stats, "The default key is not used")
+  }
+
+  @Test
+  fun `filter on a numeric stat fails`() {
+    val error = assertFailsWith<IllegalArgumentException> {
+      TechDebtInitiativeStats.addDerivedStats(
+        collectedData(),
+        listOf(dialogsTdi.copy(remainingStatKey = testCountMetadata.key)),
+        logger,
+      )
+    }
+    assertTrue(error.message.orEmpty().contains("'test_count' is a NUMERIC stat"), error.message)
   }
 
   @Test
@@ -151,6 +166,33 @@ class TechDebtInitiativeStatsTest {
       TechDebtInitiativeStats.addDerivedStats(collectedData(), listOf(dialogsTdi, dialogsTdi), logger)
     }
     assertTrue(error.message.orEmpty().contains("produced more than once"), error.message)
+  }
+
+  @Test
+  fun `duplicate filter keys fail`() {
+    val filter = dialogsTdi.remainingFilter!!.copy(key = "dialogs.v1")
+    val error = assertFailsWith<IllegalArgumentException> {
+      TechDebtInitiativeStats.addDerivedStats(
+        collectedData(),
+        listOf(
+          dialogsTdi.copy(remainingFilter = filter),
+          dialogsTdi.copy(id = "other_dialogs", remainingFilter = filter),
+        ),
+        logger,
+      )
+    }
+    val message = error.message.orEmpty()
+    assertTrue(message.contains("'dialogs.v1' is produced more than once"), message)
+    assertTrue(message.contains("legacy_dialogs, other_dialogs"), message)
+  }
+
+  @Test
+  fun `filter key used by a collected stat fails`() {
+    val tdi = dialogsTdi.copy(remainingFilter = dialogsTdi.remainingFilter!!.copy(key = screensMetadata.key))
+    val error = assertFailsWith<IllegalArgumentException> {
+      TechDebtInitiativeStats.addDerivedStats(collectedData(), listOf(tdi), logger)
+    }
+    assertTrue(error.message.orEmpty().contains("already used by a collected stat"), error.message)
   }
 
   @Test

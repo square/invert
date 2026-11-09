@@ -15,13 +15,15 @@ import kotlinx.serialization.Serializable
  *  1. Pure Burndown: in which case only [remainingStatKey] is specified.
  *  2. % Completion: in which case a [completedStatKey] and [remainingStatKey] are specified.
  *
- * Either stat can be narrowed with a [StatFilter] ([remainingFilter], [completedFilter]). The
- * filtered result is published at build time as a derived stat, under [effectiveRemainingStatKey]
- * and [effectiveCompletedStatKey], so that it gets totals, history and exports like any other
- * stat. Read the effective keys to show or export an initiative's numbers.
+ * Either stat, when it is a code references stat, can be narrowed with a [StatFilter]
+ * ([remainingFilter], [completedFilter]). The filtered result is published at build time as a
+ * derived stat, under [effectiveRemainingStatKey] and [effectiveCompletedStatKey], so that it gets
+ * totals, history and exports like any other stat. Read the effective keys to show or export an
+ * initiative's numbers.
  *
- * A derived stat's history is keyed by [id]. If you change what a filter selects, also change
- * [id], so the old and new definitions do not share one history.
+ * A derived stat's history is kept by its key: [StatFilter.key], or [derivedStatKey] of [id] when
+ * it is not set. If you change what a filter selects, also change that key, so the old and new
+ * definitions do not share one history.
  */
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
@@ -46,14 +48,14 @@ data class TechDebtInitiative(
 ) {
   /**
    * The stat to read for this initiative's remaining work: [remainingStatKey], or the derived
-   * stat when [remainingFilter] is set.
+   * stat when [remainingFilter] is set ([StatFilter.key], or [derivedStatKey] by default).
    *
    * Computed from the other properties. It is written to `tdi_config.json` for consumers that
    * cannot compute it, such as shell scripts.
    */
   @EncodeDefault
   val effectiveRemainingStatKey: StatKey =
-    if (remainingFilter == null) remainingStatKey else derivedStatKey(id, StatRole.REMAINING)
+    remainingFilter?.let { it.key ?: derivedStatKey(id, StatRole.REMAINING) } ?: remainingStatKey
 
   /**
    * The stat to read for this initiative's completed work: [completedStatKey], or the derived
@@ -64,7 +66,7 @@ data class TechDebtInitiative(
    */
   @EncodeDefault
   val effectiveCompletedStatKey: StatKey? = completedStatKey?.let { completedStatKey ->
-    if (completedFilter == null) completedStatKey else derivedStatKey(id, StatRole.COMPLETED)
+    completedFilter?.let { it.key ?: derivedStatKey(id, StatRole.COMPLETED) } ?: completedStatKey
   }
 
   /** Which of an initiative's two stats a key refers to. */
@@ -76,7 +78,7 @@ data class TechDebtInitiative(
   companion object {
     private const val DERIVED_STAT_KEY_PREFIX = "tdi__"
 
-    /** The key of the derived stat for an initiative's filtered [role] stat. */
+    /** The default key of the derived stat for an initiative's filtered [role] stat. */
     fun derivedStatKey(id: String, role: StatRole): StatKey =
       "$DERIVED_STAT_KEY_PREFIX${id}__${role.keySuffix}"
   }

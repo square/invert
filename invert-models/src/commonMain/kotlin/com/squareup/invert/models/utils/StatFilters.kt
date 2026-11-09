@@ -20,44 +20,28 @@ object StatFilters {
   fun validate(filter: StatFilter, statMetadata: StatMetadata): List<String> {
     val errors = mutableListOf<String>()
     val statKey = statMetadata.key
-    when (statMetadata.dataType) {
-      StatDataType.CODE_REFERENCES -> {
-        if (filter.details != null) {
-          errors.add("'details' cannot filter '$statKey', a CODE_REFERENCES stat. Use 'extras'.")
-        }
-        if (filter.extras.isEmpty()) {
-          errors.add("The filter for '$statKey' has no 'extras' conditions.")
-        }
-        val declaredExtraKeys = statMetadata.extras.map { it.key }.toSet()
-        filter.extras.keys.filterNot { it in declaredExtraKeys }.forEach { extraKey ->
-          errors.add(
-            "Extra '$extraKey' is not declared by '$statKey'. " +
-              "Declared extras: ${declaredExtraKeys.sorted().ifEmpty { listOf("(none)") }.joinToString()}"
-          )
-        }
-      }
-
-      StatDataType.NUMERIC,
-      StatDataType.BOOLEAN -> {
-        if (filter.extras.isNotEmpty()) {
-          errors.add(
-            "'extras' cannot filter '$statKey', a ${statMetadata.dataType} stat. Use 'details'."
-          )
-        }
-        if (filter.details == null) {
-          errors.add("The filter for '$statKey' has no 'details' condition.")
-        }
-      }
-
-      StatDataType.STRING -> {
-        errors.add("'$statKey' is a STRING stat, which has no totals and cannot be filtered.")
+    if (statMetadata.dataType != StatDataType.CODE_REFERENCES) {
+      errors.add(
+        "'$statKey' is a ${statMetadata.dataType} stat. Only CODE_REFERENCES stats can be filtered."
+      )
+    }
+    if (filter.key?.isBlank() == true) {
+      errors.add("The filter for '$statKey' has a blank 'key'. Remove it to use the default key.")
+    }
+    if (filter.extras.isEmpty()) {
+      errors.add("The filter for '$statKey' has no 'extras' conditions.")
+    }
+    if (statMetadata.dataType == StatDataType.CODE_REFERENCES) {
+      val declaredExtraKeys = statMetadata.extras.map { it.key }.toSet()
+      filter.extras.keys.filterNot { it in declaredExtraKeys }.forEach { extraKey ->
+        errors.add(
+          "Extra '$extraKey' is not declared by '$statKey'. " +
+            "Declared extras: ${declaredExtraKeys.sorted().ifEmpty { listOf("(none)") }.joinToString()}"
+        )
       }
     }
-
-    val matchers = filter.extras.map { (key, matcher) -> "extras[$key]" to matcher } +
-      listOfNotNull(filter.details?.let { "details" to it })
-    matchers.forEach { (name, matcher) ->
-      errors.addAll(validate(matcher).map { "$name of the filter for '$statKey': $it" })
+    filter.extras.forEach { (extraKey, matcher) ->
+      errors.addAll(validate(matcher).map { "extras[$extraKey] of the filter for '$statKey': $it" })
     }
     return errors
   }
@@ -96,17 +80,14 @@ object StatFilters {
   }
 
   /**
-   * Builds a function that applies [filter] to one module's [Stat]:
+   * Builds a function that applies [filter] to one module's [Stat.CodeReferencesStat], keeping
+   * only the code references whose extras all match. A module with no matches keeps an empty
+   * stat, so a finished initiative reads `0`.
    *
-   * - [Stat.CodeReferencesStat]: keeps only the code references whose extras match.
-   * - [Stat.NumericStat] / [Stat.BooleanStat]: keeps the stat if its details match, otherwise
-   *   replaces its value with `0` / `false`, so the module still reports the stat.
-   *
-   * Call [validate] first. A [Stat.StringStat] is returned unchanged.
+   * Call [validate] first. Other stat types are returned unchanged.
    */
   fun transform(filter: StatFilter): (Stat) -> Stat {
     val extrasPredicates = filter.extras.map { (key, matcher) -> key to predicate(matcher) }
-    val detailsPredicate = filter.details?.let { predicate(it) } ?: { true }
     return { stat ->
       when (stat) {
         is Stat.CodeReferencesStat -> Stat.CodeReferencesStat(
@@ -115,9 +96,7 @@ object StatFilters {
           }
         )
 
-        is Stat.NumericStat -> if (detailsPredicate(stat.details)) stat else stat.copy(value = 0)
-        is Stat.BooleanStat -> if (detailsPredicate(stat.details)) stat else stat.copy(value = false)
-        is Stat.StringStat -> stat
+        else -> stat
       }
     }
   }

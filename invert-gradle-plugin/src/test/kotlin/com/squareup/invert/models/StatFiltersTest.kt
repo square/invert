@@ -80,17 +80,6 @@ class StatFiltersTest {
   }
 
   @Test
-  fun `transform zeroes basic stats whose details do not match`() {
-    val transform = StatFilters.transform(StatFilter(details = ValueMatcher.regex("^unit")))
-
-    assertEquals(Stat.NumericStat(5, "unit tests"), transform(Stat.NumericStat(5, "unit tests")))
-    assertEquals(Stat.NumericStat(0, "ui tests"), transform(Stat.NumericStat(7, "ui tests")))
-    assertEquals(Stat.NumericStat(0, null), transform(Stat.NumericStat(7, null)))
-    assertEquals(Stat.BooleanStat(false, "ui"), transform(Stat.BooleanStat(true, "ui")))
-    assertEquals(Stat.BooleanStat(true, "unit"), transform(Stat.BooleanStat(true, "unit")))
-  }
-
-  @Test
   fun `validate accepts a filter on declared extras`() {
     val filter = StatFilter(extras = mapOf("kind" to ValueMatcher.equalTo("dialog")))
     assertEquals(emptyList(), StatFilters.validate(filter, codeReferencesMetadata))
@@ -106,26 +95,26 @@ class StatFiltersTest {
   }
 
   @Test
-  fun `validate rejects conditions that do not apply to the stat type`() {
-    assertEquals(
-      2,
-      StatFilters.validate(StatFilter(details = ValueMatcher.present()), codeReferencesMetadata).size,
-      "details on code references, and no extras",
-    )
-    assertEquals(
-      2,
-      StatFilters.validate(
-        StatFilter(extras = mapOf("kind" to ValueMatcher.present())),
-        numericMetadata,
-      ).size,
-      "extras on a numeric stat, and no details",
-    )
+  fun `validate rejects stats that are not code references`() {
+    val filter = StatFilter(extras = mapOf("kind" to ValueMatcher.present()))
+    listOf(StatDataType.NUMERIC, StatDataType.BOOLEAN, StatDataType.STRING).forEach { dataType ->
+      val errors = StatFilters.validate(filter, numericMetadata.copy(dataType = dataType))
+      assertEquals(1, errors.size, errors.toString())
+      assertTrue(errors.single().contains("is a $dataType stat"), errors.single())
+    }
+  }
+
+  @Test
+  fun `validate rejects a filter without extras conditions`() {
     assertTrue(
-      StatFilters.validate(
-        StatFilter(details = ValueMatcher.present()),
-        numericMetadata.copy(dataType = StatDataType.STRING),
-      ).single().contains("STRING")
+      StatFilters.validate(StatFilter(), codeReferencesMetadata).single().contains("no 'extras' conditions")
     )
+  }
+
+  @Test
+  fun `validate rejects a blank key`() {
+    val filter = StatFilter(extras = mapOf("kind" to ValueMatcher.present()), key = " ")
+    assertTrue(StatFilters.validate(filter, codeReferencesMetadata).single().contains("blank 'key'"))
   }
 
   @Test
