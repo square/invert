@@ -5,6 +5,7 @@ import com.squareup.invert.models.StatKey
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmOverloads
 
 /**
  * A special class of stats that represent tracking of Tech Debt in a repository, facilitating
@@ -27,7 +28,7 @@ import kotlinx.serialization.Serializable
  */
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
-data class TechDebtInitiative(
+data class TechDebtInitiative @JvmOverloads constructor(
   /** Unique identifier for this initiative, should remain constant for deep-linking **/
   val id: String,
   /** Display title **/

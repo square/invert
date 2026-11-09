@@ -90,6 +90,13 @@ internal object TechDebtInitiativeStats {
       }
       val sourceMetadata = collectedStatInfos[derivedStat.sourceStatKey]
       if (sourceMetadata == null) {
+        // Still report the problems that do not depend on the source stat, so that a bad filter
+        // does not pass just because its source stat was not collected in this build.
+        val filterErrors = StatFilters.validate(derivedStat.filter, derivedStat.sourceStatKey)
+        if (filterErrors.isNotEmpty()) {
+          errors.addAll(filterErrors.map { "TDI '$tdiId' ${roleName}Filter: $it" })
+          return@forEach
+        }
         logger.warn(
           "TDI '$tdiId': $roleName stat '${derivedStat.sourceStatKey}' was not collected, " +
             "so derived stat '${derivedStat.key}' was not created."

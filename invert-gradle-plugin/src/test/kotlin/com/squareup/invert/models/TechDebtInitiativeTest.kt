@@ -63,6 +63,13 @@ class TechDebtInitiativeTest {
   }
 
   @Test
+  fun `the constructor without filters is still available to Java and Groovy`() {
+    val string = String::class.java
+    val constructor = TechDebtInitiative::class.java.getConstructor(string, string, string, string, string, string)
+    assertEquals(unfiltered, constructor.newInstance("kotlin", "Migrate to Kotlin", "", "Files", "kotlin_files", "java_files"))
+  }
+
+  @Test
   fun `effective completed key is null without a completed stat`() {
     assertNull(filtered.copy(completedStatKey = null).effectiveCompletedStatKey)
   }

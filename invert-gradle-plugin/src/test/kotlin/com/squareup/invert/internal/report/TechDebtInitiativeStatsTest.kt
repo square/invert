@@ -216,6 +216,25 @@ class TechDebtInitiativeStatsTest {
   }
 
   @Test
+  fun `invalid filter on a missing source stat still fails`() {
+    val error = assertFailsWith<IllegalArgumentException> {
+      TechDebtInitiativeStats.addDerivedStats(
+        collectedData(),
+        listOf(
+          dialogsTdi.copy(
+            remainingStatKey = "not_collected",
+            remainingFilter = StatFilter(extras = mapOf("kind" to ValueMatcher.regex("(unclosed")), key = ""),
+          ),
+        ),
+        logger,
+      )
+    }
+    val message = error.message.orEmpty()
+    assertTrue(message.contains("blank 'key'"), message)
+    assertTrue(message.contains("Invalid regular expression '(unclosed'"), message)
+  }
+
+  @Test
   fun `writeProjectData publishes totals, exports and effective keys for derived stats`() {
     InvertReportWriter(logger, testDir).writeProjectData(
       reportMetadata = metadata(),

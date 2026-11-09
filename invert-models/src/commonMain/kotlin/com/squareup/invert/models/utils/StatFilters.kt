@@ -4,12 +4,14 @@ import com.squareup.invert.models.MatchOp
 import com.squareup.invert.models.Stat
 import com.squareup.invert.models.StatDataType
 import com.squareup.invert.models.StatFilter
+import com.squareup.invert.models.StatKey
 import com.squareup.invert.models.StatMetadata
 import com.squareup.invert.models.ValueMatcher
 
 /**
- * Validation and evaluation of [StatFilter]s, shared by the build and the web report so that
- * both apply the same rules.
+ * Validation and evaluation of [StatFilter]s.
+ *
+ * The build uses these on the JVM, so regular expressions follow JVM syntax.
  */
 object StatFilters {
 
@@ -24,14 +26,7 @@ object StatFilters {
       errors.add(
         "'$statKey' is a ${statMetadata.dataType} stat. Only CODE_REFERENCES stats can be filtered."
       )
-    }
-    if (filter.key?.isBlank() == true) {
-      errors.add("The filter for '$statKey' has a blank 'key'. Remove it to use the default key.")
-    }
-    if (filter.extras.isEmpty()) {
-      errors.add("The filter for '$statKey' has no 'extras' conditions.")
-    }
-    if (statMetadata.dataType == StatDataType.CODE_REFERENCES) {
+    } else {
       val declaredExtraKeys = statMetadata.extras.map { it.key }.toSet()
       filter.extras.keys.filterNot { it in declaredExtraKeys }.forEach { extraKey ->
         errors.add(
@@ -39,6 +34,23 @@ object StatFilters {
             "Declared extras: ${declaredExtraKeys.sorted().ifEmpty { listOf("(none)") }.joinToString()}"
         )
       }
+    }
+    errors.addAll(validate(filter, statKey))
+    return errors
+  }
+
+  /**
+   * Returns a description of every problem with [filter] that does not depend on the stat it
+   * filters, or an empty list if there are none. Use this when that stat's metadata is not
+   * available. [statKey] names the stat in the messages.
+   */
+  fun validate(filter: StatFilter, statKey: StatKey): List<String> {
+    val errors = mutableListOf<String>()
+    if (filter.key?.isBlank() == true) {
+      errors.add("The filter for '$statKey' has a blank 'key'. Remove it to use the default key.")
+    }
+    if (filter.extras.isEmpty()) {
+      errors.add("The filter for '$statKey' has no 'extras' conditions.")
     }
     filter.extras.forEach { (extraKey, matcher) ->
       errors.addAll(validate(matcher).map { "extras[$extraKey] of the filter for '$statKey': $it" })
