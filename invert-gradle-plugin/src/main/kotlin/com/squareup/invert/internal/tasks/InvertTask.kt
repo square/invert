@@ -20,6 +20,7 @@ import com.squareup.invert.logging.GradleInvertLogger
 import com.squareup.invert.logging.InvertLogger
 import com.squareup.invert.models.ExtraDataType
 import com.squareup.invert.models.ExtraMetadata
+import com.squareup.invert.models.InvertSerialization
 import com.squareup.invert.models.ModulePath
 import com.squareup.invert.models.OwnerName
 import com.squareup.invert.models.Stat
@@ -62,6 +63,10 @@ abstract class InvertTask : DefaultTask() {
 
   @get:Internal
   abstract var techDebtInitiatives: List<TechDebtInitiative>?
+
+  /** [techDebtInitiatives] as JSON, so that changing an initiative (or its filters) reruns the task. */
+  @get:Input
+  abstract val techDebtInitiativesJson: Property<String>
 
   @get:Internal
   abstract var ownershipCollector: InvertOwnershipCollector?
@@ -184,6 +189,12 @@ abstract class InvertTask : DefaultTask() {
     this.historicalDataFileProperty.set(extension.getHistoricalDataFilePath())
     this.statCollectors = extension.getStatCollectors().toList()
     this.techDebtInitiatives = extension.getTechDebtInitiatives().toList()
+    this.techDebtInitiativesJson.set(
+      InvertSerialization.InvertJson.encodeToString(
+        ListSerializer(TechDebtInitiative.serializer()),
+        this.techDebtInitiatives.orEmpty(),
+      )
+    )
     this.ownershipCollector = extension.getOwnershipCollector()
     this.aggregateStatsSarifReportEnabled.set(extension.isAggregateStatsSarifReportEnabled())
 
