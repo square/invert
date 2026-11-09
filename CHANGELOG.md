@@ -1,11 +1,14 @@
 # Change Log
 
-## Unreleased
+## Version 0.0.17
 
 * Tech Debt Initiatives can count part of a stat. `TechDebtInitiative.remainingFilter` and `completedFilter` take a `StatFilter` of `extras` conditions on a code references stat. Each filtered stat is published at build time as a derived stat, keyed by the filter's optional `key` or by default `tdi__<id>__remaining` or `tdi__<id>__completed`, which gets totals, history, the web report and the per-stat JSON and SARIF exports like any other stat. It is left out of the aggregate `stats.sarif`. History is kept by the derived key, so change `key` when a filter's definition changes.
 * `TechDebtInitiative.effectiveRemainingStatKey` and `effectiveCompletedStatKey` name the stat to read for an initiative (the derived stat when filtered), and are written to `tdi_config.json`. Consumers that show or export initiative numbers should read these instead of `remainingStatKey` and `completedStatKey`.
 * Invalid filters fail the report: a filter on a stat that is not a code references stat, an extra that the stat does not declare, an empty or invalid matcher, a blank `key`, a derived key produced more than once (duplicate initiative ids or filter keys), or a derived key that a collected stat already uses.
 * Changing `techDebtInitiatives` now reruns the `invert` task.
+* Include the header row in table "Download Table as CSV" exports.
+
+**Full Changelog**: https://github.com/square/invert/compare/0.0.16...0.0.17
 
 ## Version 0.0.16
 
