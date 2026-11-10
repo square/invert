@@ -1,5 +1,7 @@
 # Change Log
 
+## Unreleased
+
 ## Version 0.0.17
 
 * Tech Debt Initiatives can count part of a stat. `TechDebtInitiative.remainingFilter` and `completedFilter` take a `StatFilter` of `extras` conditions on a code references stat. Each filtered stat is published at build time as a derived stat, keyed by the filter's optional `key` or by default `tdi__<id>__remaining` or `tdi__<id>__completed`, which gets totals, history, the web report and the per-stat JSON and SARIF exports like any other stat. It is left out of the aggregate `stats.sarif`. History is kept by the derived key, so change `key` when a filter's definition changes.
