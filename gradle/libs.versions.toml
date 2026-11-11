@@ -15,7 +15,7 @@ vanniktech-maven-publish = "0.33.0"
 jetbrains-compose = "1.8.0"
 ksp = "2.1.21-2.0.2"
 truth = "1.4.4"
-dokka = "2.0.0"
+dokka = "2.1.0"
 sarif4k = "0.7.0"
 okio = "3.16.2"
 
