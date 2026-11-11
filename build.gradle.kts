@@ -2,6 +2,8 @@ import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinJvm
 import com.vanniktech.maven.publish.KotlinMultiplatform
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 buildscript {
   repositories {
@@ -32,6 +34,25 @@ plugins {
   alias(libs.plugins.kotlin.serialization) apply false
   alias(libs.plugins.jetbrains.compose) apply false
   alias(libs.plugins.vanniktech.maven.publish) apply false
+}
+
+// Pin the JVM target so published artifacts stay compatible with Java 11, independent of the
+// JDK running Gradle (Gradle itself requires JDK 17+).
+val invertJvmTarget = 11
+subprojects {
+  tasks.withType<KotlinJvmCompile>().configureEach {
+    compilerOptions {
+      jvmTarget.set(JvmTarget.fromTarget(invertJvmTarget.toString()))
+      // Compile against the Java 11 API so newer JDK APIs can't leak into published artifacts.
+      freeCompilerArgs.add("-Xjdk-release=$invertJvmTarget")
+    }
+  }
+  plugins.withType<JavaBasePlugin>().configureEach {
+    extensions.configure<JavaPluginExtension> {
+      sourceCompatibility = JavaVersion.toVersion(invertJvmTarget)
+      targetCompatibility = JavaVersion.toVersion(invertJvmTarget)
+    }
+  }
 }
 
 if (hasProperty("buildScan")) {

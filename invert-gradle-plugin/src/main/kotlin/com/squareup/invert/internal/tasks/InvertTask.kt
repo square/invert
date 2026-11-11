@@ -73,7 +73,7 @@ abstract class InvertTask : DefaultTask() {
 
   @get:Optional
   @get:Input
-  abstract val historicalDataFileProperty: Property<String?>
+  abstract val historicalDataFileProperty: Property<String>
 
   @get:Input
   abstract val projectPath: Property<String>

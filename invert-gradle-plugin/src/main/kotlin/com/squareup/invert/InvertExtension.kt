@@ -55,7 +55,7 @@ open class InvertExtension(project: Project) {
 
   @get:InputFile
   @get:Input
-  internal val historicalDataFileProperty = objects.property<String?>(String::class.java)
+  internal val historicalDataFileProperty = objects.property(String::class.java)
 
   @get:Input
   internal val aggregateStatsSarifReportEnabledProperty =
